@@ -95,7 +95,7 @@ input::placeholder{color:#a3aab6}
 .ava{width:38px;height:38px;border-radius:50%;border:1.5px solid #5b6472;display:grid;place-items:center;flex:none;color:#5b6472}
 .prof b{display:block;color:var(--primary);font-size:13.5px}
 .online{width:9px;height:9px;border-radius:50%;background:#2fb344}
-.body{display:grid;grid-template-columns:220px minmax(0,1fr);flex:1;min-height:0}
+.body{display:grid;grid-template-columns:240px minmax(0,1fr);flex:1;min-height:0}
 .side{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;background:#fbfcfe}
 .side .lab{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:10px 12px 4px}
 .side button{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;border:0;background:none;text-align:left;font-weight:600;color:#3b4453;position:relative}
@@ -109,6 +109,32 @@ input::placeholder{color:#a3aab6}
 @media (max-width:820px){.body{grid-template-columns:1fr}.side{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}.side .lab{display:none}.side button{flex:none}.scr{padding:20px 16px 36px}.prof div{display:none}}
 .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
 .g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:980px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tcard{min-height:200px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid #dfe4ea;border-radius:14px;padding:14px;cursor:pointer}
+.opt b{display:block;font-size:14px;margin-bottom:2px}
+.opt:hover{border-color:var(--primary)}
+.opt.on{border-color:var(--primary);background:var(--soft);box-shadow:0 0 0 2px rgba(8,87,143,.15)}
+.bignum{font-size:26px;font-weight:800;color:var(--primary)}
+input[type=time]{width:100%;height:44px;border:1px solid #dfe4ea;border-radius:10px;padding:0 12px;background:#fff}
+.tcard.off{opacity:.6}
+.side .grp{display:flex;align-items:center;gap:2px;border-radius:10px}
+.side button svg{flex:none}
+.side .grp > button:first-child span.lbl{overflow:hidden;text-overflow:ellipsis}
+.side .grp > button:first-child{flex:1;min-width:0;white-space:nowrap}
+.side .chev{flex:none;width:30px;height:30px;padding:0;display:grid;place-items:center;border-radius:8px;color:#5b6472}
+.side .chev svg{transform:rotate(90deg);transition:transform .15s}
+.side .chev.open svg{transform:rotate(-90deg)}
+.side .chev:hover{background:#f0f5fa}
+.side .sub-menu{display:flex;flex-direction:column;gap:2px;margin:2px 0 4px 14px;padding-left:4px;border-left:1.5px solid #e3e8ee}
+.side .soon{margin-left:auto;font-size:10px;font-weight:700;color:var(--muted);background:#eef2f6;border-radius:6px;padding:1px 6px}
+.plist{margin:0;padding-left:18px;font-size:13px;display:flex;flex-direction:column;gap:6px;color:#2b3342}
+.psteps{margin:0;padding:0;list-style:none;counter-reset:ps;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:820px){.psteps{grid-template-columns:1fr}}
+.psteps li{counter-increment:ps;background:var(--soft);border-radius:12px;padding:12px 12px 12px 48px;position:relative;font-size:13px;display:flex;flex-direction:column;gap:4px}
+.psteps li::before{content:counter(ps);position:absolute;left:12px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-weight:700;display:grid;place-items:center;font-size:12px}
+.psteps li span{color:#3b4453}
 @media (max-width:820px){.g2{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end}
 .lt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -161,7 +187,7 @@ div.f{display:flex;flex-direction:column;gap:6px}
 .dtable td.empty{text-align:center;color:var(--muted);padding:26px}
 .acts{display:flex;flex-direction:column;gap:6px;align-items:stretch}
 .acts .btn{height:30px;padding:0 10px;font-size:12px;display:inline-flex;align-items:center;justify-content:center;gap:5px}
-.side button.child{padding-left:30px;font-weight:500;font-size:13px}
+.side button.child{padding-left:16px;font-weight:500;font-size:13px;white-space:nowrap}
 .thumb .pg{position:relative}
 .pgc{position:absolute;right:4px;bottom:4px;background:rgba(0,42,92,.85);color:#fff;font-size:10px;font-weight:700;border-radius:6px;padding:2px 6px}
 .pgf{margin:0 0 18px}
@@ -279,7 +305,7 @@ var KANTOR = [
 ];
 /* Jarak jalur darat (km), rute mobil tercepat di Google Maps */
 var ROAD = {"bgr|jkt":59.6, "ckp|jkt":65.9, "bdg|jkt":140, "jkt|smg":425, "jkt|sby":770, "bgr|ckp":109, "bdg|bgr":183, "bgr|smg":469, "bgr|sby":813, "bdg|ckp":80.2, "ckp|smg":364, "ckp|sby":708, "bdg|smg":360, "bdg|sby":704, "sby|smg":350};
-var ROAD_SRC = "Google Maps, rute mobil tercepat, diakses 16 Nov 2026 pukul 14.15 WIB";
+var ROAD_SRC = "snapshot Google Maps 16 Nov 2026, 14.15 WIB";
 var EMP = {nama:"Budi Santoso", npp:"10234", unit:"Divisi Operasi"};
 var SKS = [
   {no:"SK-MUT/0457/DIR/XI/2026", tanggal:"12 November 2026", efektif:"2026-12-01", jabSeb:"Staf Senior Operasi", asal:"jkt", jabSet:"Asisten Manajer Operasi", tujuan:"smg", current:true},
@@ -289,7 +315,7 @@ var SKS = [
 var SK = SKS[0];
 var STORIES = ["Trigger notifikasi","Akses fitur SPPD Mutasi","Pengisian form kelengkapan","Unggah dokumen persyaratan","Ketentuan sistem (validasi)","Review form","Submit & nomor pelacakan","Riwayat & status pengajuan"];
 var STATUS_FLOW = ["Diajukan","Verifikasi HCS","Proses Accounting & Tax","Selesai"];
-var STATUS_ALL = ["Belum diisi","Draft","Dialihkan ke Tiket PP"].concat(STATUS_FLOW);
+var STATUS_ALL = ["Belum diisi","Draft"].concat(STATUS_FLOW);
 var DOCS = [
   {k:"sk", label:"SK Mutasi", req:true},
   {k:"kk", label:"Kartu Keluarga terupdate", req:true},
@@ -305,6 +331,20 @@ var KK_DEFAULT = [
 ];
 var KK_ADULT = {hub:"Anak", nama:"Dimas Santoso", tgl:"2000-03-10", nik:"3175041003000005"};
 
+var LEVELS = ["Staf","Staf Senior","Asisten Manajer","Manajer"];
+var BENEFIT = [
+  {k:"Uang harian perjalanan mutasi", note:"per hari, maks. 3 hari", v:["Rp300.000","Rp350.000","Rp450.000","Rp600.000"]},
+  {k:"Transportasi karyawan dan keluarga", note:"pesawat/kereta", v:["Kelas ekonomi","Kelas ekonomi","Kelas ekonomi","Kelas bisnis"]},
+  {k:"Akomodasi sementara", note:"per malam, maks. 7 malam", v:["Rp500.000","Rp600.000","Rp750.000","Rp1.000.000"]},
+  {k:"Biaya angkut barang pindahan", note:"sekali", v:["Rp5.000.000","Rp6.000.000","Rp8.000.000","Rp10.000.000"]},
+  {k:"Bantuan biaya pindah sekolah anak", note:"per anak", v:["Rp2.500.000","Rp2.500.000","Rp2.500.000","Rp2.500.000"]},
+  {k:"Tiket pulang pergi", note:"jika tidak membawa keluarga", v:["1× per bulan","1× per bulan","1× per bulan","2× per bulan"]}
+];
+var KD = [
+  {no:"KD-xxx/DIR/2025 (contoh)", ttg:"Ketentuan Perjalanan Dinas Karyawan", sejak:"2025-01-01"},
+  {no:"KD-yyy/DIR/2025 (contoh)", ttg:"Fasilitas dan Benefit Mutasi Karyawan", sejak:"2025-07-01"}
+];
+function levelOf(j){ for(var i=LEVELS.length-1;i>=0;i--){ if(j.indexOf(LEVELS[i])===0) return LEVELS[i]; } return "Staf"; }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function emptyForm(){ return {asal:SK.asal, tujuan:SK.tujuan, bawa:"", anggota:[], kk:null, docs:{sk:null,kk:null,rek:null,skolAsal:null,skolBaru:null}, bantuanSekolah:false}; }
 function seedSubs(){
@@ -332,10 +372,11 @@ function fresh(){
   SK.tujuan="smg";
   return {screen:"login", notifs:seedNotifs(), form:emptyForm(), step:1, errors:[], reviewOk:false, hasDraft:false, draftAt:null,
     subs:seedSubs(), seq:142, detail:null, lastTicket:null, log:seedLog(), visited:{}, nid:3, hist:[], files:{}, preview:null,
-    skTujuan:"smg", redirected:false, flt:{q:"",status:"",year:""}, loginErr:"", loginVal:EMP.npp, tppSk:null};
+    skTujuan:"smg", redirected:false, flt:{q:"",status:"",year:""}, loginErr:"", loginVal:EMP.npp, tppSk:null,
+    tpp:{confirmed:false, subs:[], notifiedFor:null, seq:20}, tf:emptyTpp(), tstep:1, terrors:[], treviewOk:false, tppLast:null};
 }
 var S = fresh();
-var PERSIST = ["notifs","form","hasDraft","draftAt","subs","seq","log","nid","skTujuan","redirected"];
+var PERSIST = ["notifs","form","hasDraft","draftAt","subs","seq","log","nid","skTujuan","redirected","tpp"];
 try{
   var raw = localStorage.getItem(KEY);
   if(raw){ var p = JSON.parse(raw); PERSIST.forEach(function(k){ if(p[k]!==undefined) S[k]=p[k]; }); SK.tujuan=S.skTujuan||"smg"; }
@@ -352,7 +393,7 @@ function kantorNama(id){ var k=kantor(id); return k?k.nama:"-"; }
 function distKm(a,b){ if(!kantor(a)||!kantor(b)||a===b) return null; var v=ROAD[[a,b].sort().join("|")]; return v==null?null:v; }
 function km(d){ return d==null?"-":Number(d).toLocaleString("id-ID",{maximumFractionDigits:1})+" km"; }
 function mapsUrl(a,b){ return "https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(kantor(a).q)+"&destination="+encodeURIComponent(kantor(b).q)+"&travelmode=driving"; }
-function srcLine(a,b){ return '<span class="src">Sumber: '+esc(ROAD_SRC)+' · <a href="'+mapsUrl(a,b)+'" target="_blank" rel="noopener">Lihat rute di Google Maps ↗</a></span>'; }
+function srcLine(a,b){ return '<span class="src">Sumber: '+esc(ROAD_SRC)+' · <a href="'+mapsUrl(a,b)+'" target="_blank" rel="noopener">Cek rute real-time di Google Maps ↗</a></span>'; }
 function distMsg(d){ return "Jarak kantor lama ke kantor baru "+km(d)+" melalui jalur darat, kurang dari 100 km, sehingga pengajuan SPPD Mutasi tidak dapat diproses."; }
 function age(dob){
   if(!dob) return null; var d=new Date(dob+"T00:00:00"); if(isNaN(d)) return null;
@@ -377,7 +418,6 @@ function rowStatus(sk){
   var sub=subFor(sk.no);
   if(sub) return {label:STATUS_FLOW[sub.statusIdx], cls:["","warn","warn","ok"][sub.statusIdx]};
   if(sk.current){
-    if(S.redirected) return {label:"Dialihkan ke Tiket PP", cls:""};
     if(S.hasDraft) return {label:"Draft", cls:"warn"};
   }
   return {label:"Belum diisi", cls:"bad"};
@@ -385,7 +425,7 @@ function rowStatus(sk){
 function rowNoFamily(sk){
   var sub=subFor(sk.no);
   if(sub) return sub.form.bawa==="tidak";
-  return !!(sk.current && S.redirected && S.form.bawa==="tidak");
+  return false;
 }
 
 /* ---------- file & preview ---------- */
@@ -432,14 +472,15 @@ function renderAllPages(k){
   }).catch(function(err){ try{ console.error("[SPPD] Halaman PDF gagal:", err); }catch(e){} }).then(function(){ fl.allBusy=false; render(); });
 }
 function takeFile(dk,file){
-  var lb=docLabel(dk);
-  if(file.size>10*1024*1024){ S.errors=[lb+": ukuran file "+(file.size/1048576).toFixed(1)+" MB, melebihi batas 10 MB."]; log("Menolak unggahan "+file.name+" karena melebihi 10 MB.","bad"); render(); return; }
+  var isT=dk.indexOf("t_")===0, lb=isT?TDOCS[dk]:docLabel(dk), setErr=function(m){ if(isT) S.terrors=[m]; else S.errors=[m]; };
+  if(file.size>10*1024*1024){ setErr(lb+": ukuran file "+(file.size/1048576).toFixed(1)+" MB, melebihi batas 10 MB."); log("Menolak unggahan "+file.name+" karena melebihi 10 MB.","bad"); render(); return; }
   var isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name), isImg=/^image\//.test(file.type);
-  if(!isPdf && !isImg){ S.errors=[lb+": format file harus PDF, JPG, atau PNG."]; render(); return; }
-  S.errors=[]; S.form.docs[dk]=file.name; log("Menerima unggahan dokumen: "+file.name+".","ok");
-  if(dk==="kk"){ S.form.kk=clone(KK_DEFAULT); log("Membaca data Kartu Keluarga (OCR): "+S.form.kk.length+" anggota keluarga terdeteksi.","ok"); if(S.form.bawa==="ya") loadFamily(); }
-  if(isPdf){ var rd=new FileReader(); rd.onload=function(){ S.files[dk]={name:file.name, type:"pdf", data:rd.result, pages:0, imgs:[]}; render(); renderPdf(dk); }; rd.onerror=function(){ S.files[dk]={name:file.name, type:"pdf", err:true}; render(); }; rd.readAsArrayBuffer(file); }
-  else { var r=new FileReader(); r.onload=function(){ S.files[dk]={name:file.name, type:"img", thumb:r.result, pages:1, imgs:[r.result]}; render(); }; r.readAsDataURL(file); }
+  if(!isPdf && !isImg){ setErr(lb+": format file harus PDF, JPG, atau PNG."); render(); return; }
+  if(isT){ S.terrors=[]; S.tf.docs[dk]=file.name; } else { S.errors=[]; S.form.docs[dk]=file.name; }
+  log("Menerima unggahan dokumen: "+file.name+".","ok");
+  if(!isT && dk==="kk"){ S.form.kk=clone(KK_DEFAULT); log("Membaca data Kartu Keluarga (OCR): "+S.form.kk.length+" anggota keluarga terdeteksi.","ok"); if(S.form.bawa==="ya") loadFamily(); }
+  if(isPdf){ var rd=new FileReader(); rd.onload=function(){ S.files[dk]={name:file.name, type:"pdf", data:rd.result, pages:0, imgs:[], label:lb}; render(); renderPdf(dk); }; rd.onerror=function(){ S.files[dk]={name:file.name, type:"pdf", err:true}; render(); }; rd.readAsArrayBuffer(file); }
+  else { var r=new FileReader(); r.onload=function(){ S.files[dk]={name:file.name, type:"img", thumb:r.result, pages:1, imgs:[r.result], label:lb}; render(); }; r.readAsDataURL(file); }
 }
 
 /* ---------- system rules ---------- */
@@ -490,6 +531,7 @@ function go(screen, extra, noPush){
 }
 function back(){
   if(S.screen==="form" && S.step>1){ S.errors=[]; S.step--; render(); toTop(); return; }
+  if(S.screen==="tppform" && S.tstep>1){ S.terrors=[]; S.tstep--; S.treviewOk=false; render(); toTop(); return; }
   var p=S.hist.pop() || {screen:"home"};
   var ex={detail:p.detail, reviewOk:false}; if(p.screen==="form") ex.step=p.step;
   go(p.screen, ex, true);
@@ -524,7 +566,8 @@ function submit(){
   if(all.length){ S.errors=all; log("Submit ditolak sistem: data belum memenuhi ketentuan.","bad"); render(); return; }
   S.seq++; var t="SPPD-MTS-"+new Date().getFullYear()+"-"+String(S.seq).padStart(5,"0");
   var snap=clone(S.form); delete snap.kk;
-  S.subs.unshift({ticket:t, created:today()+", "+now(), statusIdx:0, sk:SK.no, form:snap, history:[today()]});
+  S.subs.unshift({ticket:t, created:today()+", "+now(), diajukanISO:isoToday(), statusIdx:0, sk:SK.no, form:snap, history:[today()]});
+  if(snap.bawa==="tidak"){ var dl=addDays(isoToday(),7); S.notifs.unshift({id:S.nid++, type:"tpp", title:"Ajukan Tiket PP paling lambat "+fmtDate(dl), body:"Anda tidak membawa keluarga. Batas pengajuan Tiket Pulang Pergi 7 hari setelah SPPD Mutasi diajukan.", time:now(), read:false}); log("Membuka hak Tiket PP. Batas pengajuan pertama "+fmtDate(dl)+".","info"); }
   S.lastTicket=t; S.hasDraft=false; S.draftAt=null; S.redirected=false; S.form=emptyForm(); S.step=1;
   log("Menerima pengajuan dan menerbitkan nomor pelacakan "+t+".","ok");
   log("Meneruskan pengajuan ke antrian verifikasi HCS (HCIS & Office Administration).","info");
@@ -575,7 +618,11 @@ var ICON={
   chat:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21l3-4"/><path d="M7 9h10M7 12h6"/>',
   mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
   doc:'<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/>',
-  filter:'<path d="M3 5h18l-7 8v6l-4 2v-8z"/>'
+  filter:'<path d="M3 5h18l-7 8v6l-4 2v-8z"/>',
+  gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-2.5S14 4 12 8z"/>',
+  guide:'<path d="M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h6"/>',
+  scale:'<path d="M12 3v18M5 21h14"/><path d="M5 7h14"/><path d="M5 7l-3 6a3 3 0 0 0 6 0zM19 7l-3 6a3 3 0 0 0 6 0z"/>',
+  db:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>'
 };
 function ic(n,s,w){ return '<svg width="'+(s||20)+'" height="'+(s||20)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(w||2)+'" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[n]+'</svg>'; }
 function hdr(title,crumb){ return '<div class="hdr"><button class="bk" data-act="back" aria-label="Kembali">'+ic("back",18,2.6)+'</button><div><span class="crumb">'+esc(crumb||"Beranda")+'</span><h2>'+esc(title)+'</h2></div></div>'; }
@@ -609,6 +656,7 @@ function vHome(){
     '<button class="mi" disabled>'+ic("menu",28)+'Lainnya</button></div></div>';
   h+='<div class="g2"><div class="stack"><div class="sec" style="color:var(--ink);font-weight:600">My Task</div>';
   if(pending && !S.redirected) h+='<button class="task" data-act="sppd"><span><b style="display:block">Lengkapi Form SPPD Mutasi</b><span class="sub">'+esc(SK.no)+' · efektif '+fmtDate(SK.efektif)+'</span></span><span class="go">'+ic("chev",14,3)+'</span></button>';
+  else if(firstPending() && !tppExpired()) h+='<button class="task" data-act="tpp"><span><b style="display:block">Ajukan Tiket Pulang Pergi</b><span class="sub">Paling lambat '+fmtDate(tppDeadline())+' · sisa '+daysLeft(tppDeadline())+' hari</span></span><span class="go">'+ic("chev",14,3)+'</span></button>';
   else h+='<div class="task"><span class="sub">Tidak ada task SPPD Mutasi yang perlu diselesaikan.</span></div>';
   h+='</div><div class="stack"><div class="sec" style="color:var(--ink);font-weight:600">Pengumuman</div><div class="card"><b style="font-size:13px">SPPD Mutasi kini ada di Travel Management</b><p class="sub" style="margin:4px 0 0">Isi kelengkapan, unggah dokumen, dan lacak status langsung dari JM-Click.</p></div></div></div>';
   return h;
@@ -629,12 +677,85 @@ function vSK(){
   '<div class="card">'+rows(skRows(SK).concat([["Jarak jalur darat",'<span class="dist">'+km(distKm(SK.asal,SK.tujuan))+'</span>']]))+'</div>'+
   '<div class="actions"><button class="btn pri" data-act="sppd">Buka SPPD Mutasi</button></div>';
 }
+function tcard(icn,title,desc,act,badge,disabled){
+  return '<div class="card stack tcard'+(disabled?' off':'')+'"><div class="row between"><span class="ic" style="width:44px;height:44px">'+ic(icn,22)+'</span>'+(badge||'')+'</div><b style="font-size:15px">'+title+'</b><span class="sub">'+desc+'</span><div class="actions" style="border:0;padding:0;margin-top:auto">'+(disabled?'<button class="btn sm" disabled>Menyusul</button>':'<button class="btn sm'+(act==="sppd"?' pri':'')+'" data-act="'+act+'">Buka</button>')+'</div></div>';
+}
 function vTravel(){
   var pending=!submittedForSK() && !S.redirected;
-  return hdr("Travel Management","Beranda / Travel Management")+'<div class="g2">'+
-    '<div class="card stack"><div class="row between"><span class="ic" style="width:44px;height:44px">'+ic("brief",22)+'</span>'+(pending?'<span class="chip bad">1 perlu diisi</span>':'')+'</div><b style="font-size:16px">SPPD Mutasi</b><span class="sub">Surat Permohonan Perjalanan Dinas untuk karyawan yang dimutasi: kelengkapan dokumen, keluarga yang dibawa, dan status pengajuan.</span><div class="actions" style="border:0;padding:0"><button class="btn pri" data-act="sppd">Buka</button></div></div>'+
-    '<div class="card stack"><div class="row between"><span class="ic" style="width:44px;height:44px">'+ic("ticket",22)+'</span><span class="chip">Segera hadir</span></div><b style="font-size:16px">Tiket Pulang Pergi</b><span class="sub">Tiket perjalanan pulang pergi untuk karyawan mutasi yang tidak membawa keluarga.</span><div class="actions" style="border:0;padding:0"><button class="btn" data-act="tpp">Buka</button></div></div>'+
+  return hdr("Travel Management","Beranda / Travel Management")+'<div class="g3">'+
+    tcard("brief","SPPD Mutasi","Pengajuan perjalanan dinas karyawan yang dimutasi: dokumen, keluarga yang dibawa, dan status.","sppd",pending?'<span class="chip bad">1 perlu diisi</span>':'')+
+    tcard("ticket","Tiket Pulang Pergi","Tiket pulang pergi ke kampung halaman, dipesankan kantor atau reimbursement. 3 bulan sekali.","tpp",tppEligible()?(tppExpired()?'<span class="chip bad">Lewat batas</span>':(firstPending()?'<span class="chip warn">Maks. '+fmtDate(tppDeadline())+'</span>':(canTpp()?'<span class="chip ok">Bisa diajukan</span>':'<span class="chip warn">Bisa lagi '+fmtDate(nextTpp())+'</span>'))):'')+
+    tcard("gift","Benefit","Benefit mutasi yang Anda terima, disesuaikan dengan jabatan.","benefit")+
+    tcard("guide","Panduan Pengajuan","Cara mengajukan SPPD Mutasi dan Tiket Pulang Pergi beserta persyaratannya.","panduan")+
+    tcard("scale","Referensi Mutasi","SK Mutasi Anda dan Keputusan Direksi yang menjadi dasar pengajuan.","referensi")+
+    tcard("db","Master Data","Pengelolaan data acuan Travel Management.","",'<span class="chip">Menyusul</span>',true)+
   '</div>';
+}
+function vBenefit(){
+  var lv=S.benefitLv||levelOf(SK.jabSet), i=LEVELS.indexOf(lv);
+  var h=hdr("Benefit","Travel Management / Benefit");
+  h+='<div class="alert info"><div class="t">'+ic("gift",18)+' Benefit mengikuti jabatan</div><p>Jabatan Anda setelah mutasi: <b>'+esc(SK.jabSet)+'</b> ('+esc(kantorNama(SK.tujuan))+'), termasuk tingkat <b>'+esc(levelOf(SK.jabSet))+'</b>.</p></div>';
+  h+='<div class="card stack"><div class="row between"><span class="sec">Rincian benefit mutasi</span><span class="chip warn">Data contoh</span></div>'+
+    '<label class="f" for="bjab" style="max-width:280px">Tingkat jabatan<select id="bjab">'+LEVELS.map(function(x){return '<option'+(x===lv?' selected':'')+'>'+x+(x===levelOf(SK.jabSet)?' (jabatan Anda)':'')+'</option>';}).join("")+'</select></label>'+
+    '<div class="tblw"><table class="ftable"><thead><tr><th>Komponen</th><th>Ketentuan</th><th>Untuk '+esc(lv)+'</th></tr></thead><tbody>'+
+    BENEFIT.map(function(b){ return '<tr><td class="n">'+esc(b.k)+'</td><td class="sub">'+esc(b.note)+'</td><td><b>'+esc(b.v[i])+'</b></td></tr>'; }).join("")+
+    '</tbody></table></div><span class="sub small">Nilai di atas hanya contoh untuk prototipe. Angka resmi mengikuti Keputusan Direksi di menu Referensi Mutasi.</span></div>';
+  return h;
+}
+function vPanduan(){
+  var tab=S.panduanTab||"sppd", h=hdr("Panduan Pengajuan","Travel Management / Panduan Pengajuan");
+  h+='<div class="seg" style="max-width:380px"><button data-act="ptab" data-v="sppd" class="'+(tab==="sppd"?'on':'')+'">SPPD Mutasi</button><button data-act="ptab" data-v="tpp" class="'+(tab==="tpp"?'on':'')+'">Tiket Pulang Pergi</button></div>';
+  if(tab==="sppd"){
+    h+='<div class="g2"><div class="card stack"><span class="sec">Siapa yang bisa mengajukan</span><ul class="plist"><li>Karyawan yang menerima SK mutasi.</li><li>Jarak kantor lama ke kantor baru minimal 100 km melalui jalur darat.</li><li>Satu SK hanya bisa diajukan satu kali.</li></ul></div>'+
+      '<div class="card stack"><span class="sec">Ketentuan penting</span><ul class="plist"><li>Anak berusia 25 tahun atau lebih per tanggal pengajuan tidak bisa diikutkan.</li><li>NIK anggota keluarga 16 digit dan tidak boleh sama.</li><li>Tidak membawa keluarga: SPPD tetap dikirim, lalu ajukan Tiket Pulang Pergi maks. 7 hari setelahnya.</li><li>Form bisa disimpan sebagai draft.</li></ul></div></div>';
+    h+='<div class="card stack"><span class="sec">Langkah pengajuan</span><ol class="psteps">'+
+      '<li><b>Buka menu</b><span>Travel Management › SPPD Mutasi, lalu klik <b>Isi Form</b> pada baris SK Anda.</span></li>'+
+      '<li><b>Cek data mutasi</b><span>Lokasi kantor lama dan baru terisi otomatis dari SK. Sistem menghitung jarak jalur darat.</span></li>'+
+      '<li><b>Unggah dokumen</b><span>SK Mutasi, Kartu Keluarga terupdate, dan foto rekening payroll.</span></li>'+
+      '<li><b>Pilih keluarga yang dibawa</b><span>Ya: data keluarga dibaca otomatis dari KK. Tidak: lanjut submit, lalu ajukan Tiket PP maks. 7 hari.</span></li>'+
+      '<li><b>Review dan submit</b><span>Periksa semua data dan dokumen, lalu submit untuk mendapat nomor pelacakan.</span></li>'+
+      '<li><b>Lacak status</b><span>Pantau status di tabel riwayat: Diajukan › Verifikasi HCS › Proses Accounting & Tax › Selesai.</span></li></ol></div>';
+    h+='<div class="card stack"><span class="sec">Persyaratan dokumen</span><div class="tblw"><table class="ftable"><thead><tr><th>Dokumen</th><th>Wajib</th><th>Format</th></tr></thead><tbody>'+
+      '<tr><td class="n">SK Mutasi</td><td>Ya</td><td>PDF/JPG/PNG, maks. 10 MB</td></tr>'+
+      '<tr><td class="n">Kartu Keluarga terupdate</td><td>Ya</td><td>PDF/JPG/PNG, maks. 10 MB</td></tr>'+
+      '<tr><td class="n">Foto rekening payroll</td><td>Ya</td><td>PDF/JPG/PNG, maks. 10 MB</td></tr>'+
+      '<tr><td class="n">Surat keterangan pindah dari sekolah asal</td><td>Jika mengajukan bantuan pindah sekolah anak</td><td>PDF/JPG/PNG, maks. 10 MB</td></tr>'+
+      '<tr><td class="n">Surat keterangan pendaftaran sekolah baru</td><td>Jika mengajukan bantuan pindah sekolah anak</td><td>PDF/JPG/PNG, maks. 10 MB</td></tr>'+
+      '</tbody></table></div></div>';
+    h+='<div class="actions"><button class="btn pri" data-act="sppd">Mulai Pengajuan SPPD Mutasi</button></div>';
+  } else {
+    h+='<div class="g2"><div class="card stack"><span class="sec">Siapa yang bisa mengajukan</span><ul class="plist"><li>Karyawan mutasi yang <b>tidak membawa keluarga</b> dan SPPD Mutasi-nya sudah dikirim.</li><li>Tiket PP pertama diajukan <b>paling lambat 7 hari</b> setelah SPPD Mutasi diajukan.</li><li>Hanya bisa diajukan <b>3 bulan sekali</b>. Sistem mengirim notifikasi saat sudah 3 bulan tanpa pengajuan.</li></ul></div>'+
+      '<div class="card stack"><span class="sec">Rute</span><ul class="plist"><li>Hanya dari <b>kota kantor baru</b> ke <b>kampung halaman</b>, dan sebaliknya.</li><li>Kampung halaman diambil dari data HCIS, wajib dikonfirmasi, dan tidak bisa diubah. Jika tidak sesuai, hubungi HCS.</li></ul></div></div>'+
+      '<div class="card stack"><span class="sec">Dua skema pengajuan</span><div class="tblw"><table class="ftable"><thead><tr><th>Skema</th><th>Yang diisi karyawan</th><th>Hasil</th></tr></thead><tbody>'+
+      '<tr><td class="n">Dipesankan kantor</td><td>Tanggal pergi, tanggal pulang, jam keberangkatan</td><td>Kantor memesan tiket sesuai jadwal</td></tr>'+
+      '<tr><td class="n">Reimbursement</td><td>Tanggal perjalanan, nominal, file tiket PP, riwayat transaksi pembelian (PDF/JPG/PNG, maks. 10 MB)</td><td>Nominal diganti setelah diverifikasi</td></tr>'+
+      '</tbody></table></div></div>'+
+      '<div class="card stack"><span class="sec">Langkah pengajuan</span><ol class="psteps">'+
+      '<li><b>Buka menu</b><span>Travel Management › Tiket Pulang Pergi, lalu klik Ajukan Tiket PP.</span></li>'+
+      '<li><b>Pilih skema dan rute</b><span>Pilih dipesankan kantor atau reimbursement, lalu konfirmasi kampung halaman. Rute otomatis dari kota kantor baru.</span></li>'+
+      '<li><b>Isi detail</b><span>Jadwal perjalanan, atau nominal dan dokumen untuk reimbursement.</span></li>'+
+      '<li><b>Review dan submit</b><span>Periksa semua data, termasuk nominal yang diajukan, lalu submit.</span></li></ol></div>'+
+      '<div class="actions"><button class="btn pri" data-act="tpp">Buka Tiket Pulang Pergi</button></div>';
+  }
+  return h;
+}
+function vReferensi(){
+  var h=hdr("Referensi Mutasi","Travel Management / Referensi Mutasi");
+  h+='<p class="sub" style="margin:0">Dasar pengajuan SPPD Mutasi: SK Mutasi Anda dan Keputusan Direksi yang berlaku.</p>';
+  h+='<div class="card stack"><span class="sec">SK Mutasi Anda</span><div class="tblw"><table class="ftable"><thead><tr><th>Nomor SK</th><th>Tanggal SK</th><th>Tanggal efektif</th><th>Mutasi</th><th></th></tr></thead><tbody>'+
+    SKS.map(function(k,i){ return '<tr><td class="n">'+esc(k.no)+'</td><td>'+esc(k.tanggal)+'</td><td>'+fmtDate(k.efektif)+'</td><td>'+esc(k.jabSeb)+', '+esc(kantorNama(k.asal))+' → '+esc(k.jabSet)+', '+esc(kantorNama(k.tujuan))+'</td><td><button class="btn sm" data-act="refview" data-r="sk'+i+'">Lihat</button></td></tr>'; }).join("")+
+    '</tbody></table></div></div>';
+  h+='<div class="card stack"><div class="row between"><span class="sec">Keputusan Direksi</span><span class="chip warn">Data contoh</span></div><div class="tblw"><table class="ftable"><thead><tr><th>Nomor</th><th>Tentang</th><th>Berlaku sejak</th><th></th></tr></thead><tbody>'+
+    KD.map(function(k,i){ return '<tr><td class="n">'+esc(k.no)+'</td><td>'+esc(k.ttg)+'</td><td>'+fmtDate(k.sejak)+'</td><td><button class="btn sm" data-act="refview" data-r="kd'+i+'">Lihat</button></td></tr>'; }).join("")+
+    '</tbody></table></div><span class="sub small">Nomor dan isi Keputusan Direksi di prototipe masih contoh. Ganti dengan dokumen resmi.</span></div>';
+  return h;
+}
+function openRef(r){
+  var key="ref_"+r, label, name, n;
+  if(r.indexOf("sk")===0){ var k=SKS[+r.slice(2)]; label="SK Mutasi "+k.no; name=k.no.replace(/\//g,"_")+".pdf"; n=2; }
+  else { var d=KD[+r.slice(2)]; label="Keputusan Direksi: "+d.ttg; name=d.no.split(" ")[0].replace(/\//g,"_")+".pdf"; n=3; }
+  if(!S.files[key]){ var imgs=[]; for(var i=1;i<=n;i++) imgs.push(makeDummy(label,name,i,n)); S.files[key]={name:name, type:"dummy", thumb:imgs[0], pages:n, imgs:imgs, label:label}; }
+  S.preview=key; render();
 }
 function filteredSKS(){
   var q=S.flt.q.trim().toLowerCase();
@@ -715,7 +836,7 @@ function vForm(){
       '<label class="f" for="f-asal">Lokasi kantor lama<input id="f-asal" type="text" readonly value="'+esc(kantorNama(f.asal))+'"></label>'+
       '<label class="f" for="f-tujuan">Lokasi kantor baru<input id="f-tujuan" type="text" readonly value="'+esc(kantorNama(f.tujuan))+'"></label>'+
       '<span class="sub small">Diisi otomatis oleh sistem dari '+esc(SK.no)+'.</span>';
-    if(d!==null) h+='<div class="stack" style="gap:6px;background:var(--soft);border-radius:10px;padding:10px 12px"><div class="row between"><span class="sub">Jarak jalur darat</span><span class="chip '+(d<100?'bad':'ok')+'"><span class="dist">'+km(d)+'</span></span></div>'+srcLine(f.asal,f.tujuan)+'</div>';
+    if(d!==null) h+='<div class="stack" style="gap:6px;background:var(--soft);border-radius:10px;padding:10px 12px"><div class="row between"><span class="sub">Jarak jalur darat</span><span class="chip '+(d<100?'bad':'ok')+'"><span class="dist">'+km(d)+'</span></span></div>'+srcLine(f.asal,f.tujuan)+'<span class="src">Prototipe memakai snapshot. Di aplikasi asli, jarak dihitung real-time lewat Google Maps saat form dibuka.</span></div>';
     h+='</div></div></div>';
   }
   if(S.step===2){
@@ -734,9 +855,9 @@ function vForm(){
         if(f.bantuanSekolah){ h+='<div class="g2">'; DOCS.forEach(function(d){ if(!d.req) h+=docWidget(d); }); h+='</div>'; }
       }
     }
-    if(f.bawa==="tidak") h+='<div class="alert info"><div class="t">'+ic("ticket",18)+' Dialihkan ke Tiket Pulang Pergi</div><p>Karena Anda tidak membawa keluarga, pengajuan dilanjutkan melalui fitur Tiket Pulang Pergi.</p></div>';
+    if(f.bawa==="tidak") h+='<div class="alert info"><div class="t">'+ic("ticket",18)+' Berhak Tiket Pulang Pergi</div><p>Anda tidak membawa keluarga. Lanjutkan review dan kirim SPPD Mutasi ini. Setelah terkirim, ajukan Tiket Pulang Pergi <b>paling lambat 7 hari</b> setelah tanggal pengajuan.</p></div>';
   }
-  var mainBtn = (S.step===3 && f.bawa==="tidak") ? '<button class="btn pri" data-act="totpp">Lanjut ke Tiket Pulang Pergi</button>' : '<button class="btn pri" data-act="next">'+(S.step<3?'Lanjut':'Lanjut ke Review')+'</button>';
+  var mainBtn = '<button class="btn pri" data-act="next">'+(S.step<3?'Lanjut':'Lanjut ke Review')+'</button>';
   h+='<div class="actions"><button class="btn" data-act="back">'+(S.step>1?'Kembali':'Batal')+'</button><button class="link" data-act="draft">Simpan sebagai Draft</button>'+mainBtn+'</div>';
   return h;
 }
@@ -767,7 +888,8 @@ function vSuccess(){
   '<div class="okc">'+ic("check",56,2.5).replace('stroke="currentColor"','stroke="#fff"')+'</div>'+
   '<div class="center"><div class="big">Pengajuan Berhasil Dikirim</div><p class="sub" style="margin:6px 0 0">Pengajuan SPPD Mutasi Anda sudah diterima sistem dan diteruskan ke HCS.</p></div>'+
   '<div class="card">'+rows([["Nomor pelacakan",'<span class="mono">'+esc(S.lastTicket)+'</span>'],["Rute",s?esc(kantorNama(s.form.asal))+' → '+esc(kantorNama(s.form.tujuan)):"-"],["Tanggal",s?esc(s.created):"-"],["Status",chipFor(0)]])+'</div>'+
-  '<button class="btn pri block" data-act="detail" data-t="'+esc(S.lastTicket)+'">Lihat Status</button><button class="btn block" data-act="copy">Salin Nomor Pelacakan</button><button class="link" data-act="sppd">Kembali ke Riwayat SPPD Mutasi</button></div>';
+  (s&&s.form.bawa==="tidak"?'<div class="alert info"><div class="t">'+ic("ticket",18)+' Jangan lupa Tiket Pulang Pergi</div><p>Anda bisa mengajukan Tiket PP sekarang atau nanti, <b>paling lambat '+fmtDate(addDays(s.diajukanISO,7))+'</b>.</p><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn pri" data-act="tpp">Ajukan Tiket PP Sekarang</button></div></div>':'')+
+  '<button class="btn '+(s&&s.form.bawa==="tidak"?'':'pri ')+'block" data-act="detail" data-t="'+esc(S.lastTicket)+'">Lihat Status</button><button class="btn block" data-act="copy">Salin Nomor Pelacakan</button><button class="link" data-act="sppd">Kembali ke Riwayat SPPD Mutasi</button></div>';
 }
 function vDetail(){
   var s=null; S.subs.forEach(function(x){ if(x.ticket===S.detail) s=x; }); if(!s) return vSppd();
@@ -784,12 +906,207 @@ function vDetail(){
   h+='<div class="sec">Keluarga</div><div class="card">'+famTable(s.form,["Bantuan biaya pindah sekolah",s.form.bantuanSekolah?'Diajukan':'Tidak diajukan'])+'</div>';
   return h;
 }
-function vTpp(){
-  var sk=S.tppSk?skBy(S.tppSk):null;
+/* ---------- Tiket Pulang Pergi ---------- */
+var TDOCS = {t_tiket:"File tiket pulang pergi", t_trx:"Riwayat transaksi pembelian"};
+var HOME = {nama:"Kab. Klaten, Jawa Tengah", q:"Klaten, Jawa Tengah"};
+function emptyTpp(){ return {skema:"", base:"baru", pergi:"", pulang:"", jamPergi:"", jamPulang:"", nomPergi:"", nomPulang:"", docs:{t_tiket:null, t_trx:null}}; }
+function isoToday(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function addMonths(iso,n){
+  var p=iso.split("-").map(Number), y=p[0], m=p[1]-1+n, d=p[2];
+  y+=Math.floor(m/12); m=((m%12)+12)%12;
+  var last=new Date(y,m+1,0).getDate(); if(d>last) d=last;
+  return y+"-"+pad(m+1)+"-"+pad(d);
+}
+function addDays(iso,n){ var d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function rp(n){ return "Rp"+Number(n||0).toLocaleString("id-ID"); }
+function tppEligible(){ var s=subFor(SK.no); return !!(s && s.form.bawa==="tidak"); }
+function tppDeadline(){ var s=subFor(SK.no); return s&&s.diajukanISO?addDays(s.diajukanISO,7):null; }
+function firstPending(){ return tppEligible() && !S.tpp.subs.length; }
+function tppExpired(){ var d=tppDeadline(); return firstPending() && !!d && isoToday()>d; }
+function daysLeft(iso){ return Math.round((Date.parse(iso+"T00:00:00")-Date.parse(isoToday()+"T00:00:00"))/864e5); }
+function lastTpp(){ var l=null; S.tpp.subs.forEach(function(s){ if(!l || s.diajukan>l) l=s.diajukan; }); return l; }
+function nextTpp(){ var l=lastTpp(); return l?addMonths(l,3):null; }
+function canTpp(){ if(tppExpired()) return false; var n=nextTpp(); return !n || isoToday()>=n; }
+function baseKantor(f){ return SK.tujuan; }
+function routeGo(f){ return kantorNama(baseKantor(f))+" → "+HOME.nama; }
+function routeBack(f){ return HOME.nama+" → "+kantorNama(baseKantor(f)); }
+function homeMaps(f){ return "https://www.google.com/maps/dir/?api=1&origin="+encodeURIComponent(kantor(baseKantor(f)).q)+"&destination="+encodeURIComponent(HOME.q)+"&travelmode=driving"; }
+function checkTppNotif(){
+  var d=tppDeadline();
+  if(firstPending() && d && !tppExpired() && daysLeft(d)<=2 && S.tpp.remindedFor!==d){
+    S.tpp.remindedFor=d; var k=daysLeft(d);
+    S.notifs.unshift({id:S.nid++, type:"tpp", title:"Sisa "+(k===0?"hari ini":k+" hari")+" untuk mengajukan Tiket PP", body:"Batas pengajuan Tiket Pulang Pergi "+fmtDate(d)+" (7 hari setelah SPPD Mutasi diajukan).", time:now(), read:false});
+    log("Mengirim pengingat batas pengajuan Tiket PP ("+fmtDate(d)+").","info"); return true;
+  }
+  var l=lastTpp(), n=nextTpp(); if(!l || isoToday()<n || S.tpp.notifiedFor===n) return false;
+  S.tpp.notifiedFor=n;
+  S.notifs.unshift({id:S.nid++, type:"tpp", title:"Tiket PP sudah bisa diajukan lagi", body:"Sudah 3 bulan sejak pengajuan Tiket PP terakhir ("+fmtDate(l)+"). Anda bisa mengajukan lagi.", time:now(), read:false});
+  log("Mengirim notifikasi: sudah 3 bulan tanpa pengajuan Tiket PP.","info");
+  return true;
+}
+function vTppHome(){
   var h=hdr("Tiket Pulang Pergi","Travel Management / Tiket Pulang Pergi");
-  if(sk) h+='<div class="tbar">✓ Data SPPD Mutasi tersimpan. Anda tidak membawa keluarga.</div><div class="card">'+rows([["Nomor SK",esc(sk.no)],["Tanggal efektif",fmtDate(sk.efektif)],["Rute",esc(kantorNama(sk.asal))+' → '+esc(kantorNama(sk.tujuan))],["Keluarga dibawa",'<span class="chip">Tidak</span>']])+'</div>';
-  h+='<div class="alert info"><div class="t">'+ic("ticket",18)+' Fitur sedang dikembangkan</div><p>Form Tiket Pulang Pergi akan dikembangkan pada tahap berikutnya.</p></div><div class="actions"><button class="btn" data-act="sppd">Kembali ke SPPD Mutasi</button></div>';
+  if(!tppEligible()){
+    h+='<div class="alert info"><div class="t">'+ic("ticket",18)+' Tiket PP untuk mutasi tanpa keluarga</div><p>Tiket Pulang Pergi tersedia setelah SPPD Mutasi dengan pilihan <b>tidak membawa keluarga</b> terkirim. Isi dan kirim form SPPD Mutasi terlebih dahulu.</p></div><div class="actions"><button class="btn pri" data-act="sppd">Buka SPPD Mutasi</button></div>';
+    return h+tppHistory();
+  }
+  var l=lastTpp(), n=nextTpp(), ok=canTpp();
+  h+='<div class="g3">'+
+    '<div class="card stack" style="gap:6px"><span class="sub">Kelayakan</span><span class="chip ok" style="align-self:flex-start">Berhak</span><span class="sub small">Tidak membawa keluarga · '+esc(SK.no)+'</span></div>'+
+    (firstPending()?'<div class="card stack" style="gap:6px"><span class="sub">Batas pengajuan pertama</span>'+(tppExpired()?'<span class="chip bad" style="align-self:flex-start">Lewat batas</span>':'<span class="chip warn" style="align-self:flex-start">Sisa '+daysLeft(tppDeadline())+' hari</span>')+'<span class="sub small">Paling lambat '+fmtDate(tppDeadline())+' (7 hari setelah SPPD diajukan)</span></div>':
+    '<div class="card stack" style="gap:6px"><span class="sub">Kuota pengajuan (3 bulan sekali)</span>'+(ok?'<span class="chip ok" style="align-self:flex-start">Bisa diajukan</span>':'<span class="chip warn" style="align-self:flex-start">Bisa lagi '+fmtDate(n)+'</span>')+'<span class="sub small">'+(l?'Pengajuan terakhir '+fmtDate(l):'Belum pernah mengajukan')+'</span></div>')+
+    '<div class="card stack" style="gap:6px"><span class="sub">Kampung halaman</span><b>'+esc(HOME.nama)+'</b><span class="sub small">'+(S.tpp.confirmed?'Sudah dikonfirmasi':'Belum dikonfirmasi')+' · tidak bisa diubah</span></div></div>';
+  if(tppExpired()) h+='<div class="alert" role="alert"><div class="t">'+ic("warn",18)+' Batas pengajuan sudah lewat</div><ul><li>Tiket PP pertama harus diajukan paling lambat 7 hari setelah SPPD Mutasi diajukan ('+fmtDate(tppDeadline())+'). Batas ini sudah lewat. Hubungi HCS.</li></ul></div>';
+  else if(!ok) h+='<div class="alert" role="alert"><div class="t">'+ic("warn",18)+' Belum bisa mengajukan</div><ul><li>Tiket PP hanya bisa diajukan 3 bulan sekali. Pengajuan terakhir '+fmtDate(l)+', jadi Anda bisa mengajukan lagi mulai '+fmtDate(n)+'.</li></ul></div>';
+  h+='<div class="actions" style="border:0;padding:0"><button class="btn pri" data-act="tppstart"'+(ok?'':' disabled')+'>Ajukan Tiket PP</button></div>';
+  return h+tppHistory();
+}
+function tppHistory(){
+  var h='<div class="card stack"><span class="sec">Riwayat Pengajuan Tiket PP</span>';
+  if(!S.tpp.subs.length) return h+'<p class="sub" style="margin:0">Belum ada pengajuan.</p></div>';
+  h+='<div class="tblw"><table class="ftable"><thead><tr><th>Nomor</th><th>Skema</th><th>Rute pergi</th><th>Tanggal pergi – pulang</th><th>Nominal</th><th>Diajukan</th><th>Status</th></tr></thead><tbody>';
+  S.tpp.subs.slice().sort(function(a,b){return a.diajukan<b.diajukan?1:-1;}).forEach(function(s){
+    h+='<tr><td class="n">'+esc(s.no)+'</td><td>'+(s.skema==="kantor"?'Dipesankan kantor':'Reimbursement')+'</td><td>'+esc(s.rute)+'</td><td>'+fmtDate(s.pergi)+' – '+fmtDate(s.pulang)+'</td><td>'+(s.skema==="reimburse"?rp(s.total):'-')+'</td><td>'+fmtDate(s.diajukan)+'</td><td><span class="chip '+(s.status==="Selesai"?'ok':'')+'">'+esc(s.status)+'</span></td></tr>';
+  });
+  return h+'</tbody></table></div></div>';
+}
+function tStepper(){
+  var names=["Skema & Rute","Detail","Review"], cur=S.tstep, h='<div class="steps" style="grid-template-columns:repeat(3,1fr)">';
+  names.forEach(function(n,i){ var k=i+1; h+='<div class="st'+(k===cur?' on':'')+(k<cur?' done':'')+'"><i>'+(k<cur?'✓':k)+'</i>'+n+'</div>'; });
+  return h+'</div>';
+}
+function tErrBox(){
+  if(!S.terrors.length) return "";
+  return '<div class="alert" role="alert"><div class="t">'+ic("warn",18)+' Alasan Penolakan Sistem</div><ul>'+S.terrors.map(function(e){return '<li>'+esc(e)+'</li>';}).join("")+'</ul></div>';
+}
+function tDocWidget(k){
+  var f=S.tf, has=f.docs[k], fl=S.files[k], ext=has?(has.split(".").pop()||"").toUpperCase().slice(0,4):"";
+  var h='<div class="stack" style="gap:6px"><div class="doclab">'+esc(TDOCS[k])+' <span class="req">*</span></div>';
+  if(has) h+='<div class="file"><span class="fi">'+esc(ext)+'</span><span class="grow"><b>'+esc(has)+'</b><span class="sub small">'+(fl&&fl.type==="dummy"?'Contoh dummy · '+fl.pages+' halaman':(fl&&fl.pages?fl.pages+' halaman':'Siap diunggah'))+'</span></span><span class="rep">Ganti<input type="file" accept=".pdf,.jpg,.jpeg,.png" data-doc="'+k+'" aria-label="Ganti '+esc(TDOCS[k])+'"></span></div>';
+  else h+='<div class="upbox">'+ic("clip",18)+'<div>Tambah foto / dokumen</div><small>Maks. 10 MB (jpg/png/pdf)</small><input type="file" accept=".pdf,.jpg,.jpeg,.png" data-doc="'+k+'" aria-label="Unggah '+esc(TDOCS[k])+'"></div>';
+  return h+'</div>';
+}
+function routeCard(f){
+  return '<div class="stack" style="gap:8px;background:var(--soft);border-radius:10px;padding:10px 12px"><div><span class="sub small">Pergi</span><b style="display:block;font-size:13px">'+esc(routeGo(f))+'</b></div><div><span class="sub small">Pulang</span><b style="display:block;font-size:13px">'+esc(routeBack(f))+'</b></div><span class="src"><a href="'+homeMaps(f)+'" target="_blank" rel="noopener">Cek rute real-time di Google Maps ↗</a></span></div>';
+}
+function vTppForm(){
+  var f=S.tf, h=hdr("Ajukan Tiket PP","Travel Management / Tiket Pulang Pergi / Pengajuan")+'<div class="card">'+tStepper()+'</div>'+tErrBox();
+  if(S.tstep===1){
+    h+='<div class="sec">Pilih skema</div><div class="g2">'+
+      '<button class="opt'+(f.skema==="kantor"?' on':'')+'" data-act="tskema" data-v="kantor"><span class="ic">'+ic("brief",18)+'</span><span><b>Dipesankan kantor</b><span class="sub">Kantor yang memesan tiket. Anda cukup isi tanggal pergi, tanggal pulang, dan jam keberangkatan.</span></span></button>'+
+      '<button class="opt'+(f.skema==="reimburse"?' on':'')+'" data-act="tskema" data-v="reimburse"><span class="ic">'+ic("ticket",18)+'</span><span><b>Reimbursement</b><span class="sub">Anda membeli tiket sendiri, lalu unggah tiket dan riwayat transaksinya untuk diganti.</span></span></button></div>';
+    h+='<div class="g2"><div class="stack"><div class="sec">Kampung halaman</div><div class="card stack">'+
+      '<label class="f">Kampung halaman (data HCIS)<input type="text" readonly value="'+esc(HOME.nama)+'"></label>'+
+      '<span class="sub small">'+ic("warn",12)+' Tidak bisa diubah. Jika tidak sesuai, hubungi HCS.</span>'+
+      '<label class="check"><input type="checkbox" id="tconf"'+(S.tpp.confirmed?' checked':'')+'> <span>Saya mengonfirmasi kampung halaman saya adalah <b>'+esc(HOME.nama)+'</b>.</span></label></div></div>'+
+      '<div class="stack"><div class="sec">Kota kantor</div><div class="card stack">'+
+      '<label class="f">Kantor baru (dari SK)<input type="text" readonly value="'+esc(kantorNama(baseKantor(f)))+'"></label>'+
+      '<span class="sub small">'+ic("warn",12)+' Tiket PP hanya dari dan ke kota kantor baru.</span>'+routeCard(f)+'</div></div></div>';
+  }
+  if(S.tstep===2){
+    if(f.skema==="kantor"){
+      h+='<div class="sec">Jadwal perjalanan</div><div class="alert info"><div class="t">'+ic("brief",18)+' Tiket dipesankan oleh kantor</div><p>Isi jadwal yang Anda inginkan. Kantor memesan tiket sesuai jadwal ini.</p></div>'+
+        '<div class="g2"><div class="card stack"><b style="color:var(--primary)">Pergi · '+esc(routeGo(f))+'</b><label class="f" for="tpergi">Tanggal pergi<input id="tpergi" type="date" data-t="pergi" value="'+esc(f.pergi)+'" min="'+isoToday()+'"></label><label class="f" for="tjp">Jam keberangkatan<input id="tjp" type="time" data-t="jamPergi" value="'+esc(f.jamPergi)+'"></label></div>'+
+        '<div class="card stack"><b style="color:var(--primary)">Pulang · '+esc(routeBack(f))+'</b><label class="f" for="tpulang">Tanggal pulang<input id="tpulang" type="date" data-t="pulang" value="'+esc(f.pulang)+'" min="'+isoToday()+'"></label><label class="f" for="tjq">Jam keberangkatan<input id="tjq" type="time" data-t="jamPulang" value="'+esc(f.jamPulang)+'"></label></div></div>';
+    } else {
+      var tot=(+f.nomPergi||0)+(+f.nomPulang||0);
+      h+='<div class="sec">Data reimbursement</div><div class="g2"><div class="card stack"><b style="color:var(--primary)">Tanggal perjalanan</b><label class="f" for="tpergi">Tanggal pergi<input id="tpergi" type="date" data-t="pergi" value="'+esc(f.pergi)+'"></label><label class="f" for="tpulang">Tanggal pulang<input id="tpulang" type="date" data-t="pulang" value="'+esc(f.pulang)+'"></label></div>'+
+        '<div class="card stack"><b style="color:var(--primary)">Nominal sesuai bukti transaksi</b><label class="f" for="tnp">Tiket pergi (Rp)<input id="tnp" type="text" inputmode="numeric" data-t="nomPergi" value="'+esc(f.nomPergi?Number(f.nomPergi).toLocaleString("id-ID"):"")+'" placeholder="0"></label><label class="f" for="tnq">Tiket pulang (Rp)<input id="tnq" type="text" inputmode="numeric" data-t="nomPulang" value="'+esc(f.nomPulang?Number(f.nomPulang).toLocaleString("id-ID"):"")+'" placeholder="0"></label><div class="row between"><span class="sub">Total diajukan</span><b id="ttot" style="color:var(--primary)">'+rp(tot)+'</b></div></div></div>';
+      h+='<div class="sec">Dokumen</div><div class="g2">'+tDocWidget("t_tiket")+tDocWidget("t_trx")+'</div>';
+    }
+  }
+  if(S.tstep===3){
+    var r=[["Skema",f.skema==="kantor"?"Dipesankan kantor":"Reimbursement"],["Kampung halaman",esc(HOME.nama)+' <span class="chip ok">Terkonfirmasi</span>'],["Pergi",esc(routeGo(f))+'<br><span class="sub small">'+fmtDate(f.pergi)+(f.jamPergi?' · '+esc(f.jamPergi):'')+'</span>'],["Pulang",esc(routeBack(f))+'<br><span class="sub small">'+fmtDate(f.pulang)+(f.jamPulang?' · '+esc(f.jamPulang):'')+'</span>']];
+    h+='<div class="row between"><span class="sec">Ringkasan</span><button class="link" style="padding:0" data-act="tedit" data-s="1">Ubah</button></div><div class="card">'+rows(r)+'</div>';
+    if(f.skema==="reimburse"){
+      var total=(+f.nomPergi||0)+(+f.nomPulang||0);
+      h+='<div class="g2"><div class="stack"><div class="row between"><span class="sec">Nominal yang diajukan</span><button class="link" style="padding:0" data-act="tedit" data-s="2">Ubah</button></div><div class="card stack"><div class="bignum">'+rp(total)+'</div>'+rows([["Tiket pergi",rp(f.nomPergi)],["Tiket pulang",rp(f.nomPulang)]])+'</div></div>'+
+        '<div class="stack"><div class="row between"><span class="sec">Dokumen</span><button class="link" style="padding:0" data-act="tedit" data-s="2">Ubah</button></div><div class="card stack"><div class="prevgrid">';
+      Object.keys(TDOCS).forEach(function(k){ var fl=S.files[k], inner=fl&&fl.thumb?'<img src="'+fl.thumb+'" alt="Pratinjau '+esc(TDOCS[k])+'">':(fl&&fl.type==="pdf"&&!fl.err?'Memuat…':'Pratinjau tidak tersedia'); h+='<button class="thumb" data-act="preview" data-k="'+k+'"'+(fl&&fl.thumb?'':' disabled')+'><div class="pg">'+inner+(fl&&fl.pages>1?'<span class="pgc">'+fl.pages+' hlm</span>':'')+'</div><b>'+esc(TDOCS[k])+'</b></button>'; });
+      h+='</div></div></div></div>';
+    }
+    if(!S.treviewOk) h+='<div class="alert info"><div class="t">Apakah data sudah benar?</div><div class="row" style="justify-content:flex-end"><button class="btn" data-act="tedit" data-s="1">Belum, Perbaiki Data</button><button class="btn pri" data-act="tok">Ya, Data Sudah Benar</button></div></div>';
+    else h+='<div class="tbar">✓ Data sudah dikonfirmasi benar</div>';
+  }
+  var main = S.tstep<3 ? '<button class="btn pri" data-act="tnext">Lanjut</button>' : '<button class="btn pri" data-act="tsubmit"'+(S.treviewOk?'':' disabled')+'>Submit Pengajuan</button>';
+  h+='<div class="actions"><button class="btn" data-act="back">'+(S.tstep>1?'Kembali':'Batal')+'</button>'+main+'</div>';
   return h;
+}
+function vTppOk(){
+  var s=S.tpp.subs.filter(function(x){return x.no===S.tppLast;})[0]; if(!s) return vTppHome();
+  var r=[["Nomor pengajuan",'<span class="mono">'+esc(s.no)+'</span>'],["Skema",s.skema==="kantor"?"Dipesankan kantor":"Reimbursement"],["Rute pergi",esc(s.rute)],["Tanggal",fmtDate(s.pergi)+" – "+fmtDate(s.pulang)]];
+  if(s.skema==="reimburse") r.push(["Nominal diajukan",'<b>'+rp(s.total)+'</b>']);
+  r.push(["Status",'<span class="chip">Diajukan</span>']);
+  return hdr("Pengajuan Tiket PP","Travel Management / Tiket Pulang Pergi / Terkirim")+'<div class="narrow"><div class="tbar">✓ Pengajuan Tiket PP diterima sistem</div>'+
+    '<div class="okc">'+ic("check",56,2.5).replace('stroke="currentColor"','stroke="#fff"')+'</div>'+
+    '<div class="center"><div class="big">Pengajuan Tiket PP Terkirim</div><p class="sub" style="margin:6px 0 0">'+(s.skema==="kantor"?'Kantor akan memesankan tiket sesuai jadwal Anda.':'Nominal reimbursement akan diverifikasi sebelum dibayarkan.')+'</p></div>'+
+    '<div class="card">'+rows(r)+'</div><p class="sub center" style="margin:0">Pengajuan berikutnya bisa dilakukan mulai '+fmtDate(addMonths(s.diajukan,3))+'.</p>'+
+    '<button class="btn pri block" data-act="tpp">Kembali ke Tiket PP</button></div>';
+}
+function vTppValidate(step){
+  var f=S.tf, e=[];
+  if(step===1){
+    if(!f.skema) e.push("Pilih skema: dipesankan kantor atau reimbursement.");
+    if(!S.tpp.confirmed) e.push("Konfirmasi kampung halaman Anda terlebih dahulu.");
+  }
+  if(step===2){
+    if(!f.pergi) e.push("Tanggal pergi wajib diisi.");
+    if(!f.pulang) e.push("Tanggal pulang wajib diisi.");
+    if(f.pergi && f.pulang && f.pulang<f.pergi) e.push("Tanggal pulang tidak boleh sebelum tanggal pergi.");
+    if(f.skema==="kantor"){
+      if(f.pergi && f.pergi<isoToday()) e.push("Tanggal pergi tidak boleh sebelum hari ini karena tiket akan dipesankan kantor.");
+      if(!f.jamPergi) e.push("Jam keberangkatan pergi wajib diisi.");
+      if(!f.jamPulang) e.push("Jam keberangkatan pulang wajib diisi.");
+    } else {
+      if(!(+f.nomPergi>0)) e.push("Nominal tiket pergi wajib diisi sesuai bukti transaksi.");
+      if(!(+f.nomPulang>0)) e.push("Nominal tiket pulang wajib diisi sesuai bukti transaksi.");
+      if(!f.docs.t_tiket) e.push("File tiket pulang pergi wajib diunggah.");
+      if(!f.docs.t_trx) e.push("Riwayat transaksi pembelian wajib diunggah.");
+    }
+  }
+  return e;
+}
+function tppStart(){
+  if(!tppEligible()){ toast("Tiket PP hanya untuk mutasi tanpa membawa keluarga."); go("tpp"); return; }
+  if(tppExpired()){ toast("Batas pengajuan Tiket PP sudah lewat. Hubungi HCS."); go("tpp"); return; }
+  if(!canTpp()){ toast("Tiket PP baru bisa diajukan lagi mulai "+fmtDate(nextTpp())+"."); go("tpp"); return; }
+  S.tf=emptyTpp(); S.tstep=1; S.terrors=[]; S.treviewOk=false;
+  log("Membuka form pengajuan Tiket PP. Kampung halaman diambil dari data HCIS.");
+  go("tppform");
+}
+function tppNext(){
+  var e=vTppValidate(S.tstep);
+  if(e.length){ S.terrors=e; log("Form Tiket PP belum lengkap: "+e.length+" alasan dikirim ke karyawan.","bad"); render(); toTop(); return; }
+  S.terrors=[]; S.tstep++; S.treviewOk=false; render(); toTop();
+}
+function tppSubmit(){
+  if(tppExpired()){ S.terrors=["Batas pengajuan Tiket PP (7 hari setelah SPPD Mutasi diajukan) sudah lewat."]; render(); return; }
+  if(!canTpp()){ S.terrors=["Tiket PP hanya bisa diajukan 3 bulan sekali. Anda bisa mengajukan lagi mulai "+fmtDate(nextTpp())+"."]; render(); return; }
+  var e=vTppValidate(1).concat(vTppValidate(2)); if(e.length){ S.terrors=e; render(); return; }
+  var f=S.tf, no="TPP-"+new Date().getFullYear()+"-"+String(++S.tpp.seq).padStart(5,"0");
+  S.tpp.subs.push({no:no, skema:f.skema, rute:routeGo(f), pergi:f.pergi, pulang:f.pulang, total:(+f.nomPergi||0)+(+f.nomPulang||0), diajukan:isoToday(), status:"Diajukan"});
+  S.tppLast=no;
+  log("Menerima pengajuan Tiket PP "+no+" ("+(f.skema==="kantor"?"dipesankan kantor":"reimbursement "+rp((+f.nomPergi||0)+(+f.nomPulang||0)))+").","ok");
+  log("Menjadwalkan notifikasi Tiket PP berikutnya pada "+fmtDate(addMonths(isoToday(),3))+".","info");
+  S.notifs.unshift({id:S.nid++, type:"tppsub", title:"Pengajuan Tiket PP diterima", body:"Nomor "+no+". Pengajuan berikutnya bisa mulai "+fmtDate(addMonths(isoToday(),3))+".", time:now(), read:false});
+  S.hist=[{screen:"home"},{screen:"travel"},{screen:"tpp"}]; go("tppok",null,true);
+}
+function tppPreset(kind){
+  SK.tujuan="smg"; S.skTujuan="smg";
+  S.subs=S.subs.filter(function(s){return s.sk!==SK.no;}); S.redirected=false; S.hasDraft=false; S.draftAt=null; S.form=emptyForm();
+  S.tpp.subs=[]; S.tpp.notifiedFor=null; S.tpp.remindedFor=null; S.tpp.confirmed=false;
+  var t=isoToday(), d0={ready:0, soon:5, expired:8, recent:34, due:97}[kind];
+  var dIso=addDays(t,-d0), dTxt=new Date(dIso+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"});
+  S.subs.unshift({ticket:"SPPD-MTS-2026-00150", created:dTxt+", 09.15", diajukanISO:dIso, statusIdx:d0>0?1:0, sk:SK.no, history:d0>0?[dTxt,dTxt]:[dTxt],
+    form:{asal:SK.asal, tujuan:SK.tujuan, bawa:"tidak", anggota:[], bantuanSekolah:false}});
+  var label={ready:"SPPD Mutasi tanpa keluarga baru dikirim hari ini", soon:"SPPD dikirim 5 hari lalu, batas Tiket PP tinggal 2 hari", expired:"SPPD dikirim 8 hari lalu, Tiket PP belum diajukan", recent:"Tiket PP terakhir diajukan 1 bulan lalu", due:"sudah 3 bulan sejak Tiket PP terakhir"}[kind];
+  if(kind==="recent"){ var r=addMonths(t,-1); S.tpp.subs.push({no:"TPP-2026-00018", skema:"kantor", rute:kantorNama(SK.tujuan)+" → "+HOME.nama, pergi:addDays(r,3), pulang:addDays(r,6), total:0, diajukan:r, status:"Selesai"}); }
+  if(kind==="due"){ var q=addDays(addMonths(t,-3),-1); S.tpp.subs.push({no:"TPP-2026-00011", skema:"reimburse", rute:kantorNama(SK.tujuan)+" → "+HOME.nama, pergi:addDays(q,2), pulang:addDays(q,5), total:1850000, diajukan:q, status:"Selesai"}); }
+  S.notifs.forEach(function(n){n.read=true;});
+  log("Skenario uji dimuat: "+label+".","info");
+  if(checkTppNotif()) toast("Notifikasi baru masuk ke lonceng.");
+  if(S.screen==="login") S.screen="home";
+  go("tpp");
 }
 function topbar(){
   var u=unread();
@@ -802,16 +1119,28 @@ function side(){
   function b(act,icn,label,on,extra,cls){ return '<button'+(act?' data-act="'+act+'"':' disabled')+' class="'+(on?'on ':'')+(cls||'')+'">'+ic(icn,18)+label+(extra||'')+'</button>'; }
   return '<nav class="side" aria-label="Menu utama"><span class="lab">Menu</span>'+
     b("home","homeI","Beranda",sc==="home")+b("bell","bell","Notifikasi",sc==="notif",unread()?'<span class="nd"></span>':'')+
-    '<span class="lab">Layanan</span>'+b("travel","plane","Travel Management",sc==="travel")+
-    b("sppd","brief","SPPD Mutasi",inS,(!submittedForSK()&&!S.redirected)?'<span class="nd"></span>':'',"child")+
-    b("tpp","ticket","Tiket Pulang Pergi",sc==="tpp",'',"child")+
+    '<span class="lab">Layanan</span>'+tmGroup(sc,inS,b)+
     b(null,"list","JMPD")+b(null,"clock","Cuti")+b(null,"presensi","Presensi")+b(null,"chat","Feedback")+b(null,"user","Profile")+'</nav>';
 }
+function tmGroup(sc,inS,b){
+  var inTM=inS||["travel","tpp","tppform","tppok","benefit","panduan","referensi"].indexOf(sc)>=0;
+  var open=S.tmOpen===undefined?inTM:S.tmOpen, need=!submittedForSK()&&!S.redirected;
+  var h='<div class="grp'+(sc==="travel"?' on':'')+'"><button data-act="travel" class="'+(sc==="travel"?'on':'')+'">'+ic("plane",18)+'Travel Management'+(!open&&need?'<span class="nd"></span>':'')+'</button>'+
+    '<button class="chev'+(open?' open':'')+'" data-act="tmtoggle" aria-expanded="'+open+'" aria-label="'+(open?'Sembunyikan':'Tampilkan')+' menu Travel Management">'+ic("chev",16,2.4)+'</button></div>';
+  if(!open) return h;
+  return h+'<div class="sub-menu">'+
+    b("sppd","brief","SPPD Mutasi",inS,need?'<span class="nd"></span>':'',"child")+
+    b("tpp","ticket","Tiket Pulang Pergi",["tpp","tppform","tppok"].indexOf(sc)>=0,'',"child")+
+    b("benefit","gift","Benefit",sc==="benefit",'',"child")+
+    b("panduan","guide","Panduan Pengajuan",sc==="panduan",'',"child")+
+    b("referensi","scale","Referensi Mutasi",sc==="referensi",'',"child")+
+    b(null,"db","Master Data",false,'<span class="soon">Menyusul</span>',"child")+'</div>';
+}
 function story(){
-  if(S.errors.length) return 5;
+  if(S.errors.length || (S.screen==="tppform" && S.terrors.length)) return 5;
   switch(S.screen){
-    case "login": return 2; case "home": return submittedForSK()?8:1; case "sk": case "notif": return 1; case "travel": return 2;
-    case "sppd": return S.visited[7]?8:2; case "form": return S.step===2?4:3; case "review": return 6; case "success": return 7; case "detail": return 8; case "tpp": return 3;
+    case "login": return 2; case "home": return submittedForSK()?8:1; case "sk": case "notif": return 1; case "travel": case "benefit": case "panduan": case "referensi": return 2;
+    case "sppd": return S.visited[7]?8:2; case "form": return S.step===2?4:3; case "review": return 6; case "success": return 7; case "detail": return 8; case "tpp": return 2; case "tppform": return S.tstep===3?6:3; case "tppok": return 7;
   } return 1;
 }
 function vPanel(cur){
@@ -826,18 +1155,24 @@ function vPanel(cur){
     '<button class="btn" data-act="preset" data-k="umur">Contoh: KK berisi anak usia ≥ 25 tahun</button>'+
     '<button class="btn" data-act="preset" data-k="jarak">Contoh: SK tujuan &lt; 100 km (Bogor)</button>'+
     '<button class="btn" data-act="preset" data-k="tidak">Contoh: tidak membawa keluarga</button>'+
-    '<button class="btn" data-act="remind">System: kirim ulang reminder</button></div></section>';
-  h+='<section class="pcard"><h3>Aturan sistem yang disimulasikan</h3><ul class="rules"><li>Lokasi kantor lama dan baru diisi otomatis dari SK.</li><li>Jarak kantor lama–baru minimal 100 km lewat jalur darat (sumber Google Maps).</li><li>SK Mutasi, KK, dan foto rekening payroll wajib, maks. 10 MB.</li><li>Anggota keluarga diambil otomatis dari KK; anak usia ≥ 25 tahun ditolak, anggota lain tetap diproses.</li><li>Tidak membawa keluarga: diarahkan ke Tiket Pulang Pergi; tombol Tiket PP di tabel aktif.</li><li>Surat sekolah wajib jika mengajukan bantuan pindah sekolah.</li><li>NPP 5 digit angka.</li></ul></section>';
+    '<button class="btn" data-act="remind">System: kirim ulang reminder</button></div>'+
+    '<div class="scen" style="margin-top:12px"><span class="lane">Tiket PP</span>'+
+    '<button class="btn" data-act="tpreset" data-k="ready">Tiket PP: SPPD tanpa keluarga baru dikirim</button>'+
+    '<button class="btn" data-act="tpreset" data-k="soon">Tiket PP: batas 7 hari tinggal 2 hari (pengingat)</button>'+
+    '<button class="btn" data-act="tpreset" data-k="expired">Tiket PP: lewat batas 7 hari</button>'+
+    '<button class="btn" data-act="tpreset" data-k="recent">Tiket PP: terakhir 1 bulan lalu (ditolak)</button>'+
+    '<button class="btn" data-act="tpreset" data-k="due">Tiket PP: sudah 3 bulan (notifikasi)</button></div></section>';
+  h+='<section class="pcard"><h3>Aturan sistem yang disimulasikan</h3><ul class="rules"><li>Lokasi kantor lama dan baru diisi otomatis dari SK.</li><li>Jarak kantor lama–baru minimal 100 km lewat jalur darat (sumber Google Maps).</li><li>SK Mutasi, KK, dan foto rekening payroll wajib, maks. 10 MB.</li><li>Anggota keluarga diambil otomatis dari KK; anak usia ≥ 25 tahun ditolak, anggota lain tetap diproses.</li><li>Tombol Tiket PP di tabel aktif untuk mutasi tanpa keluarga yang SPPD-nya sudah dikirim.</li><li>Surat sekolah wajib jika mengajukan bantuan pindah sekolah.</li><li>NPP 5 digit angka.</li><li>Tidak membawa keluarga: SPPD Mutasi tetap dikirim; Tiket PP pertama paling lambat 7 hari setelah SPPD diajukan (pengingat H-2).</li><li>Tiket PP: 3 bulan sekali, notifikasi saat sudah 3 bulan; rute hanya kota kantor baru ↔ kampung halaman (tidak bisa diubah, kampung halaman wajib dikonfirmasi).</li><li>Tiket PP dipesankan kantor: tanggal pergi minimal hari ini, jam keberangkatan wajib.</li><li>Reimbursement: file tiket, riwayat transaksi, dan nominal wajib.</li></ul></section>';
   return h;
 }
 function render(){
-  var map={home:vHome,notif:vNotif,sk:vSK,travel:vTravel,sppd:vSppd,form:vForm,review:vReview,success:vSuccess,detail:vDetail,tpp:vTpp};
+  var map={home:vHome,notif:vNotif,sk:vSK,travel:vTravel,benefit:vBenefit,panduan:vPanduan,referensi:vReferensi,sppd:vSppd,form:vForm,review:vReview,success:vSuccess,detail:vDetail,tpp:vTppHome,tppform:vTppForm,tppok:vTppOk};
   var cur=story(); S.visited[cur]=true;
   document.getElementById("app").innerHTML = S.screen==="login" ? vLogin() : topbar()+'<div class="body">'+side()+'<div class="scr"><div class="content'+(S.screen==="sppd"?' wide':'')+'">'+map[S.screen]()+'</div></div></div>';
   document.getElementById("panel").innerHTML=vPanel(cur);
   var md=document.getElementById("modal");
   if(S.preview && S.files[S.preview] && S.files[S.preview].thumb){
-    var fl=S.files[S.preview], lb=docLabel(S.preview), imgs=fl.imgs&&fl.imgs.length?fl.imgs:[fl.thumb], total=fl.pages||imgs.length;
+    var fl=S.files[S.preview], lb=fl.label||docLabel(S.preview), imgs=fl.imgs&&fl.imgs.length?fl.imgs:[fl.thumb], total=fl.pages||imgs.length;
     var body=imgs.map(function(src,i){ return '<figure class="pgf"><img src="'+src+'" alt="'+esc(lb)+' halaman '+(i+1)+'"><figcaption>Halaman '+(i+1)+' dari '+total+'</figcaption></figure>'; }).join("");
     if(imgs.length<Math.min(total,30)) body+='<p class="sub">Memuat halaman '+(imgs.length+1)+' dari '+total+'…</p>';
     if(total>30) body+='<p class="sub">Pratinjau dibatasi 30 halaman pertama.</p>';
@@ -850,7 +1185,7 @@ function render(){
 function doLogin(){
   var v=(document.getElementById("npp").value||"").trim();
   if(!/^\d{5}$/.test(v)){ S.loginVal=v; S.loginErr="NPP harus 5 digit angka."; render(); return; }
-  S.loginErr=""; S.loginVal=v; log("Autentikasi berhasil untuk NPP "+v+".","ok"); go("home");
+  S.loginErr=""; S.loginVal=v; log("Autentikasi berhasil untuk NPP "+v+".","ok"); checkTppNotif(); go("home");
 }
 document.addEventListener("click",function(e){
   var t=e.target.closest("[data-act]"); if(!t) return;
@@ -863,14 +1198,26 @@ document.addEventListener("click",function(e){
     case "bell": go("notif"); break;
     case "notif":
       var id=+t.getAttribute("data-id"), n=S.notifs.filter(function(x){return x.id===id;})[0]; if(!n) break; n.read=true;
-      if(n.type==="sk") go("sk"); else if(n.type==="submitted") go("detail",{detail:n.ticket}); else go("sppd"); break;
+      if(n.type==="sk") go("sk"); else if(n.type==="submitted") go("detail",{detail:n.ticket}); else if(n.type==="tpp"||n.type==="tppsub") go("tpp"); else go("sppd"); break;
     case "travel": go("travel"); break;
+    case "tmtoggle": var cur=S.tmOpen===undefined?(document.querySelector('.chev.open')!==null):S.tmOpen; S.tmOpen=!cur; render(); break;
+    case "benefit": go("benefit"); break;
+    case "panduan": go("panduan"); break;
+    case "referensi": go("referensi"); break;
+    case "ptab": S.panduanTab=t.getAttribute("data-v"); render(); break;
+    case "refview": openRef(t.getAttribute("data-r")); break;
+    case "tppstart": tppStart(); break;
+    case "tskema": S.tf.skema=t.getAttribute("data-v"); S.terrors=[]; render(); break;
+    case "tnext": tppNext(); break;
+    case "tok": S.treviewOk=true; render(); break;
+    case "tedit": S.tstep=+t.getAttribute("data-s"); S.treviewOk=false; S.terrors=[]; render(); toTop(); break;
+    case "tsubmit": tppSubmit(); break;
+    case "tpreset": tppPreset(t.getAttribute("data-k")); break;
     case "sppd": go("sppd"); break;
     case "tpp": go("tpp",{tppSk:t.getAttribute("data-sk")||(S.redirected?SK.no:null)}); break;
     case "start": startForm(); break;
     case "draft": saveDraft(); render(); break;
     case "next": next(); break;
-    case "totpp": toTpp(); break;
     case "bawa":
       var v=t.getAttribute("data-v"); S.form.bawa=v; S.errors=[];
       if(v==="ya") loadFamily(); else { S.form.anggota=[]; S.form.bantuanSekolah=false; log("Karyawan memilih tidak membawa keluarga.","info"); }
@@ -896,12 +1243,20 @@ document.addEventListener("click",function(e){
 document.addEventListener("input",function(e){
   var el=e.target;
   if(el.id==="npp"){ el.value=el.value.replace(/\D/g,"").slice(0,5); }
+  var tk=el.getAttribute&&el.getAttribute("data-t");
+  if(tk){
+    if(tk.indexOf("nom")===0){ var dg=el.value.replace(/\D/g,"").slice(0,12); S.tf[tk]=dg; el.value=dg?Number(dg).toLocaleString("id-ID"):""; var tt=document.getElementById("ttot"); if(tt) tt.textContent=rp((+S.tf.nomPergi||0)+(+S.tf.nomPulang||0)); }
+    else S.tf[tk]=el.value;
+  }
   if(el.id==="fq"){ S.flt.q=el.value; var tb=document.getElementById("tbody"); if(tb) tb.innerHTML=tableBody(); }
 });
 document.addEventListener("change",function(e){
   var el=e.target;
   if(el.id==="fstatus"){ S.flt.status=el.value; render(); return; }
   if(el.id==="fyear"){ S.flt.year=el.value; render(); return; }
+  if(el.id==="tconf"){ S.tpp.confirmed=el.checked; if(el.checked) log("Karyawan mengonfirmasi kampung halaman: "+HOME.nama+".","ok"); S.terrors=[]; render(); return; }
+  var tk2=el.getAttribute("data-t"); if(tk2 && tk2.indexOf("nom")!==0){ S.tf[tk2]=el.value; return; }
+  if(el.id==="bjab"){ S.benefitLv=el.value.replace(" (jabatan Anda)",""); render(); return; }
   if(el.getAttribute("data-f")){ var k=el.getAttribute("data-f"); S.form[k]=el.type==="checkbox"?el.checked:el.value; render(); return; }
   var dk=el.getAttribute("data-doc");
   if(dk && el.files && el.files[0]){ takeFile(dk, el.files[0]); }
