@@ -27,7 +27,7 @@ button{cursor:pointer}
 .top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:14px 24px;background:#fff;border-bottom:1px solid var(--line)}
 .top h1{font-size:17px;font-weight:800;color:var(--primary)}
 .top p{margin:2px 0 0;color:var(--muted);font-size:13px}
-.wrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;padding:20px;max-width:1560px;margin:0 auto}
+.wrap{display:block;padding:20px;max-width:1440px;margin:0 auto}
 @media (max-width:1180px){.wrap{grid-template-columns:1fr}}
 .hdr{display:flex;align-items:center;gap:12px;margin-bottom:2px}
 .hdr .bk{width:32px;height:32px;border-radius:50%;border:0;background:var(--back);color:#fff;display:grid;place-items:center;flex:none}
@@ -112,6 +112,87 @@ input::placeholder{color:#a3aab6}
 .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 @media (max-width:980px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .tcard{min-height:200px}
+.g6{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:1100px){.g6{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.hcsteps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.hs{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);text-align:center;position:relative;line-height:1.25}
+.hs i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1.5px solid #cfd8e2;font-weight:700;font-size:12px;z-index:1}
+.hs::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:2px;background:#dfe6ee}
+.hs:first-child::before{display:none}
+.hs.on{color:var(--primary);font-weight:700}
+.hs.on i{background:var(--primary);border-color:var(--primary);color:#fff}
+.hs.done i{background:var(--ok-soft);border-color:var(--ok-soft);color:var(--ok)}
+.hcgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:1100px){.hcgrid{grid-template-columns:1fr}}
+.rabt{border-collapse:collapse;font-size:11px;min-width:900px;width:100%}
+.rabt th,.rabt td{border:1px solid #c9d3de;padding:5px 6px;text-align:center;vertical-align:middle}
+.rabt th{background:#e8f0f8;color:#1d2433;font-weight:700}
+.rabt tr.f th{background:#f5f8fb;font-weight:500;color:var(--muted);font-size:10px}
+.paper{background:#fff;color:#111;text-align:left;padding:28px 32px;box-shadow:0 2px 12px rgba(0,0,0,.15);border-radius:4px;font-size:13px}
+.paper .ph{display:flex;flex-direction:column;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:14px}
+.paper .ph span{font-size:11px;color:#555}
+.paper h3{text-align:center;font-size:15px;margin:6px 0 4px;color:#111}
+.paper .pc{text-align:center;margin:0 0 12px;font-size:12px}
+.paper .sign{text-align:right;margin-top:18px}
+.paper{font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.45}
+.paper .co{display:flex;flex-direction:column;font-size:11px}
+.paper .co b{font-size:12px}
+.paper hr{border:0;border-top:1.5px solid #111;margin:8px 0}
+.paper hr.dbl{border-top:3px double #111}
+.paper .ttl{text-align:center;font-weight:700;font-size:14px;margin:6px 0 14px;line-height:1.35}
+.paper .two{display:flex;justify-content:space-between;gap:24px;margin:8px 0}
+.paper .kv2{border-collapse:collapse;font-size:11.5px}
+.paper .kv2 td{padding:1px 6px 1px 0;vertical-align:top;border:0;text-align:left}
+.paper .kv2 td:first-child{white-space:nowrap}
+.paper .kv2.num td{padding:5px 8px 5px 0;font-size:12.5px}
+.paper .pbox{border:1px solid #111;padding:6px 8px;font-size:11px}
+.paper .pbox.rem{min-height:60px;width:300px;font-weight:700}
+.paper .bx{display:inline-block;border:1px solid #111;min-width:150px;padding:1px 6px;text-align:right}
+.paper .bx.sm{min-width:0;text-align:left}
+.paper .sm{font-size:11px}
+.paper table.grid{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.paper table.grid th,.paper table.grid td{border:1px solid #111;padding:3px 5px;text-align:center}
+.paper table.grid th{font-weight:400}
+.paper .n{text-align:right!important;white-space:nowrap}
+.paper .disc{font-size:9.5px;color:#444;margin-top:26px}
+.paper.po{background:#d8efcf}
+.paper.gr{background:#f7d3df}
+.paper.land{padding:28px 24px}
+.paper .rabt.doc{font-size:10.5px;min-width:1100px}
+.paper .rabt.doc th,.paper .rabt.doc td{border-color:#111}
+.paper .rabt.doc th{background:#cfe0f3;font-weight:700}
+.paper .rabt.doc tr.nums th{background:#cfe0f3;font-weight:400;font-size:9.5px}
+.paper .rabt.doc tr.row1 td{height:60px}
+.paper .rabt.doc tr.tot td{font-weight:700}
+.paper .it{margin:10px 0 4px}
+.paper .ket{display:flex;gap:10px;font-size:11.5px}
+.paper .sign{display:flex;flex-direction:column;align-items:flex-end;text-align:right;margin-top:16px;font-weight:700;font-size:12px}
+.paper .sign .sp{height:46px}
+.paper.nd{font-size:13px;padding:36px 48px}
+.paper.draft{position:relative;overflow:hidden}
+.paper.draft::after{content:"DRAF";position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) rotate(-24deg);font-size:110px;font-weight:900;color:rgba(211,47,47,.08);pointer-events:none}
+.modal .ft{display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line);background:#fff}
+.modal .ft .sub{margin-right:auto}
+.rabbase{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:900px){.rabbase{grid-template-columns:1fr 1fr}}
+.rabbase > div{background:var(--soft);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.rabbase select,.rabbase input{height:38px;background:#fff}
+.rabbase .bv{font-size:20px;color:var(--primary)}
+.costs{display:flex;flex-direction:column;border:1px solid #e6ebf1;border-radius:12px;overflow:hidden}
+.cost{display:grid;grid-template-columns:minmax(0,1fr) 190px 190px;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid #edf1f5}
+.cost:first-child{border-top:0}
+.cost b{display:block;font-size:13.5px}
+.cost.head{background:#f5f8fb;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:9px 14px}
+.cost.man{background:#fffaf0}
+.cost .amt{text-align:right;font-weight:700;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.minp{display:flex;align-items:center;border:1px solid #dfe4ea;border-radius:8px;background:#fff;padding:0 8px;width:170px}
+.minp span{color:var(--muted);font-size:12px;font-weight:600}
+.minp input{border:0;height:34px;text-align:right;padding:0 0 0 6px;background:transparent;font-weight:700}
+.rabsum{margin-left:auto;width:min(420px,100%);background:var(--soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.rabsum .big2{border-top:1px solid #cddcea;padding-top:8px;font-size:15px;color:var(--primary)}
+.rabsum .big2 b{font-size:20px}
+.paper .dummy{margin-top:18px;font-size:10px;color:#999;text-align:center}
+.paper .rows .r span:last-child{color:#111}
 .opt{display:flex;gap:12px;align-items:flex-start;text-align:left;background:#fff;border:1.5px solid #dfe4ea;border-radius:14px;padding:14px;cursor:pointer}
 .opt b{display:block;font-size:14px;margin-bottom:2px}
 .opt:hover{border-color:var(--primary)}
@@ -280,21 +361,20 @@ div.f{display:flex;flex-direction:column;gap:6px}
 <body>
 <header class="top">
   <div>
-    <h1>Prototipe SPPD Mutasi · Alur Karyawan</h1>
-    <p>Simulasi konsep JM-Click versi web (laptop) dari sisi karyawan pemohon. Semua data di sini dummy.</p>
+    <h1>Prototipe JM-Click · SPPD Mutasi</h1>
+    <p>Masuk sebagai Karyawan atau HCIS. Semua data di sini dummy.</p>
   </div>
   <button class="btn sm" data-act="reset" id="btn-reset">Reset simulasi</button>
 </header>
 <div class="wrap">
   <main class="app" id="app" aria-live="polite"></main>
-  <aside class="panel" id="panel"></aside>
 </div>
 <div id="modal"></div>
 <div id="toast"></div>
 <script>
 (function(){
 "use strict";
-var KEY = "sppd-mutasi-proto-v3";
+var KEY = "sppd-mutasi-proto-v5";
 var KANTOR = [
   {id:"jkt", nama:"Kantor Pusat (Jakarta Timur)", q:"Jakarta Timur"},
   {id:"bgr", nama:"Kantor Cabang Bogor", q:"Kota Bogor"},
@@ -306,7 +386,7 @@ var KANTOR = [
 /* Jarak jalur darat (km), rute mobil tercepat di Google Maps */
 var ROAD = {"bgr|jkt":59.6, "ckp|jkt":65.9, "bdg|jkt":140, "jkt|smg":425, "jkt|sby":770, "bgr|ckp":109, "bdg|bgr":183, "bgr|smg":469, "bgr|sby":813, "bdg|ckp":80.2, "ckp|smg":364, "ckp|sby":708, "bdg|smg":360, "bdg|sby":704, "sby|smg":350};
 var ROAD_SRC = "snapshot Google Maps 16 Nov 2026, 14.15 WIB";
-var EMP = {nama:"Budi Santoso", npp:"10234", unit:"Divisi Operasi"};
+var EMP = {nama:"Budi Santoso", npp:"10234", unit:"Divisi Operasi", level:"5", grade:"BOD-4"};
 var SKS = [
   {no:"SK-MUT/0457/DIR/XI/2026", tanggal:"12 November 2026", efektif:"2026-12-01", jabSeb:"Staf Senior Operasi", asal:"jkt", jabSet:"Asisten Manajer Operasi", tujuan:"smg", current:true},
   {no:"SK-MUT/0112/DIR/III/2023", tanggal:"6 Maret 2023", efektif:"2023-04-01", jabSeb:"Staf Operasi", asal:"bdg", jabSet:"Staf Senior Operasi", tujuan:"jkt"},
@@ -371,12 +451,13 @@ function seedNotifs(){
 function fresh(){
   SK.tujuan="smg";
   return {screen:"login", notifs:seedNotifs(), form:emptyForm(), step:1, errors:[], reviewOk:false, hasDraft:false, draftAt:null,
-    subs:seedSubs(), seq:142, detail:null, lastTicket:null, log:seedLog(), visited:{}, nid:3, hist:[], files:{}, preview:null,
+    subs:seedSubs().concat(othersSeed()), seq:142, detail:null, lastTicket:null, log:seedLog(), visited:{}, nid:3, hist:[], files:{}, preview:null,
     skTujuan:"smg", redirected:false, flt:{q:"",status:"",year:""}, loginErr:"", loginVal:EMP.npp, tppSk:null,
-    tpp:{confirmed:false, subs:[], notifiedFor:null, seq:20}, tf:emptyTpp(), tstep:1, terrors:[], treviewOk:false, tppLast:null};
+    tpp:{confirmed:false, subs:[], notifiedFor:null, seq:20}, tf:emptyTpp(), tstep:1, terrors:[], treviewOk:false, tppLast:null,
+    role:"karyawan", loginRole:"karyawan", hc:{}, hcSeq:{rab:490, pr:1000310120, po:4000301040, gr:5000392720, nd:3450}, hcOpen:null, hcErr:[], hcFlt:"aktif", hcQ:"", hcDoc:null};
 }
 var S = fresh();
-var PERSIST = ["notifs","form","hasDraft","draftAt","subs","seq","log","nid","skTujuan","redirected","tpp"];
+var PERSIST = ["notifs","form","hasDraft","draftAt","subs","seq","log","nid","skTujuan","redirected","tpp","hc","hcSeq","role"];
 try{
   var raw = localStorage.getItem(KEY);
   if(raw){ var p = JSON.parse(raw); PERSIST.forEach(function(k){ if(p[k]!==undefined) S[k]=p[k]; }); SK.tujuan=S.skTujuan||"smg"; }
@@ -633,9 +714,11 @@ function chipFor(i){ return chip({label:STATUS_FLOW[i], cls:["","warn","warn","o
 var CRUMB_SPPD="Travel Management / SPPD Mutasi";
 
 function vLogin(){
+  var r=S.loginRole||"karyawan", def=r==="hcis"?HC_USER.npp:EMP.npp;
   return '<div class="loginw"><div class="hero"><div class="disc">'+logo("lg")+'</div><h2>JM-Click</h2></div>'+
   '<div class="lform" data-form="login">'+
-  '<label class="f" for="npp">NPP<input id="npp" type="text" inputmode="numeric" maxlength="5" value="'+esc(S.loginVal)+'" autocomplete="off" placeholder="5 digit NPP"></label>'+
+  '<div class="seg"><button data-act="lrole" data-v="karyawan" class="'+(r==="karyawan"?'on':'')+'">Karyawan</button><button data-act="lrole" data-v="hcis" class="'+(r==="hcis"?'on':'')+'">HCIS</button></div>'+
+  '<label class="f" for="npp">NPP<input id="npp" type="text" inputmode="numeric" maxlength="5" value="'+esc(S.loginErr?S.loginVal:def)+'" autocomplete="off" placeholder="5 digit NPP"></label>'+
   (S.loginErr?'<span class="ferr" role="alert">'+esc(S.loginErr)+'</span>':'')+
   '<div class="f"><label for="pw" style="font-size:13px;font-weight:600">Password</label><div class="inwrap pw"><input id="pw" type="password" value="contoh123" placeholder="Password"><button type="button" class="eyebtn" data-act="pwtoggle" aria-label="Tampilkan password" aria-pressed="false">'+ic("eye",20)+'</button></div></div>'+
   '<button class="btn navy block" type="button" data-act="login" style="margin-top:6px">Login</button></div></div>';
@@ -1108,11 +1191,386 @@ function tppPreset(kind){
   if(S.screen==="login") S.screen="home";
   go("tpp");
 }
+/* ================= HCIS (Human Capital Services) ================= */
+var HC_USER = {nama:"Dewi Lestari", npp:"20117", jabatan:"Staf HCIS"};
+var HC_STAGES = ["Diterima","Cek kelengkapan","Susun RAB","Approval Dept Head HCIS","Buat PR","Approval OAD & Group Head","Buat PO & GR","Serahkan ke ATA","Diserahkan ke ATA"];
+/* Tabel hak & kebutuhan (dari file Dummy Data Hak & Kebutuhan Karyawan) */
+var LV_KEYS = ["1/2/3","4","5","6/7","8/9"];
+var TPD = {"1/2/3":{hotel:"Bintang 4", makan:400000, saku:450000, jml:850000}, "4":{hotel:"Bintang 3", makan:300000, saku:350000, jml:650000}, "5":{hotel:"Bintang 3", makan:300000, saku:300000, jml:600000}, "6/7":{hotel:"Bintang 3", makan:300000, saku:275000, jml:575000}, "8/9":{hotel:"Bintang 2", makan:300000, saku:250000, jml:550000}};
+var BRACKETS = ["1","2","3–4","≥5"];
+var HOTEL = {"1/2/3":[4000000,4000000,8000000,12000000], "4":[3200000,3200000,6400000,9600000], "5":[3200000,3200000,6400000,9600000], "6/7":[3200000,3200000,6400000,9600000], "8/9":[2000000,2000000,4000000,6000000]};
+var SEWA = {"1/2/3":20000000, "4":15000000, "5":15000000, "6/7":10000000, "8/9":10000000};
+var REGIONS = ["Jabotabek","Jawa Barat","Jawa Tengah dan DIY","Jawa Timur","Sumatera / Kalimantan / Sulawesi","Bali"];
+var PACK = {
+  "1/2/3":[[400000,800000,1800000,3000000,7200000,6000000],[550000,1100000,2700000,4500000,10700000,9000000],[750000,1500000,3600000,5900000,14300000,12000000],[950000,1900000,4500000,7400000,18000000,15000000]],
+  "4":[[300000,600000,1500000,2400000,6000000,5000000],[450000,900000,2300000,3700000,9000000,7500000],[650000,1300000,3000000,5000000,12000000,10000000],[800000,1600000,3800000,6200000,15000000,12500000]],
+  "5":[[250000,500000,1200000,2000000,4800000,4000000],[400000,800000,1800000,3000000,7200000,6000000],[500000,1000000,2400000,4000000,9600000,8000000],[650000,1300000,3000000,5000000,12000000,10000000]],
+  "6/7":[[250000,500000,1200000,2000000,4800000,4000000],[400000,800000,1800000,3000000,7200000,6000000],[500000,1000000,2400000,4000000,9600000,8000000],[650000,1300000,3000000,5000000,12000000,10000000]],
+  "8/9":[[200000,400000,1000000,1500000,3600000,3000000],[300000,600000,1400000,2200000,5400000,4500000],[400000,800000,1800000,3000000,7200000,6000000],[450000,900000,2300000,3700000,9000000,7500000]]
+};
+var REGION_OF = {jkt:"Jabotabek", bgr:"Jabotabek", ckp:"Jawa Barat", bdg:"Jawa Barat", smg:"Jawa Tengah dan DIY", sby:"Jawa Timur"};
+var CK_ITEMS = [
+  {k:"form", label:"Form permohonan SPPD Pindah"},
+  {k:"sk", label:"SK Mutasi", doc:"sk"},
+  {k:"kk", label:"Kartu Keluarga terupdate", doc:"kk"},
+  {k:"rek", label:"Foto rekening payroll", doc:"rek"},
+  {k:"skolAsal", label:"Surat keterangan pindah dari sekolah asal", doc:"skolAsal", opt:true},
+  {k:"skolBaru", label:"Surat keterangan / kwitansi pendaftaran sekolah baru", doc:"skolBaru", opt:true}
+];
+function lvKey(l){ l=String(l); if(["1","2","3"].indexOf(l)>=0) return "1/2/3"; if(l==="6"||l==="7") return "6/7"; if(l==="8"||l==="9") return "8/9"; return l; }
+function bracketIdx(n){ return n<=1?0:(n===2?1:(n<=4?2:3)); }
+function terbilang(n){
+  n=Math.floor(Math.abs(n)); var s=["","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh","sebelas"];
+  function t(x){ if(x<12) return s[x]; if(x<20) return t(x-10)+" belas"; if(x<100) return t(Math.floor(x/10))+" puluh"+(x%10?" "+t(x%10):""); if(x<200) return "seratus"+(x-100?" "+t(x-100):""); if(x<1000) return t(Math.floor(x/100))+" ratus"+(x%100?" "+t(x%100):""); if(x<2000) return "seribu"+(x-1000?" "+t(x-1000):""); if(x<1e6) return t(Math.floor(x/1000))+" ribu"+(x%1000?" "+t(x%1000):""); if(x<1e9) return t(Math.floor(x/1e6))+" juta"+(x%1e6?" "+t(x%1e6):""); return t(Math.floor(x/1e9))+" miliar"+(x%1e9?" "+t(x%1e9):""); }
+  var w=n===0?"nol":t(n); return w.charAt(0).toUpperCase()+w.slice(1)+" rupiah";
+}
+function subEmp(sub){
+  if(sub.emp) return sub.emp;
+  var sk=skBy(sub.sk)||SK; return {nama:EMP.nama, npp:EMP.npp, jabatan:sk.jabSet, level:EMP.level, grade:EMP.grade};
+}
+function isMine(sub){ return !sub.emp; }
+function hcCase(t){
+  if(!S.hc[t]) S.hc[t]={stage:0, check:{}, notes:{}, rabIn:{}, rab:null, dh:null, pr:null, prapp:{oad:null, gh:null}, po:null, gr:null, nd:null, dhNote:""};
+  return S.hc[t];
+}
+function hcStage(sub){ if(S.hc[sub.ticket]) return S.hc[sub.ticket].stage; return sub.statusIdx>=2?8:0; }
+function hcChip(st){ var c=st===8?"ok":(st===0?"bad":(st===3||st===5?"warn":"")); return '<span class="chip '+c+'">'+esc(HC_STAGES[st])+'</span>'; }
+function famCount(sub){ return sub.form.bawa==="ya"?sub.form.anggota.filter(function(m){return !m.rejected;}).length:0; }
+function rabCalc(sub, inp){
+  var e=subEmp(sub), lv=inp.level||e.level, k=lvKey(lv), orang=1+famCount(sub), hari=+(inp.hari||5);
+  var tunj=TPD[k].jml, uh=orang*hari*tunj;
+  var asalR=REGION_OF[sub.form.asal], tujR=REGION_OF[sub.form.tujuan], b=bracketIdx(orang);
+  var packAuto=asalR==="Jabotabek", pack=packAuto?PACK[k][b][REGIONS.indexOf(tujR)]:(inp.pack===undefined||inp.pack===""?null:+inp.pack);
+  var sewa=SEWA[k], hotel=HOTEL[k][b], sekolah=sub.form.bantuanSekolah?(+inp.sekolah||0):0;
+  var jumlah=uh+(pack||0)+sewa+hotel+sekolah, pajak=Math.round(jumlah*0.05);
+  var ket=[];
+  ket.push(packAuto?"Pengepakan barang: "+asalR+" ke "+tujR+" untuk "+orang+" orang (tabel Biaya Pengepakan).":"Pengepakan barang: tarif asal "+asalR+" belum ada di tabel, diisi manual oleh HCIS.");
+  if(sub.form.bawa==="ya") sub.form.anggota.forEach(function(m){ if(m.rejected) ket.push(m.hub+" ("+m.nama+") tidak mendapat SPPD Pindah karena usia 25 tahun atau lebih (sesuai KK)."); });
+  if(sub.form.bawa!=="ya") ket.push("Karyawan tidak membawa keluarga; berhak Tiket Pulang Pergi.");
+  return {lv:String(lv), k:k, grade:e.grade, orang:orang, hari:hari, tunj:tunj, uh:uh, pack:pack, packAuto:packAuto, sewa:sewa, hotel:hotel, sekolah:sekolah, jumlah:jumlah, pajak:pajak, diterima:jumlah-pajak, ket:ket, asalR:asalR, tujR:tujR};
+}
+function hcLog(c, x){ log(x, "info"); }
+function hcSetEmpStatus(sub, idx){
+  if(sub.statusIdx<idx){ sub.statusIdx=idx; sub.history=sub.history||[]; sub.history[idx]=today(); }
+}
+function hcNotifyEmp(sub, title, body){ if(isMine(sub)) S.notifs.unshift({id:S.nid++, type:"submitted", title:title, body:body, time:now(), read:false, ticket:sub.ticket}); }
+function subBy(t){ return S.subs.filter(function(s){return s.ticket===t;})[0]||null; }
+
+/* ---------- HCIS views ---------- */
+function hcTopbar(){
+  return '<header class="topbar"><div class="brandm">'+logo("sm")+'JM-Click <span class="chip" style="margin-left:6px">HCIS</span></div><div class="sp"></div>'+
+    '<div class="prof"><div class="ava">'+ic("user",20)+'</div><div><b>'+esc(HC_USER.nama)+'</b><span class="sub small">'+esc(HC_USER.jabatan)+' · NPP '+esc(HC_USER.npp)+'</span></div></div><button class="btn sm" data-act="logout" style="margin-left:12px">Keluar</button></header>';
+}
+function hcSide(){
+  var sc=S.screen;
+  function b(act,icn,label,on,extra){ return '<button'+(act?' data-act="'+act+'"':' disabled')+' class="'+(on?'on':'')+'">'+ic(icn,18)+label+(extra||'')+'</button>'; }
+  var baru=S.subs.filter(function(s){return hcStage(s)===0;}).length;
+  return '<nav class="side" aria-label="Menu HCIS"><span class="lab">HCIS</span>'+
+    b("hchome","list","Antrian SPPD Mutasi",sc==="hchome"||sc==="hccase",baru?'<span class="nd"></span>':'')+
+    b("hchak","scale","Tabel Hak & Kebutuhan",sc==="hchak")+
+    b(null,"ticket","Antrian Tiket PP",false,'<span class="soon">Menyusul</span>')+
+    '<span class="lab">Akun</span>'+b("logout","user","Keluar",false)+'</nav>';
+}
+function vHcHome(){
+  var counts=[0,0,0,0,0,0,0,0,0]; S.subs.forEach(function(s){ counts[hcStage(s)]++; });
+  var groups=[["Baru masuk",[0]],["Cek kelengkapan",[1]],["RAB & approval Dept Head",[2,3]],["PR & approval",[4,5]],["PO, GR, serah ATA",[6,7]],["Diserahkan ke ATA",[8]]];
+  var h='<div><h2 style="font-size:24px;color:var(--primary)">Antrian SPPD Mutasi</h2><span class="sub">Human Capital Services · proses pengajuan dari karyawan sampai diserahkan ke Accounting & Tax (ATA)</span></div>';
+  h+='<div class="g6">'+groups.map(function(g){ var n=g[1].reduce(function(a,i){return a+counts[i];},0); return '<div class="card"><div class="sub small">'+g[0]+'</div><div class="v" style="font-size:22px;font-weight:800;color:var(--primary);margin-top:4px">'+n+'</div></div>'; }).join("")+'</div>';
+  var f=S.hcFlt||"aktif", q=(S.hcQ||"").toLowerCase();
+  var list=S.subs.filter(function(s){ var st=hcStage(s); if(f==="aktif" && st===8) return false; if(f==="selesai" && st!==8) return false; if(q){ var e=subEmp(s); if((e.nama+" "+e.npp+" "+s.ticket).toLowerCase().indexOf(q)<0) return false; } return true; })
+    .sort(function(a,b){ return hcStage(a)-hcStage(b); });
+  h+='<div class="card stack"><div class="fbar" style="grid-template-columns:minmax(0,1fr) 200px"><div class="inwrap left">'+ic("search",18)+'<input id="hcq" type="text" value="'+esc(S.hcQ||"")+'" placeholder="Cari nama, NPP, atau nomor pelacakan"></div><select id="hcflt"><option value="aktif"'+(f==="aktif"?' selected':'')+'>Sedang diproses</option><option value="selesai"'+(f==="selesai"?' selected':'')+'>Sudah diserahkan ke ATA</option><option value="semua"'+(f==="semua"?' selected':'')+'>Semua</option></select></div>';
+  h+='<div class="tblw"><table class="dtable" style="min-width:0"><thead><tr><th>Nomor pelacakan</th><th>Karyawan</th><th>Mutasi</th><th>Keluarga</th><th>Diajukan</th><th>Tahap HCIS</th><th style="width:96px">Aksi</th></tr></thead><tbody>';
+  if(!list.length) h+='<tr><td colspan="7" class="empty">Tidak ada pengajuan di filter ini. Pakai skenario "Isi antrian HCIS" di panel kanan.</td></tr>';
+  list.forEach(function(s){ var e=subEmp(s), st=hcStage(s);
+    h+='<tr><td><b style="font-size:12px">'+esc(s.ticket)+'</b></td><td><b>'+esc(e.nama)+'</b><span class="sub small" style="display:block">NPP '+esc(e.npp)+' · Level '+esc(e.level)+'</span></td><td>'+esc(kantorNama(s.form.asal))+' → '+esc(kantorNama(s.form.tujuan))+'</td><td>'+(s.form.bawa==="ya"?famCount(s)+' orang':'Tidak dibawa')+'</td><td>'+esc(s.created)+'</td><td>'+hcChip(st)+'</td><td><button class="btn sm'+(st<8?' pri':'')+'" data-act="hcopen" data-t="'+esc(s.ticket)+'">'+(st===0?'Proses':(st<8?'Lanjutkan':'Lihat'))+'</button></td></tr>'; });
+  return h+'</tbody></table></div></div>';
+}
+function hcStepper(st){
+  return '<div class="hcsteps">'+HC_STAGES.slice(1).map(function(n,i){ var k=i+1; return '<div class="hs'+(k===st?' on':'')+(k<st||st===8?' done':'')+'"><i>'+(k<st||st===8?'✓':k)+'</i><span>'+n+'</span></div>'; }).join("")+'</div>';
+}
+function docBtns(sub){
+  var h='<div class="stack" style="gap:6px">';
+  DOCS.forEach(function(d){ if(sub.form.docs && sub.form.docs[d.k]) h+='<div class="row between"><span class="small">'+esc(d.label)+'</span><button class="link" style="padding:0;font-size:12px" data-act="hcfile" data-t="'+esc(sub.ticket)+'" data-k="'+d.k+'">Lihat</button></div>'; });
+  return h+'</div>';
+}
+function genDocs(c, t){
+  var items=[["rab","RAB",c.rab&&c.rab.no],["pr","Purchase Requisition",c.pr&&c.pr.no],["po","Purchase Order",c.po&&c.po.no],["gr","Goods Receipt",c.gr&&c.gr.matDoc],["nd","Nota Dinas ke ATA",c.nd&&c.nd.no]].filter(function(x){return x[2];});
+  if(!items.length) return '<span class="sub small">Belum ada dokumen yang dibuat.</span>';
+  return '<div class="stack" style="gap:6px">'+items.map(function(x){ return '<div class="row between"><span class="small"><b>'+x[1]+'</b> · '+esc(x[2])+'</span><button class="link" style="padding:0;font-size:12px" data-act="hcdoc" data-t="'+esc(t)+'" data-k="'+x[0]+'">Lihat</button></div>'; }).join("")+'</div>';
+}
+function vHcCase(){
+  var sub=subBy(S.hcOpen); if(!sub) return vHcHome();
+  var e=subEmp(sub), c=hcCase(sub.ticket), st=c.stage;
+  if(sub.statusIdx>=3 && st<8){ c.stage=st=8; }
+  var h=hdr("SPPD Mutasi · "+e.nama,"HCIS / Antrian SPPD Mutasi / "+sub.ticket)+'<div class="card">'+hcStepper(st)+'</div>';
+  h+='<div class="hcgrid"><div class="stack">'+hcStageCard(sub,c,e)+'</div><div class="stack">'+
+    '<div class="card stack" style="gap:8px"><span class="sec">Data pengajuan</span>'+rows([["Nomor",'<span style="font-size:12px">'+esc(sub.ticket)+'</span>'],["Nama / NPP",esc(e.nama)+" / "+esc(e.npp)],["Jabatan baru",esc(e.jabatan)],["Grade / Level",esc(e.grade)+" / "+esc(e.level)],["Mutasi",esc(kantorNama(sub.form.asal))+" → "+esc(kantorNama(sub.form.tujuan))],["Keluarga",sub.form.bawa==="ya"?famCount(sub)+" orang ikut":"Tidak dibawa"],["Bantuan sekolah",sub.form.bantuanSekolah?"Diajukan":"Tidak"],["Diajukan",esc(sub.created)]])+'</div>'+
+    (sub.form.bawa==="ya"&&sub.form.anggota.length?'<div class="card stack" style="gap:6px"><span class="sec">Keluarga (dari KK)</span>'+sub.form.anggota.map(function(m){ return '<div class="row between small"><span>'+esc(m.hub)+' · '+esc(m.nama)+' ('+age(m.tgl)+' th)</span>'+(m.rejected?'<span class="chip bad">Ditolak</span>':'<span class="chip ok">Diproses</span>')+'</div>'; }).join("")+'</div>':'')+
+    '<div class="card stack" style="gap:8px"><span class="sec">Dokumen karyawan</span>'+docBtns(sub)+'</div>'+
+    '<div class="card stack" style="gap:8px"><span class="sec">Dokumen HCIS</span>'+genDocs(c,sub.ticket)+'</div></div></div>';
+  return h;
+}
+function hcErr(){ return S.hcErr&&S.hcErr.length?'<div class="alert" role="alert"><div class="t">'+ic("warn",18)+' Belum bisa lanjut</div><ul>'+S.hcErr.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>':''; }
+function hcStageCard(sub,c,e){
+  var st=c.stage, t=esc(sub.ticket), h='';
+  if(st===0){
+    h='<div class="card stack"><span class="sec">Pengajuan baru diterima</span><p class="sub" style="margin:0">Karyawan mengirim form SPPD Mutasi pada '+esc(sub.created)+'. Mulai dengan mengecek kelengkapan dokumen.</p><div class="actions" style="border:0;padding:0"><button class="btn pri" data-act="hcstart" data-t="'+t+'">Mulai cek kelengkapan</button></div></div>';
+  }
+  if(st===1){
+    h=hcErr()+'<div class="card stack"><span class="sec">Bukti kelengkapan pemohon</span><span class="sub small">Status "Ada" terisi otomatis untuk dokumen yang diunggah karyawan. Periksa isinya, lalu tandai.</span><div class="tblw"><table class="ftable"><thead><tr><th>No</th><th>Persyaratan SPPD Pindah</th><th>Status</th><th>Catatan</th></tr></thead><tbody>';
+    CK_ITEMS.forEach(function(it,i){
+      var na=it.opt && !sub.form.bantuanSekolah, v=c.check[it.k]||(na?"na":((it.doc?sub.form.docs&&sub.form.docs[it.doc]:true)?"ada":"tidak"));
+      c.check[it.k]=v;
+      h+='<tr><td>'+(i+1)+'</td><td class="n">'+esc(it.label)+(it.doc&&sub.form.docs&&sub.form.docs[it.doc]?' <button class="link" style="padding:0;font-size:12px" data-act="hcfile" data-t="'+t+'" data-k="'+it.doc+'">Lihat</button>':'')+'</td><td>'+(na?'<span class="sub small">Tidak perlu</span>':'<select id="ck_'+it.k+'" data-hc="'+t+'" style="height:34px;width:120px"><option value="ada"'+(v==="ada"?' selected':'')+'>Ada</option><option value="tidak"'+(v==="tidak"?' selected':'')+'>Tidak ada</option></select>')+'</td><td><input type="text" id="ckn_'+it.k+'" data-hc="'+t+'" value="'+esc(c.notes[it.k]||"")+'" placeholder="Catatan" style="height:34px"'+(na?' disabled':'')+'></td></tr>';
+    });
+    h+='</tbody></table></div><div class="actions"><button class="btn" data-act="hcckreq" data-t="'+t+'">Minta kelengkapan ke karyawan</button><button class="btn pri" data-act="hcckok" data-t="'+t+'">Lengkap, susun RAB</button></div></div>';
+  }
+  if(st===2){
+    var r=rabCalc(sub,c.rabIn), fam=famCount(sub), bi=bracketIdx(r.orang), rej=sub.form.bawa==="ya"?sub.form.anggota.filter(function(m){return m.rejected;}).length:0;
+    function cost(name,how,src,amt,manual){ return '<div class="cost'+(manual?' man':'')+'"><div><b>'+name+'</b><span class="sub small">'+how+'</span></div><div><span class="chip">'+src+'</span></div><div class="amt">'+amt+'</div></div>'; }
+    function inp(id,val,ph){ return '<div class="minp"><span>Rp</span><input id="'+id+'" type="text" inputmode="numeric" data-hc="'+t+'" value="'+esc(val?Number(val).toLocaleString("id-ID"):"")+'" placeholder="'+ph+'"></div>'; }
+    h=hcErr()+(c.dhNote?'<div class="alert"><div class="t">'+ic("warn",18)+' Dikembalikan Dept Head HCIS</div><ul><li>'+esc(c.dhNote)+'</li></ul></div>':'')+
+      '<div class="card stack"><div class="row between"><span class="sec">Susun RAB</span></div>'+
+      '<span class="sub small">Cek dasar perhitungan, lengkapi isian bertanda <b>Isi manual</b>, lalu ajukan ke Dept Head HCIS.</span>'+
+      '<div class="rabbase">'+
+        '<div><span class="sub small">Level karyawan</span><select id="rab_level" data-hc="'+t+'">'+["1","2","3","4","5","6","7","8","9"].map(function(x){return '<option'+(x===r.lv?' selected':'')+'>'+x+'</option>';}).join("")+'</select><span class="sub small">Grade '+esc(r.grade)+' · kelompok '+r.k+'</span></div>'+
+        '<div><span class="sub small">Jumlah orang pindah</span><b class="bv">'+r.orang+' orang</b><span class="sub small">Karyawan + '+fam+' keluarga'+(rej?' · '+rej+' anak ≥ 25 th tidak dihitung':'')+'</span></div>'+
+        '<div><span class="sub small">Jumlah hari perjalanan</span><input id="rab_hari" type="text" inputmode="numeric" data-hc="'+t+'" value="'+r.hari+'"><span class="sub small">Default 5 hari</span></div>'+
+        '<div><span class="sub small">Rute pengepakan</span><b class="bv" style="font-size:14px">'+esc(r.asalR)+' → '+esc(r.tujR)+'</b><span class="sub small">'+esc(kantorNama(sub.form.asal))+' → '+esc(kantorNama(sub.form.tujuan))+'</span></div>'+
+      '</div>'+
+      '<div class="costs"><div class="cost head"><span>Komponen</span><span>Sumber</span><span class="amt">Nilai</span></div>'+
+        cost("Uang harian", r.orang+" orang × "+r.hari+" hari × "+rp(r.tunj)+" per hari", "Tunjangan perjalanan dinas", rp(r.uh))+
+        cost("Pengepakan barang", r.packAuto?esc(r.asalR)+" → "+esc(r.tujR)+" · "+BRACKETS[bi]+" orang · level "+r.k:"Tarif asal "+esc(r.asalR)+" belum ada di tabel", "Biaya pengepakan", r.packAuto?rp(r.pack):'<span class="chip warn">Isi manual</span>'+inp("rab_pack",c.rabIn.pack,"0"), !r.packAuto)+
+        cost("Sewa rumah 1 tahun", "Sesuai level "+r.k, "Bantuan sewa rumah", rp(r.sewa))+
+        cost("Biaya hotel (penginapan sementara)", BRACKETS[bi]+" orang · level "+r.k, "Bantuan penginapan", rp(r.hotel))+
+        (sub.form.bantuanSekolah?cost("Biaya pindah sekolah anak", "Sesuai kwitansi dari karyawan", "Input HCIS", '<span class="chip warn">Isi manual</span>'+inp("rab_sekolah",c.rabIn.sekolah,"0"), true):cost("Biaya pindah sekolah anak","Tidak diajukan karyawan","-",'<span class="sub">Rp0</span>'))+
+      '</div>'+
+      '<div class="rabsum"><div class="row between"><span>Jumlah</span><b>'+rp(r.jumlah)+'</b></div><div class="row between"><span>Pajak 5%</span><span>− '+rp(r.pajak)+'</span></div><div class="row between big2"><span>Jumlah diterima karyawan</span><b>'+rp(r.diterima)+'</b></div><span class="sub small"><i>'+esc(terbilang(r.diterima))+'</i></span></div>'+
+      '<div><b class="small">Catatan RAB</b><ul class="plist" style="margin-top:6px">'+r.ket.map(function(x){return '<li>'+esc(x)+'</li>';}).join("")+'</ul></div>'+
+      '<div class="actions"><button class="btn" data-act="hcprev" data-k="rab" data-t="'+t+'">Pratinjau RAB</button><button class="btn pri" data-act="hcrab" data-t="'+t+'">Ajukan ke Dept Head HCIS</button></div></div>';
+  }
+  if(st===3){
+    h='<div class="card stack"><div class="row between"><span class="sec">Approval Dept Head HCIS</span><span class="chip warn">Menunggu</span></div>'+
+      '<div class="alert info"><div class="t">'+ic("eyeOpen",18)+' Hanya terlihat oleh HCIS</div><p>Proses approval RAB oleh Dept Head HCIS tidak tampil di halaman karyawan. Karyawan tetap melihat status Verifikasi HCS.</p></div>'+
+      rows([["Nomor RAB",esc(c.rab.no)],["Jumlah",rp(c.rab.jumlah)],["Pajak 5%",rp(c.rab.pajak)],["Jumlah diterima",'<b>'+rp(c.rab.diterima)+'</b>'],["Diajukan",esc(c.rab.tgl)]])+
+      '<div class="actions"><span class="sub small" style="margin-right:auto">Simulasi keputusan Dept Head HCIS:</span><button class="btn" data-act="hcdhno" data-t="'+t+'">Kembalikan untuk revisi</button><button class="btn pri" data-act="hcdhok" data-t="'+t+'">Setujui RAB</button></div></div>';
+  }
+  if(st===4){
+    var pr=prDraft(sub,c);
+    h='<div class="card stack"><span class="sec">Purchase Requisition (PR)</span><span class="sub small">Terisi otomatis dari RAB yang sudah disetujui Dept Head HCIS ('+esc(c.dh)+').</span>'+
+      rows([["Plant",esc(pr.plant)],["Short text",esc(pr.shortText)],["Qty / UoM","1 AU"],["Delivery date",esc(pr.delivery)],["Commitment item",pr.commitment],["Fund center",pr.fund],["Valuation price",'<b>'+rp(pr.value)+'</b>'],["Release strategy","G5 - Office Administration"],["Remarks",esc(pr.remarks)]])+
+      '<div class="actions"><button class="btn" data-act="hcprev" data-k="pr" data-t="'+t+'">Pratinjau PR</button><button class="btn pri" data-act="hcpr" data-t="'+t+'">Kirim PR untuk approval</button></div></div>';
+  }
+  if(st===5){
+    var a=c.prapp;
+    h='<div class="card stack"><div class="row between"><span class="sec">Approval PR '+esc(c.pr.no)+'</span><span class="chip warn">Menunggu</span></div>'+
+      '<div class="tblw"><table class="ftable"><thead><tr><th>Release</th><th>Approver</th><th>Status</th><th></th></tr></thead><tbody>'+
+      '<tr><td>Level 1 · 1Q</td><td class="n">Office Administration (OAD)</td><td>'+(a.oad?'<span class="chip ok">Disetujui '+esc(a.oad)+'</span>':'<span class="chip warn">Menunggu</span>')+'</td><td>'+(a.oad?'':'<button class="btn sm pri" data-act="hcoad" data-t="'+t+'">Simulasi: OAD setujui</button>')+'</td></tr>'+
+      '<tr><td>Level 2 · 1M</td><td class="n">Group Head Human Capital Services</td><td>'+(a.gh?'<span class="chip ok">Disetujui '+esc(a.gh)+'</span>':'<span class="chip warn">'+(a.oad?'Menunggu':'Menunggu OAD')+'</span>')+'</td><td>'+(a.gh?'':'<button class="btn sm pri" data-act="hcgh" data-t="'+t+'"'+(a.oad?'':' disabled')+'>Simulasi: Group Head setujui</button>')+'</td></tr>'+
+      '</tbody></table></div><span class="sub small">Halaman OAD dan Group Head belum dibangun; persetujuan disimulasikan dari sini.</span></div>';
+  }
+  if(st===6){
+    h='<div class="card stack"><span class="sec">Purchase Order & Goods Receipt</span><span class="sub small">PR '+esc(c.pr.no)+' sudah disetujui OAD dan Group Head.</span>'+
+      '<div class="g2"><div class="card stack" style="box-shadow:none"><b>Purchase Order</b>'+(c.po?rows([["Nomor PO",esc(c.po.no)],["Vendor",esc(c.po.vendorNo)+" - "+esc(c.po.vendor)],["Net price",rp(c.po.net)],["Tax code","PPN Masukan 0%"]])+'<button class="link" style="align-self:flex-start;padding:0" data-act="hcdoc" data-k="po" data-t="'+t+'">Lihat PO</button>':'<span class="sub small">Vendor = karyawan, nilai sesuai PR.</span><div class="row"><button class="btn" data-act="hcprev" data-k="po" data-t="'+t+'">Pratinjau PO</button><button class="btn pri" data-act="hcpo" data-t="'+t+'">Buat PO</button></div>')+'</div>'+
+      '<div class="card stack" style="box-shadow:none"><b>Goods Receipt / Service Acceptance</b>'+(c.gr?rows([["Mat. Doc",esc(c.gr.matDoc)],["G/L",esc(c.gr.gl)+" · Beban Perjalanan Dinas Pindah"],["Amount",rp(c.gr.amount)],["Posting date",esc(c.gr.posting)]])+'<button class="link" style="align-self:flex-start;padding:0" data-act="hcdoc" data-k="gr" data-t="'+t+'">Lihat GR</button>':'<span class="sub small">Dibuat setelah PO terbit.</span><div class="row"><button class="btn" data-act="hcprev" data-k="gr" data-t="'+t+'"'+(c.po?'':' disabled')+'>Pratinjau GR</button><button class="btn pri" data-act="hcgr" data-t="'+t+'"'+(c.po?'':' disabled')+'>Posting GR</button></div>')+'</div></div>'+
+      (c.po&&c.gr?'<div class="actions"><button class="btn pri" data-act="hcnext7" data-t="'+t+'">Lanjut serahkan ke ATA</button></div>':'')+'</div>';
+  }
+  if(st===7){
+    var nd=ndDraft(sub,c);
+    h='<div class="card stack"><span class="sec">Serahkan ke Accounting & Tax (ATA)</span><span class="sub small">Nota dinas permohonan pembayaran dibuat otomatis.</span>'+
+      rows([["Kepada","Accounting and Tax Group Head"],["Hal","Permohonan Pembayaran"],["Jenis pekerjaan","Perjalanan Dinas Mutasi Pindah Karyawan"],["Pelaksana",esc(e.nama)+" / "+esc(e.npp)],["Total",'<b>'+rp(nd.total)+'</b>'],["Terbilang",esc(terbilang(nd.total))],["Pembayaran","Transfer ke rekening payroll karyawan"],["Purchase Request",esc(c.pr.no)]])+
+      '<div class="actions"><button class="btn" data-act="hcprev" data-k="nd" data-t="'+t+'">Pratinjau Nota Dinas</button><button class="btn pri" data-act="hcata" data-t="'+t+'">Serahkan ke ATA</button></div></div>';
+  }
+  if(st===8){
+    h='<div class="card stack"><div class="okc" style="width:84px;height:84px">'+ic("check",44,2.5).replace('stroke="currentColor"','stroke="#fff"')+'</div><div class="center"><div class="big" style="font-size:20px">Diserahkan ke Accounting & Tax</div><p class="sub" style="margin:6px 0 0">'+(c.nd?'Nota dinas '+esc(c.nd.no)+' · '+esc(c.nd.tgl)+'. ':'')+'Status karyawan berubah menjadi Proses Accounting & Tax.</p></div></div>';
+  }
+  return h;
+}
+function rabTable(sub,r){
+  var e=subEmp(sub);
+  return '<table class="rabt"><thead><tr><th>NPP</th><th>Nama</th><th>Jabatan</th><th>Grade</th><th>Level</th><th>Unit kerja baru</th><th>Jml orang</th><th>Jml hari</th><th>Tunjangan /hari</th><th>Uang harian</th><th>Pengepakan</th><th>Sewa rumah 1 thn</th><th>Biaya hotel</th><th>Pindah sekolah</th><th>Jumlah</th><th>Pajak 5%</th><th>Jumlah diterima</th></tr>'+
+    '<tr class="f"><th></th><th></th><th></th><th></th><th></th><th></th><th>a</th><th>b</th><th>c</th><th>a×b×c</th><th></th><th></th><th></th><th></th><th>total</th><th>5%</th><th>total−pajak</th></tr></thead><tbody>'+
+    '<tr><td>'+esc(e.npp)+'</td><td>'+esc(e.nama)+'</td><td>'+esc(e.jabatan)+'</td><td>'+esc(e.grade)+'</td><td>'+esc(r.lv)+'</td><td>'+esc(kantorNama(sub.form.tujuan))+'</td><td>'+r.orang+'</td><td>'+r.hari+'</td><td>'+fmtN(r.tunj)+'</td><td>'+fmtN(r.uh)+'</td><td>'+(r.pack==null?'<span class="chip bad">isi</span>':fmtN(r.pack))+'</td><td>'+fmtN(r.sewa)+'</td><td>'+fmtN(r.hotel)+'</td><td>'+fmtN(r.sekolah)+'</td><td><b>'+fmtN(r.jumlah)+'</b></td><td>'+fmtN(r.pajak)+'</td><td><b>'+fmtN(r.diterima)+'</b></td></tr></tbody></table>'+
+    '<p class="small" style="margin:8px 0 0"><i>Terbilang: '+esc(terbilang(r.diterima))+'.</i></p>';
+}
+function fmtN(n){ return Number(n||0).toLocaleString("id-ID"); }
+function prDraft(sub,c){ var e=subEmp(sub); return {plant:"JM00 - Kantor Pusat Jasa Marga", shortText:"SPPD Mutasi "+e.nama+" / "+e.npp, delivery:today(), commitment:"6119020103", fund:"1000HO0804", value:c.rab.jumlah, remarks:"PEMBAYARAN SPPD MUTASI KARYAWAN a.n. "+e.nama.toUpperCase()+" / "+e.npp}; }
+function ndDraft(sub,c){ return {total:c.rab.jumlah}; }
+function nextNo(k){ S.hcSeq[k]++; return S.hcSeq[k]; }
+
+/* ---------- HCIS actions ---------- */
+function rabErrors(sub,c){
+  var r=rabCalc(sub,c.rabIn), er=[];
+  if(r.pack==null) er.push("Isi biaya pengepakan secara manual karena tarif asal "+r.asalR+" belum ada di tabel.");
+  if(!(r.hari>0)) er.push("Jumlah hari harus lebih dari 0.");
+  if(sub.form.bantuanSekolah && !(r.sekolah>0)) er.push("Isi biaya pindah sekolah sesuai kwitansi karena karyawan mengajukan bantuan pindah sekolah.");
+  return er;
+}
+function hcPreview(t,k){
+  var sub=subBy(t); if(!sub) return; var c=hcCase(t); S.hcErr=[];
+  if(k==="rab"){ S.hcErr=rabErrors(sub,c); if(S.hcErr.length){ render(); toTop(); return; } }
+  S.hcDoc={t:t, k:k, draft:true}; render();
+}
+function hcAct(a,t){
+  var sub=subBy(t); if(!sub) return; var c=hcCase(t), e=subEmp(sub); S.hcErr=[]; S.hcDoc=null;
+  if(a==="hcstart"){ c.stage=1; hcSetEmpStatus(sub,1); log("HCIS mulai memverifikasi "+t+" ("+e.nama+").","info"); hcNotifyEmp(sub,"Pengajuan sedang diverifikasi HCS","Nomor "+t+" sedang dicek kelengkapannya oleh HCIS."); }
+  if(a==="hcckok"){
+    var miss=CK_ITEMS.filter(function(it){ return c.check[it.k]==="tidak"; });
+    if(miss.length){ S.hcErr=miss.map(function(it){return it.label+" ditandai Tidak ada.";}); }
+    else { c.stage=2; c.ckDate=today(); log("Kelengkapan "+t+" dinyatakan lengkap oleh HCIS.","ok"); }
+  }
+  if(a==="hcckreq"){
+    var m2=CK_ITEMS.filter(function(it){ return c.check[it.k]==="tidak"; }).map(function(it){return it.label;});
+    if(!m2.length){ toast("Tidak ada dokumen yang ditandai Tidak ada."); }
+    else { log("HCIS meminta kelengkapan ke "+e.nama+": "+m2.join(", ")+".","bad"); hcNotifyEmp(sub,"HCS meminta kelengkapan dokumen","Lengkapi: "+m2.join(", ")+"."); toast("Permintaan kelengkapan dikirim ke karyawan."); }
+  }
+  if(a==="hcrab"){
+    var r=rabCalc(sub,c.rabIn); S.hcErr=rabErrors(sub,c);
+    if(!S.hcErr.length){ r.no="EB3.HM.03.02."+nextNo("rab"); r.tgl=today(); c.rab=r; c.dhNote=""; c.stage=3; log("RAB "+r.no+" ("+rp(r.jumlah)+") diajukan ke Dept Head HCIS.","info"); }
+  }
+  if(a==="hcdhok"){ c.dh=today(); c.stage=4; log("Dept Head HCIS menyetujui RAB "+c.rab.no+".","ok"); }
+  if(a==="hcdhno"){ c.dhNote="RAB "+c.rab.no+" dikembalikan: periksa kembali komponen biaya dan jumlah hari."; c.stage=2; log("Dept Head HCIS mengembalikan RAB "+c.rab.no+" untuk revisi.","bad"); }
+  if(a==="hcpr"){ var pr=prDraft(sub,c); pr.no=String(nextNo("pr")); pr.tgl=today(); c.pr=pr; c.stage=5; log("PR "+pr.no+" dibuat dan dikirim ke OAD dan Group Head.","info"); }
+  if(a==="hcoad"){ c.prapp.oad=today(); log("OAD menyetujui PR "+c.pr.no+" (release level 1).","ok"); }
+  if(a==="hcgh"){ c.prapp.gh=today(); c.stage=6; log("Group Head Human Capital Services menyetujui PR "+c.pr.no+" (release level 2).","ok"); }
+  if(a==="hcpo"){ c.po={no:String(nextNo("po")), vendorNo:"11000"+e.npp, vendor:e.nama.toUpperCase(), net:c.rab.jumlah, tgl:today(), prNo:c.pr.no}; log("PO "+c.po.no+" diterbitkan.","ok"); }
+  if(a==="hcgr"){ c.gr={matDoc:String(nextNo("gr"))+" - 1", gl:"6119020103", amount:c.rab.jumlah, posting:today(), poNo:c.po.no}; log("GR "+c.gr.matDoc+" diposting.","ok"); }
+  if(a==="hcnext7"){ c.stage=7; }
+  if(a==="hcata"){ c.nd={no:"EB.KU06."+nextNo("nd"), tgl:today(), total:c.rab.jumlah}; c.stage=8; hcSetEmpStatus(sub,2); log("Berkas "+t+" diserahkan ke Accounting & Tax (Nota Dinas "+c.nd.no+").","ok"); hcNotifyEmp(sub,"Pengajuan diteruskan ke Accounting & Tax","Nomor "+t+" sudah diverifikasi HCS dan sedang diproses Accounting & Tax."); }
+  render(); toTop();
+}
+function docData(sub,c,e,k,draft){
+  if(!draft) return c[k];
+  if(k==="rab"){ var r=rabCalc(sub,c.rabIn); r.no="(terbit saat diajukan)"; r.tgl=today(); return r; }
+  if(k==="pr"){ var p=prDraft(sub,c); p.no="(terbit saat dikirim)"; p.tgl=today(); return p; }
+  if(k==="po") return {no:"(terbit saat dibuat)", vendorNo:"11000"+e.npp, vendor:e.nama.toUpperCase(), net:c.rab.jumlah, tgl:today(), prNo:c.pr.no};
+  if(k==="gr") return {matDoc:"(terbit saat diposting)", gl:"6119020103", amount:c.rab.jumlah, posting:today(), poNo:c.po.no};
+  if(k==="nd") return {no:"(terbit saat diserahkan)", tgl:today(), total:c.rab.jumlah};
+}
+function kv2(list){ return '<table class="kv2">'+list.map(function(r){ return '<tr><td>'+r[0]+'</td><td>:</td><td>'+r[1]+'</td></tr>'; }).join("")+'</table>'; }
+function coHead(){ return '<div class="co"><b>PT Jasa Marga (Persero) Tbk</b><span>Plaza Tol Taman Mini Indonesia Indah, Jakarta 13550</span><span>Jakarta Timur - DKI Jakarta, 13550</span></div>'; }
+function dShort(iso){ var d=iso?new Date(iso+"T00:00:00"):new Date(); return pad(d.getDate())+"."+["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"].at(d.getMonth())+"."+d.getFullYear(); }
+function dDot(){ var d=new Date(); return pad(d.getDate())+"."+pad(d.getMonth()+1)+"."+d.getFullYear(); }
+function longDate(){ return new Date().toLocaleDateString("id-ID",{day:"numeric",month:"long",year:"numeric"}); }
+function paperDoc(t,k,draft){
+  var sub=subBy(t), c=hcCase(t), e=subEmp(sub), D=docData(sub,c,e,k,draft), pby="JMHO4HCS"+HC_USER.npp, h='';
+  if(k==="rab"){
+    var r=D;
+    h='<div class="paper land'+(draft?' draft':'')+'"><div class="ttl">RENCANA ANGGARAN BIAYA (RAB)<br>PERJALANAN DINAS MUTASI PINDAH KARYAWAN<br>AKUN BARU : 1000HO0804<br>Nomor : '+esc(r.no)+'</div>'+
+      '<div class="tblw"><table class="rabt doc"><thead><tr><th>No.</th><th>NPP</th><th>Nama</th><th>Jabatan</th><th>Grade</th><th>Level</th><th>Unit Kerja Baru</th><th>Jml Orang</th><th>Jml Hari</th><th>Tunjangan Per Hari</th><th>Uang Harian</th><th>Pengepakan Barang</th><th>Biaya Sewa Rumah 1 thn</th><th>Biaya Hotel</th><th>Biaya Pindah Sekolah</th><th>Jumlah</th><th>Pajak 5 %</th><th>Jumlah Diterima</th></tr>'+
+      '<tr class="nums"><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11 = 8 X 9 X 10</th><th>12</th><th>13</th><th>14</th><th>15</th><th>16 = 11+12+13+14+15</th><th>17</th><th>18 = 16-17</th></tr></thead><tbody>'+
+      '<tr class="row1"><td>1.</td><td>'+esc(e.npp)+'</td><td>'+esc(e.nama)+'</td><td>'+esc(e.jabatan)+'</td><td>'+esc(e.grade)+'</td><td>'+esc(r.lv)+'</td><td>'+esc(kantorNama(sub.form.tujuan))+'</td><td>'+r.orang+'</td><td>'+r.hari+'</td><td class="n">'+fmtN(r.tunj)+'</td><td class="n">'+fmtN(r.uh)+'</td><td class="n">'+fmtN(r.pack)+'</td><td class="n">'+fmtN(r.sewa)+'</td><td class="n">'+fmtN(r.hotel)+'</td><td class="n">'+(r.sekolah?fmtN(r.sekolah):'')+'</td><td class="n">'+fmtN(r.jumlah)+'</td><td class="n">'+fmtN(r.pajak)+'</td><td class="n">'+fmtN(r.diterima)+'</td></tr>'+
+      '<tr class="tot"><td colspan="7" style="text-align:right"><b>Total :</b></td><td></td><td></td><td></td><td class="n">'+fmtN(r.uh)+'</td><td class="n">'+fmtN(r.pack)+'</td><td class="n">'+fmtN(r.sewa)+'</td><td class="n">'+fmtN(r.hotel)+'</td><td class="n">'+fmtN(r.sekolah)+'</td><td class="n">'+fmtN(r.jumlah)+'</td><td class="n">'+fmtN(r.pajak)+'</td><td class="n">'+fmtN(r.diterima)+'</td></tr></tbody></table></div>'+
+      '<p class="it"><i>Terbilang : '+esc(terbilang(r.diterima))+'.</i></p>'+
+      '<div class="ket"><span><i>Ket :</i></span><div>'+r.ket.map(function(x){return '<i>- '+esc(x)+'</i>';}).join("<br>")+'</div></div>'+
+      '<div class="sign"><span>Jakarta, '+longDate()+'</span><span>Human Capital Information System</span><span>Department Head</span><span class="sp"></span><span><u>(nama Dept Head HCIS)</u></span></div>';
+  }
+  if(k==="pr"){
+    var p=D, val=p.value, cons=2543545928, used=1806325572;
+    h='<div class="paper'+(draft?' draft':'')+'">'+coHead()+'<hr class="dbl"><div class="ttl" style="margin-top:4px">PURCHASE REQUISITIONS</div>'+
+      '<div class="two">'+kv2([["PR Number",esc(p.no)],["Plant",esc(p.plant)]])+kv2([["Printed Date",dShort()],["Printed By",pby],["Created Date",dShort()],["Page","1 OF 1"]])+'</div>'+
+      '<div class="two" style="align-items:flex-start"><div><span class="sm">Remarks :</span><div class="pbox rem">'+esc(p.remarks)+' ('+esc(kantorNama(sub.form.asal))+' - '+esc(kantorNama(sub.form.tujuan))+')</div></div>'+
+      kv2([["Rel Strategy","G5 - Office Admnistration"],["Release Group","03"],["Release Code - Level 1","1Q - Office Administration"+(c.prapp.oad?" ✓":"")],["Release Code - Level 2","1M - Human Capital Services"+(c.prapp.gh?" ✓":"")]])+'</div>'+
+      '<table class="grid"><thead><tr><th>Item</th><th>Short Text</th><th>QTY</th><th>UOM</th><th>Delivery Date</th><th>Commitment Item</th><th>Fund Center</th><th>Valuation Price</th></tr></thead><tbody>'+
+      '<tr><td>1</td><td style="text-align:left">'+esc(p.shortText)+'</td><td>1</td><td>AU</td><td>'+dDot()+'</td><td>'+p.commitment+'</td><td>'+p.fund+'</td><td class="n">'+fmtN(val)+'</td></tr>'+
+      '<tr><td colspan="6" style="border:0"></td><td><b>TOTAL VALUE</b></td><td class="n"><b>'+fmtN(val)+'</b></td></tr></tbody></table>'+
+      '<div class="pbox" style="margin-top:6px">TERBILANG : '+esc(terbilang(val).toUpperCase())+'</div>'+
+      '<p class="sm" style="margin:18px 0 4px">Availability Budget at '+dShort()+'</p><table class="grid"><thead><tr><th>Fund</th><th>Funds center</th><th>Commitment Item</th><th>Consumable Amount</th><th>Consumed Amount</th><th>Available Amount</th></tr></thead><tbody><tr><td></td><td>1000HO0804</td><td>6119020103</td><td class="n">'+fmtN(cons)+'</td><td class="n">'+fmtN(used)+'</td><td class="n">'+fmtN(cons-used)+'</td></tr></tbody></table>';
+  }
+  if(k==="po"){
+    var o=D;
+    h='<div class="paper po'+(draft?' draft':'')+'">'+coHead()+'<hr><div class="ttl">PURCHASE ORDER</div>'+
+      '<div class="two" style="align-items:flex-start">'+kv2([["PO Number",esc(o.no)],["Vendor Number",esc(o.vendorNo)],["Vendor Name",esc(o.vendor)],["Purch. Org","JM00 / Kantor Pusat"],["Purch. Group","004 / Jasa non Lelang"],["Header","Perjalanan Dinas Mutasi Pindah Karyawan"]])+
+      '<table class="grid sm" style="width:auto"><thead><tr><th>Description</th><th>Processor</th><th>Status</th></tr></thead><tbody><tr><td>SM Proc Log<br>JM00</td><td>(petugas pengadaan)</td><td>'+(draft?'Draft':'Released, no<br>changes')+'</td></tr></tbody></table></div>'+
+      '<div class="two" style="margin-top:10px"><div><b class="sm">Pricing Elements</b>'+kv2([["Net Price",'<span class="bx">'+fmtN(o.net)+'</span>'],["VAT",'<span class="bx"></span>'],["Gross Price",'<span class="bx">'+fmtN(o.net)+'</span>']])+'</div>'+kv2([["Retention",'<span class="bx sm">Not Applicable &nbsp; 0,00 %</span>'],["DP Category",'<span class="bx sm">0,00 %</span>']])+'</div>'+
+      '<table class="grid"><thead><tr><th>Item</th><th>Short Text</th><th>Qty</th><th>UOM</th><th>Delivery Date</th><th>Net Price</th><th>Matl Group</th><th>PR Number</th><th>PR Item</th><th>Tax Code</th></tr></thead><tbody>'+
+      '<tr><td>1</td><td style="text-align:left">SPPD Mutasi '+esc(e.nama)+' / '+esc(e.npp)+'</td><td>1</td><td>AU</td><td>'+dDot()+'</td><td class="n">'+fmtN(o.net)+'</td><td>Perjalanan Dinas Pindah</td><td>'+esc(o.prNo)+'</td><td>10</td><td>PPN Masukan 0%</td></tr></tbody></table>'+
+      '<div style="margin-top:16px">'+kv2([["Posted At",dShort()],["Printed At",dShort()+" - "+now().replace(".",":")],["Printed By","JMHO4PFAASS3"],["Page","1"]])+'</div>'+
+      '<p class="disc">Disclaimer: Dokumen ini dibuat dan dicetak melalui proses elektronik sistem SAP pada tanggal '+dDot()+'.</p>';
+  }
+  if(k==="gr"){
+    var g=D;
+    h='<div class="paper gr'+(draft?' draft':'')+'">'+coHead()+'<hr class="dbl"><div class="ttl">GOODS RECEIPT / SERVICE ACCEPTANCE</div>'+
+      '<div class="two">'+kv2([["PO Number",'<b>'+esc(g.poNo)+'</b>'],["Plant","JM00 - Kantor Pusat Jasa Marga"],["vendor","11000"+esc(e.npp)+" - "+esc(e.nama.toUpperCase())]])+kv2([["Print Date",dShort()],["Printed By","JMHO4PFAASS3"]])+'</div>'+
+      '<p class="sm" style="margin:10px 0 0">1 of 1</p><div class="two">'+kv2([["<b>Mat Doc</b>",esc(g.matDoc)],["Description","SPPD Mutasi "+esc(e.nama)+" / "+esc(e.npp)],["Quantity","1 AU"]])+kv2([["PO Line","1"],["Reference",c.rab?esc(c.rab.no):"-"],["Posting Date",dShort()]])+'</div>'+
+      '<table class="grid"><thead><tr><th>FI DOC</th><th>G/L Account</th><th>G/L ACC Description</th><th>Cost Center</th><th>Order</th><th>Aset</th><th>Currency</th><th>Amount</th></tr></thead><tbody>'+
+      '<tr><td>'+(draft?'(otomatis)':'37000080'+String(S.hcSeq.gr).slice(-2)+' - 1')+'</td><td>'+esc(g.gl)+'</td><td style="text-align:left">Beban Perjalanan Dinas Pindah</td><td>-</td><td>26HO08041214</td><td>-</td><td>IDR</td><td class="n">'+fmtN(g.amount)+'</td></tr></tbody></table>'+
+      '<p class="disc">Disclaimer: Dokumen ini dibuat dan dicetak melalui proses elektronik sistem SAP pada tanggal '+dDot()+'.</p>';
+  }
+  if(k==="nd"){
+    var n=D;
+    h='<div class="paper nd'+(draft?' draft':'')+'"><div class="ttl" style="font-size:18px;margin:8px 0 18px">NOTA DINAS</div>'+
+      '<div class="two" style="align-items:flex-start">'+kv2([["Nomor",esc(n.no)],["Lampiran","1 (satu) berkas"]])+'<span>'+longDate()+'</span></div>'+
+      kv2([["Yth","Accounting and Tax Group Head"],["Dari","Human Capital Services Group Head"],["Hal","<b>Permohonan Pembayaran</b>"]])+'<hr>'+
+      '<p>Bersama ini mohon pembayaran pekerjaan :</p><table class="kv2 num">'+
+      [["Jenis Pekerjaan","Perjalanan Dinas Mutasi Pindah Karyawan"],["Pelaksana","<b>"+esc(e.nama)+" / "+esc(e.npp)+"</b>"],["Pembayaran/Penggantian","Tunjangan Perjalanan Dinas Pindah Karyawan dari "+esc(kantorNama(sub.form.asal))+" – "+esc(kantorNama(sub.form.tujuan))],["Total","<b>Rp "+fmtN(n.total)+" ,-</b>"],["Terbilang",esc(terbilang(n.total))+"."],["Pembayaran","<b>Transfer<br>(bank rekening payroll)<br>No rek. (sesuai data payroll)<br>"+esc(e.nama.toUpperCase())+"</b>"],["Purchase Request",esc(c.pr?c.pr.no:"-")]].map(function(r,i){ return '<tr><td>'+(i+1)+'</td><td>'+r[0]+'</td><td>:</td><td>'+r[1]+'</td></tr>'; }).join("")+
+      '</table><p style="margin-top:16px">Demikian atas perhatian dan kerja samanya, kami ucapkan terima kasih</p>'+
+      '<div class="sign" style="text-align:center;align-items:center"><span class="sp"></span><span><u>(nama Group Head HCS)</u></span><span>Human Capital Services Group Head</span></div>';
+  }
+  return h+'<p class="dummy">Pratinjau prototipe · data contoh, bukan dokumen resmi</p></div>';
+}
+function openHcFile(t,k){
+  var sub=subBy(t); if(!sub) return;
+  if(isMine(sub) && S.files[k] && S.files[k].thumb){ S.preview=k; render(); renderAllPages(k); return; }
+  var key="hc_"+t+"_"+k, name=sub.form.docs[k], n=k==="sk"?2:1;
+  if(!S.files[key]){ var imgs=[]; for(var i=1;i<=n;i++) imgs.push(makeDummy(docLabel(k),name,i,n)); S.files[key]={name:name, type:"dummy", thumb:imgs[0], pages:n, imgs:imgs, label:docLabel(k)+" · "+subEmp(sub).nama}; }
+  S.preview=key; render();
+}
+function othersSeed(){ return [
+    {ticket:"SPPD-MTS-2026-00139", created:"12 Nov 2026, 14.20", diajukanISO:"2026-11-12", statusIdx:0, sk:"SK-MUT/0449/DIR/XI/2026", history:["12 Nov 2026"],
+      emp:{nama:"Rina Pratiwi", npp:"10871", jabatan:"Staf Keuangan", level:"4", grade:"BOD-5"},
+      form:{asal:"bdg", tujuan:"jkt", bawa:"ya", anggota:[{hub:"Suami",nama:"Hendra Wijaya",tgl:"1988-03-02",nik:"3273010203880001"},{hub:"Anak",nama:"Alya Wijaya",tgl:"2016-06-11",nik:"3273015106160002"}], bantuanSekolah:true, docs:{sk:"SK_Mutasi_0449.pdf",kk:"KK_Rina.pdf",rek:"rekening_rina.jpg",skolAsal:"ket_pindah_SD_Alya.pdf",skolBaru:"daftar_SD_Alya.pdf"}}},
+    {ticket:"SPPD-MTS-2026-00141", created:"14 Nov 2026, 09.05", diajukanISO:"2026-11-14", statusIdx:0, sk:"SK-MUT/0452/DIR/XI/2026", history:["14 Nov 2026"],
+      emp:{nama:"Agus Salim", npp:"11302", jabatan:"Staf Teknik", level:"6", grade:"BOD-6"},
+      form:{asal:"jkt", tujuan:"sby", bawa:"tidak", anggota:[], bantuanSekolah:false, docs:{sk:"SK_Mutasi_0452.pdf",kk:"KK_Agus.pdf",rek:"rekening_agus.jpg"}}}
+
+  ]; }
+function hcSeed(){
+  var mine=S.subs.filter(function(s){return s.sk===SK.no;})[0];
+  S.subs=S.subs.filter(function(s){ return !(s.emp && /^SPPD-MTS-2026-001(39|41)$/.test(s.ticket)); });
+  if(!mine){
+    SK.tujuan="smg"; S.skTujuan="smg";
+    var fam=KK_DEFAULT.concat([KK_ADULT]).map(function(m,i){ var x=clone(m); x.id=i+1; checkAge(x,false); return x; });
+    S.subs.unshift({ticket:"SPPD-MTS-2026-00143", created:"18 Nov 2026, 10.24", diajukanISO:"2026-11-18", statusIdx:0, sk:SK.no, history:["18 Nov 2026"],
+      form:{asal:"jkt", tujuan:"smg", bawa:"ya", anggota:fam, bantuanSekolah:true, docs:{sk:"SK_Mutasi_0457.pdf",kk:"KK_Budi_2026.pdf",rek:"rekening_payroll.jpg",skolAsal:"ket_pindah_SDN05.pdf",skolBaru:"ket_daftar_SDN02_Smg.pdf"}}});
+    S.hasDraft=false; S.form=emptyForm();
+  }
+  S.subs=S.subs.concat(othersSeed());
+  ["SPPD-MTS-2026-00139","SPPD-MTS-2026-00141"].forEach(function(t){ delete S.hc[t]; });
+  if(!mine) delete S.hc["SPPD-MTS-2026-00143"];
+  log("Skenario uji dimuat: antrian HCIS berisi 3 pengajuan.","info");
+  go("hchome");
+}
+function vHcHak(){
+  var h=hdr("Tabel Hak & Kebutuhan","HCIS / Tabel Hak & Kebutuhan")+'<p class="sub" style="margin:0">Sumber perhitungan RAB otomatis. Data dari file Dummy Data Hak & Kebutuhan Karyawan.</p>';
+  h+='<div class="card stack"><span class="sec">Tunjangan perjalanan dinas (per orang per hari)</span><div class="tblw"><table class="ftable"><thead><tr><th>Level</th><th>Akomodasi</th><th>Uang makan</th><th>Uang saku & transport lokal</th><th>Jumlah per hari</th></tr></thead><tbody>'+
+    LV_KEYS.map(function(k){ var x=TPD[k]; return '<tr><td class="n">'+k+'</td><td>'+x.hotel+'</td><td>'+rp(x.makan)+'</td><td>'+rp(x.saku)+'</td><td><b>'+rp(x.jml)+'</b></td></tr>'; }).join("")+
+    '</tbody></table></div><span class="sub small">Transportasi semua level: udara kelas ekonomi, darat kelas eksekutif. Uang harian di RAB = jumlah orang × jumlah hari × jumlah per hari.</span></div>';
+  h+='<div class="card stack"><span class="sec">Bantuan biaya penginapan sementara & sewa rumah</span><div class="tblw"><table class="ftable"><thead><tr><th>Level</th><th>1 orang</th><th>2 orang</th><th>3–4 orang</th><th>≥5 orang</th><th>Sewa rumah (1 thn)</th></tr></thead><tbody>'+
+    LV_KEYS.map(function(k){ return '<tr><td class="n">'+k+'</td>'+HOTEL[k].map(function(v){return '<td>'+rp(v)+'</td>';}).join("")+'<td><b>'+rp(SEWA[k])+'</b></td></tr>'; }).join("")+'</tbody></table></div></div>';
+  h+='<div class="card stack"><span class="sec">Biaya pengepakan (asal Jabotabek)</span><div class="tblw"><table class="ftable"><thead><tr><th>Level</th><th>Orang</th>'+REGIONS.map(function(r){return '<th>'+r+'</th>';}).join("")+'</tr></thead><tbody>'+
+    LV_KEYS.map(function(k){ return PACK[k].map(function(row,i){ return '<tr><td class="n">'+(i===0?k:'')+'</td><td>'+BRACKETS[i]+'</td>'+row.map(function(v){return '<td>'+fmtN(v)+'</td>';}).join("")+'</tr>'; }).join(""); }).join("")+
+    '</tbody></table></div><span class="sub small">Tabel baru memuat asal Jabotabek. Untuk asal lain, HCIS mengisi biaya pengepakan secara manual di RAB.</span></div>';
+  return h;
+}
+function hcStory(){ var sub=S.hcOpen&&subBy(S.hcOpen); return sub?hcStage(sub):-1; }
+function vHcPanel(){
+  var cur=hcStory(), h='<section class="pcard"><h3>Tahap proses <span class="lane">Lane HCIS</span></h3><ol class="stories">';
+  HC_STAGES.slice(1).forEach(function(n,i){ var k=i+1; h+='<li class="'+(k===cur?'on':(cur>k||cur===8?'done':''))+'"><i>'+(cur>k||cur===8?'✓':k)+'</i>'+n+'</li>'; });
+  h+='</ol>'+(cur<0?'<span class="sub small">Buka salah satu pengajuan untuk melihat tahapnya.</span>':'')+'</section>';
+  h+='<section class="pcard"><h3>Aktivitas System <span class="lane">Lane System</span></h3><ul class="log">';
+  S.log.slice(0,30).forEach(function(l){ h+='<li class="'+l.c+'"><time>'+esc(l.t)+'</time><span>'+esc(l.x)+'</span></li>'; });
+  h+='</ul></section><section class="pcard"><h3>Skenario uji</h3><div class="scen"><button class="btn" data-act="hcseed">Isi antrian HCIS (3 pengajuan contoh)</button><button class="btn" data-act="logout">Masuk sebagai Karyawan</button></div></section>';
+  h+='<section class="pcard"><h3>Aturan yang disimulasikan</h3><ul class="rules"><li>Cek kelengkapan mengikuti Bukti Kelengkapan Pemohon; dokumen yang diunggah terisi "Ada" otomatis.</li><li>RAB dihitung dari tabel hak & kebutuhan: level, jumlah orang yang pindah, tujuan.</li><li>Uang harian = orang × hari × tunjangan per hari; pajak 5%.</li><li>Anak usia ≥ 25 tahun tidak dihitung.</li><li>Approval Dept Head HCIS hanya terlihat oleh HCIS.</li><li>PR disetujui berurutan: OAD (level 1) lalu Group Head (level 2).</li><li>PO dan GR dibuat setelah PR disetujui, lalu berkas diserahkan ke ATA.</li><li>Status karyawan: Verifikasi HCS saat mulai dicek, Proses Accounting & Tax setelah diserahkan ke ATA.</li></ul></section>';
+  return h;
+}
+
 function topbar(){
   var u=unread();
   return '<header class="topbar"><div class="brandm">'+logo("sm")+'JM-Click</div><div class="sp"></div>'+
     '<button class="bell" data-act="bell" aria-label="Notifikasi, '+u+' belum dibaca">'+ic("bell",22)+(u?'<span class="dot">'+u+'</span>':'')+'</button>'+
-    '<div class="prof"><div class="ava">'+ic("user",20)+'</div><div><b>'+esc(EMP.nama)+'</b><span class="sub small">'+esc(EMP.unit)+' · NPP '+esc(EMP.npp)+'</span></div><span class="online" aria-hidden="true"></span></div></header>';
+    '<div class="prof"><div class="ava">'+ic("user",20)+'</div><div><b>'+esc(EMP.nama)+'</b><span class="sub small">'+esc(EMP.unit)+' · NPP '+esc(EMP.npp)+'</span></div><span class="online" aria-hidden="true"></span></div><button class="btn sm" data-act="logout" style="margin-left:12px">Keluar</button></header>';
 }
 function side(){
   var sc=S.screen, inS=["sppd","form","review","success","detail","sk"].indexOf(sc)>=0;
@@ -1166,10 +1624,17 @@ function vPanel(cur){
   return h;
 }
 function render(){
+  if(S.screen.indexOf("hc")===0){
+    var hmap={hchome:vHcHome, hccase:vHcCase, hchak:vHcHak};
+    document.getElementById("app").innerHTML=hcTopbar()+'<div class="body">'+hcSide()+'<div class="scr"><div class="content wide">'+hmap[S.screen]()+'</div></div></div>';
+    renderModal(); persist(); return;
+  }
   var map={home:vHome,notif:vNotif,sk:vSK,travel:vTravel,benefit:vBenefit,panduan:vPanduan,referensi:vReferensi,sppd:vSppd,form:vForm,review:vReview,success:vSuccess,detail:vDetail,tpp:vTppHome,tppform:vTppForm,tppok:vTppOk};
   var cur=story(); S.visited[cur]=true;
   document.getElementById("app").innerHTML = S.screen==="login" ? vLogin() : topbar()+'<div class="body">'+side()+'<div class="scr"><div class="content'+(S.screen==="sppd"?' wide':'')+'">'+map[S.screen]()+'</div></div></div>';
-  document.getElementById("panel").innerHTML=vPanel(cur);
+  renderModal(); persist();
+}
+function renderModal(){
   var md=document.getElementById("modal");
   if(S.preview && S.files[S.preview] && S.files[S.preview].thumb){
     var fl=S.files[S.preview], lb=fl.label||docLabel(S.preview), imgs=fl.imgs&&fl.imgs.length?fl.imgs:[fl.thumb], total=fl.pages||imgs.length;
@@ -1177,6 +1642,11 @@ function render(){
     if(imgs.length<Math.min(total,30)) body+='<p class="sub">Memuat halaman '+(imgs.length+1)+' dari '+total+'…</p>';
     if(total>30) body+='<p class="sub">Pratinjau dibatasi 30 halaman pertama.</p>';
     md.innerHTML='<div class="modal" data-act="closeprev"><div class="box" role="dialog" aria-label="Pratinjau '+esc(lb)+'"><div class="hd"><div><b>'+esc(lb)+'</b><div class="small muted">'+esc(fl.name)+' · '+total+' halaman'+(fl.type==="dummy"?' · contoh dummy':'')+'</div></div><button class="btn sm" data-act="closeprev">Tutup</button></div><div class="bd">'+body+'</div></div></div>';
+  } else if(S.hcDoc){
+    var dk=S.hcDoc.k, dr=S.hcDoc.draft, nm={rab:"RAB",pr:"Purchase Requisition",po:"Purchase Order",gr:"Goods Receipt",nd:"Nota Dinas ke ATA"}[dk];
+    var act={rab:"hcrab",pr:"hcpr",po:"hcpo",gr:"hcgr",nd:"hcata"}[dk], lab={rab:"Ajukan ke Dept Head HCIS",pr:"Kirim PR untuk approval",po:"Buat PO",gr:"Posting GR",nd:"Serahkan ke ATA"}[dk];
+    md.innerHTML='<div class="modal" data-act="closehcdoc"><div class="box" role="dialog" aria-label="'+(dr?'Pratinjau ':'')+nm+'" style="max-width:'+(dk==="rab"?1240:860)+'px"><div class="hd"><div><b>'+(dr?'Pratinjau ':'')+nm+'</b>'+(dr?' <span class="chip warn">Draf · belum dikirim</span>':'')+'</div><button class="btn sm" data-act="closehcdoc">Tutup</button></div><div class="bd">'+paperDoc(S.hcDoc.t,dk,dr)+'</div>'+
+      (dr?'<div class="ft"><span class="sub small">Periksa isi dokumen. Nomor dokumen terbit setelah dikirim.</span><button class="btn" data-act="closehcdoc">Kembali, perbaiki</button><button class="btn pri" data-act="'+act+'" data-t="'+esc(S.hcDoc.t)+'">'+lab+'</button></div>':'')+'</div></div>';
   } else md.innerHTML="";
   persist();
 }
@@ -1185,7 +1655,9 @@ function render(){
 function doLogin(){
   var v=(document.getElementById("npp").value||"").trim();
   if(!/^\d{5}$/.test(v)){ S.loginVal=v; S.loginErr="NPP harus 5 digit angka."; render(); return; }
-  S.loginErr=""; S.loginVal=v; log("Autentikasi berhasil untuk NPP "+v+".","ok"); checkTppNotif(); go("home");
+  S.loginErr=""; S.loginVal=v; S.hist=[];
+  if((S.loginRole||"karyawan")==="hcis"){ S.role="hcis"; log("Autentikasi HCIS berhasil untuk NPP "+v+".","ok"); go("hchome",null,true); return; }
+  S.role="karyawan"; log("Autentikasi berhasil untuk NPP "+v+".","ok"); checkTppNotif(); go("home",null,true);
 }
 document.addEventListener("click",function(e){
   var t=e.target.closest("[data-act]"); if(!t) return;
@@ -1213,6 +1685,17 @@ document.addEventListener("click",function(e){
     case "tedit": S.tstep=+t.getAttribute("data-s"); S.treviewOk=false; S.terrors=[]; render(); toTop(); break;
     case "tsubmit": tppSubmit(); break;
     case "tpreset": tppPreset(t.getAttribute("data-k")); break;
+    case "lrole": S.loginRole=t.getAttribute("data-v"); S.loginErr=""; render(); break;
+    case "logout": S.screen="login"; S.hist=[]; S.preview=null; S.hcDoc=null; S.loginErr=""; S.loginRole=S.role||"karyawan"; render(); toTop(); break;
+    case "hchome": go("hchome"); break;
+    case "hchak": go("hchak"); break;
+    case "hcopen": S.hcOpen=t.getAttribute("data-t"); S.hcErr=[]; go("hccase"); break;
+    case "hcseed": hcSeed(); break;
+    case "hcfile": openHcFile(t.getAttribute("data-t"), t.getAttribute("data-k")); break;
+    case "hcdoc": S.hcDoc={t:t.getAttribute("data-t"), k:t.getAttribute("data-k")}; render(); break;
+    case "hcprev": hcPreview(t.getAttribute("data-t"), t.getAttribute("data-k")); break;
+    case "closehcdoc": if(e.target===t || t.tagName==="BUTTON"){ S.hcDoc=null; render(); } break;
+    case "hcstart": case "hcckok": case "hcckreq": case "hcrab": case "hcdhok": case "hcdhno": case "hcpr": case "hcoad": case "hcgh": case "hcpo": case "hcgr": case "hcnext7": case "hcata": hcAct(a, t.getAttribute("data-t")); break;
     case "sppd": go("sppd"); break;
     case "tpp": go("tpp",{tppSk:t.getAttribute("data-sk")||(S.redirected?SK.no:null)}); break;
     case "start": startForm(); break;
@@ -1243,6 +1726,12 @@ document.addEventListener("click",function(e){
 document.addEventListener("input",function(e){
   var el=e.target;
   if(el.id==="npp"){ el.value=el.value.replace(/\D/g,"").slice(0,5); }
+  var hct=el.getAttribute&&el.getAttribute("data-hc");
+  if(hct){ var hc0=hcCase(hct);
+    if(el.id.indexOf("ckn_")===0){ hc0.notes[el.id.slice(4)]=el.value; return; }
+    if(el.id==="rab_hari"||el.id==="rab_pack"||el.id==="rab_sekolah"){ var dg2=el.value.replace(/\D/g,"").slice(0,12); el.value=dg2; hc0.rabIn[el.id.slice(4)]=dg2; return; }
+  }
+  if(el.id==="hcq"){ S.hcQ=el.value; var pos=el.value.length; render(); var q2=document.getElementById("hcq"); if(q2){ q2.focus(); q2.setSelectionRange(pos,pos); } return; }
   var tk=el.getAttribute&&el.getAttribute("data-t");
   if(tk){
     if(tk.indexOf("nom")===0){ var dg=el.value.replace(/\D/g,"").slice(0,12); S.tf[tk]=dg; el.value=dg?Number(dg).toLocaleString("id-ID"):""; var tt=document.getElementById("ttot"); if(tt) tt.textContent=rp((+S.tf.nomPergi||0)+(+S.tf.nomPulang||0)); }
@@ -1254,6 +1743,13 @@ document.addEventListener("change",function(e){
   var el=e.target;
   if(el.id==="fstatus"){ S.flt.status=el.value; render(); return; }
   if(el.id==="fyear"){ S.flt.year=el.value; render(); return; }
+  var hct2=el.getAttribute("data-hc");
+  if(hct2){ var hc1=hcCase(hct2);
+    if(el.id.indexOf("ck_")===0){ hc1.check[el.id.slice(3)]=el.value; render(); return; }
+    if(el.id==="rab_level"){ hc1.rabIn.level=el.value; S.hcErr=[]; render(); return; }
+    if(el.id==="rab_hari"||el.id==="rab_pack"||el.id==="rab_sekolah"){ S.hcErr=[]; render(); return; }
+  }
+  if(el.id==="hcflt"){ S.hcFlt=el.value; render(); return; }
   if(el.id==="tconf"){ S.tpp.confirmed=el.checked; if(el.checked) log("Karyawan mengonfirmasi kampung halaman: "+HOME.nama+".","ok"); S.terrors=[]; render(); return; }
   var tk2=el.getAttribute("data-t"); if(tk2 && tk2.indexOf("nom")!==0){ S.tf[tk2]=el.value; return; }
   if(el.id==="bjab"){ S.benefitLv=el.value.replace(" (jabatan Anda)",""); render(); return; }
@@ -1263,7 +1759,7 @@ document.addEventListener("change",function(e){
 });
 document.addEventListener("keydown",function(e){
   if(e.key==="Enter" && e.target.closest && e.target.closest("[data-form=login]") && e.target.tagName==="INPUT"){ e.preventDefault(); doLogin(); return; }
-  if(e.key==="Escape" && S.preview){ S.preview=null; render(); return; }
+  if(e.key==="Escape" && (S.preview||S.hcDoc)){ S.preview=null; S.hcDoc=null; render(); return; }
   if(e.altKey && e.key==="ArrowLeft" && S.screen!=="login" && S.screen!=="home"){ e.preventDefault(); back(); }
 });
 render();
