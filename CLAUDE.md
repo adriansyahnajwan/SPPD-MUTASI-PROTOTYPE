@@ -43,7 +43,7 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
 - Dokumen sekolah wajib jika mengajukan bantuan sekolah.
 
 ## Database (rencana, Supabase)
-- Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi.xlsx` (20 tabel; sheet Ringkasan & Relasi).
+- Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (20 tabel; sheet Ringkasan & Relasi).
 - SQL Tahap 1: `supabase-tahap1.sql`.
 - Bertahap:
   - Tahap 1: karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
