@@ -57,7 +57,7 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
     - nomor SPPD-MTS & TPP dibuat fungsi database `next_no_pengajuan()` / `next_no_tpp()`; RAB/PR/PO/GR/ND dari nomor terbesar + 1
 - index.html memanggil REST API Supabase lewat `fetch` (fungsi `sb()`, kirim token login; token kedaluwarsa diperbarui otomatis), tanpa library. Sesi login hanya di memori (muat ulang = login lagi). Data Supabase dipetakan ke `S.subs` / `S.notifs` / `S.hc` supaya tampilan tidak berubah.
 - Masih di localStorage (key `sppd-mutasi-proto-v5`): draft form, konfirmasi kampung halaman TPP, log aktivitas, cache kasus HCIS (diisi ulang dari database). Tampilan & alur JANGAN berubah.
-- Kondisi awal demo: Budi (10234) BELUM mengajukan SPPD untuk SK-MUT/0457 (tombol "Isi Form", notifikasi "SK Mutasi terbit" belum dibaca); Rina & Agus = contoh antrean HCIS.
+- Kondisi awal demo: Budi (10234) BELUM mengajukan SPPD untuk SK-MUT/0457 (tombol "Isi Form", notifikasi "SK Mutasi terbit" belum dibaca); Rina (10871) = pengajuan baru yang diproses HCIS dari awal (Diajukan / Diterima, belum ada RAB); Agus (11302) = contoh kasus yang sudah diserahkan ke ATA.
 - Tombol "Reset data demo" (halaman login) memanggil fungsi database `reset_demo()` (`supabase-reset-demo.sql`): hapus semua transaksi (termasuk tabel Tahap 3–4 kalau sudah ada), isi ulang contoh data, lalu hapus localStorage di browser itu. Data master tidak disentuh.
 - Contoh data transaksi ada di 3 tempat dan harus sama: Excel, `supabase-tahap1/2/3/4.sql`, dan `reset_demo()`.
 - Hanya pakai publishable/anon key di index.html. JANGAN pernah taruh secret/service_role key di kode atau repo.

@@ -71,8 +71,7 @@ insert into akun (npp, role, aktif, login_terakhir) values
 insert into approval (id, objek, objek_no, urutan, approver_npp, peran, keputusan, catatan, waktu) values
  (1,'RAB','RAB-HCIS-2026-0491',1,'20101','dept_head_hcis','Disetujui',null,'2026-11-20 14:00+07'),
  (2,'PR', '1000310121',        1,'30045','oad',           'Disetujui',null,'2026-11-21 09:30+07'),
- (3,'PR', '1000310121',        2,'20001','group_head',    'Disetujui',null,'2026-11-21 13:45+07'),
- (4,'RAB','RAB-HCIS-2026-0492',1,'20101','dept_head_hcis','Menunggu', null,null);
+ (3,'PR', '1000310121',        2,'20001','group_head',    'Disetujui',null,'2026-11-21 13:45+07');
 
 insert into dokumen_pengadaan (id, jenis, nomor, rab_id, referensi_id, tanggal, nilai, status, dibuat_oleh, path_storage) values
  (1,'PR','1000310121',  1,null,'2026-11-20',18075000,'Final','20117','pengadaan/pr-1000310121.pdf'),

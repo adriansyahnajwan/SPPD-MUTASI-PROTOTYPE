@@ -296,10 +296,9 @@ insert into tarif_pengepakan (id, level_kelompok, jumlah_orang, wilayah_asal, wi
 insert into tiket_pp (id, no_tpp, pengajuan_id, skema, asal, tujuan, tgl_pergi, jam_pergi, tgl_pulang, jam_pulang, nominal_pergi, nominal_pulang, status, diajukan_pada) values
  (1,'TPP-2026-00018',3,'reimburse','sby','Kab. Gresik, Jawa Timur','2026-11-20',null,'2026-11-22',null,450000,450000,'Diajukan','2026-11-22');
 
--- RAB Rina (id 2) sudah tersimpan sebagai draf; tahap pengajuannya masih "Susun RAB"
+-- RAB contoh hanya milik Agus; pengajuan Rina masih baru (belum ada RAB)
 insert into rab (id, no_rab, pengajuan_id, level_kelompok, jumlah_orang, jumlah_hari, tarif_harian, pengepakan, pengepakan_manual, sewa, penginapan, bantuan_sekolah, catatan, dibuat_oleh, dibuat_pada) values
- (1,'RAB-HCIS-2026-0491',3,'6/7',1,5,575000,2000000,false,10000000,3200000,0,null,'20117','2026-11-20 10:15+07'),
- (2,'RAB-HCIS-2026-0492',2,'4',3,5,650000,3500000,true,15000000,6400000,2500000,'Pengepakan diisi manual (asal Jawa Barat)','20117','2026-11-24 11:00+07');
+ (1,'RAB-HCIS-2026-0491',3,'6/7',1,5,575000,2000000,false,10000000,3200000,0,null,'20117','2026-11-20 10:15+07');
 
 insert into checklist_kelengkapan (id, pengajuan_id, item, wajib, hasil, catatan, dicek_oleh, dicek_pada) values
  (1,3,'form',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),

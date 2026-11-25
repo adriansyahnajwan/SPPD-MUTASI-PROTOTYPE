@@ -120,9 +120,9 @@ insert into sk_mutasi (no_sk, npp, tanggal_sk, tanggal_efektif, kantor_asal, kan
  ('SK-MUT/0469/DIR/XI/2026','11302','2026-11-13','2026-12-15','jkt','sby','Staf Operasi','Staf Senior Operasi','sk/SK-MUT-0469.pdf');
 
 -- Kondisi awal demo: Budi (10234) BELUM mengajukan SPPD untuk SK-MUT/0457 (tombol "Isi Form").
--- Rina & Agus = contoh antrean HCIS. batas_tpp tidak diisi: dihitung otomatis (id 3 → 2026-11-26)
+-- Rina = pengajuan baru di antrean HCIS (mulai dari awal); Agus = contoh kasus yang sudah diserahkan ke ATA. batas_tpp tidak diisi: dihitung otomatis (id 3 → 2026-11-26)
 insert into pengajuan_sppd (id, no_pengajuan, npp, no_sk, jarak_km, bawa_keluarga, bantuan_sekolah, status, tahap_hcis, diajukan_pada, catatan) values
- (2,'SPPD-MTS-2026-00139','10871','SK-MUT/0462/DIR/XI/2026',140,true, true, 'Verifikasi HCS',         'Susun RAB',        '2026-11-18',null),
+ (2,'SPPD-MTS-2026-00139','10871','SK-MUT/0462/DIR/XI/2026',140,true, true, 'Diajukan',               'Diterima',         '2026-11-18',null),
  (3,'SPPD-MTS-2026-00141','11302','SK-MUT/0469/DIR/XI/2026',770,false,false,'Proses Accounting & Tax','Diserahkan ke ATA','2026-11-19',null);
 
 -- Waktu unggah dianggap WIB (+07)

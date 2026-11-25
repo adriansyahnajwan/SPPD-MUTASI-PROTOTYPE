@@ -10,7 +10,8 @@
 --     notifikasi, riwayat_status, dan tabel Tahap 3-4 (tiket_pp, rab, approval,
 --     dokumen_pengadaan, checklist_kelengkapan) kalau tabelnya sudah ada.
 --  2. Isi ulang contoh data dari Rancangan_Database_SPPD_Mutasi_fix.xlsx:
---     Budi (10234) BELUM mengajukan SPPD; Rina & Agus = contoh antrean HCIS.
+--     Budi (10234) BELUM mengajukan SPPD; Rina (10871) pengajuan baru yang mulai dari awal
+--     (Diajukan / Diterima); Agus (11302) contoh kasus yang sudah diserahkan ke ATA.
 --  Data master (karyawan, sk_mutasi, kantor, jarak_kantor, keluarga, tarif_*) tidak disentuh.
 --  Nomor SPPD-MTS kembali ke awal karena dihitung dari nomor terbesar yang ada (00141 → berikutnya 00142).
 --  Id internal (identity) sengaja tidak di-restart supaya data lama di browser lain tidak
@@ -20,7 +21,7 @@
 -- Contoh data Tahap 4 (approval, dokumen_pengadaan) ikut diisi ulang. Akun & user login tidak disentuh.
 -- Fungsi ini sengaja boleh dipanggil TANPA login (tombol ada di halaman login). Siapa pun yang
 -- membuka situs bisa mereset data demo; hapus grant ke anon kalau tidak diinginkan.
--- Nomor TPP dan RAB juga kembali ke awal (dihitung dari nomor terbesar: TPP-2026-00018, RAB-HCIS-2026-0492).
+-- Nomor TPP dan RAB juga kembali ke awal (dihitung dari nomor terbesar: TPP-2026-00018, RAB-HCIS-2026-0491).
 -- ============================================================
 
 create or replace function reset_demo()
@@ -43,7 +44,7 @@ begin
 
   -- 2. Contoh data awal (sama dengan Excel)
   insert into pengajuan_sppd (id, no_pengajuan, npp, no_sk, jarak_km, bawa_keluarga, bantuan_sekolah, status, tahap_hcis, diajukan_pada, catatan) values
-   (2,'SPPD-MTS-2026-00139','10871','SK-MUT/0462/DIR/XI/2026',140,true, true, 'Verifikasi HCS',         'Susun RAB',        '2026-11-18',null),
+   (2,'SPPD-MTS-2026-00139','10871','SK-MUT/0462/DIR/XI/2026',140,true, true, 'Diajukan',               'Diterima',         '2026-11-18',null),
    (3,'SPPD-MTS-2026-00141','11302','SK-MUT/0469/DIR/XI/2026',770,false,false,'Proses Accounting & Tax','Diserahkan ke ATA','2026-11-19',null);
 
   -- Tahap 3 (dilewati kalau tabelnya belum dibuat)
@@ -53,8 +54,7 @@ begin
   end if;
   if to_regclass('public.rab') is not null then
     insert into rab (id, no_rab, pengajuan_id, level_kelompok, jumlah_orang, jumlah_hari, tarif_harian, pengepakan, pengepakan_manual, sewa, penginapan, bantuan_sekolah, catatan, dibuat_oleh, dibuat_pada) values
-     (1,'RAB-HCIS-2026-0491',3,'6/7',1,5,575000,2000000,false,10000000,3200000,0,null,'20117','2026-11-20 10:15+07'),
-     (2,'RAB-HCIS-2026-0492',2,'4',3,5,650000,3500000,true,15000000,6400000,2500000,'Pengepakan diisi manual (asal Jawa Barat)','20117','2026-11-24 11:00+07');
+     (1,'RAB-HCIS-2026-0491',3,'6/7',1,5,575000,2000000,false,10000000,3200000,0,null,'20117','2026-11-20 10:15+07');
   end if;
   if to_regclass('public.checklist_kelengkapan') is not null then
     insert into checklist_kelengkapan (id, pengajuan_id, item, wajib, hasil, catatan, dicek_oleh, dicek_pada) values
@@ -70,8 +70,7 @@ begin
     insert into approval (id, objek, objek_no, urutan, approver_npp, peran, keputusan, catatan, waktu) values
      (1,'RAB','RAB-HCIS-2026-0491',1,'20101','dept_head_hcis','Disetujui',null,'2026-11-20 14:00+07'),
      (2,'PR', '1000310121',        1,'30045','oad',           'Disetujui',null,'2026-11-21 09:30+07'),
-     (3,'PR', '1000310121',        2,'20001','group_head',    'Disetujui',null,'2026-11-21 13:45+07'),
-     (4,'RAB','RAB-HCIS-2026-0492',1,'20101','dept_head_hcis','Menunggu', null,null);
+     (3,'PR', '1000310121',        2,'20001','group_head',    'Disetujui',null,'2026-11-21 13:45+07');
   end if;
   if to_regclass('public.dokumen_pengadaan') is not null and to_regclass('public.rab') is not null then
     insert into dokumen_pengadaan (id, jenis, nomor, rab_id, referensi_id, tanggal, nilai, status, dibuat_oleh, path_storage) values
