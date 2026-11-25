@@ -1,7 +1,8 @@
 -- ============================================================
 -- SPPD Mutasi JM-Click · Fungsi reset_demo()
 -- Dipanggil tombol "Reset data demo" di halaman login (POST /rest/v1/rpc/reset_demo).
--- Jalankan SETELAH supabase-tahap1.sql dan supabase-tahap2.sql.
+-- Jalankan SETELAH supabase-tahap1.sql, supabase-tahap2.sql, dan (kalau ada) supabase-tahap3.sql.
+-- Setiap kali file tahap baru dijalankan, jalankan ulang file ini.
 -- Cara pakai: Supabase > SQL Editor > New query > paste semua > Run
 --
 -- Yang dilakukan (dalam satu transaksi):
@@ -16,7 +17,8 @@
 --  tertukar dengan pengajuan baru yang kebetulan mendapat id sama.
 --
 -- KHUSUS PROTOTIPE (data dummy). Hapus/ganti fungsi ini di Tahap 4 sebelum ada data asli.
--- Kalau Tahap 3-4 menambah contoh data (mis. tiket_pp TPP-2026-00018), tambahkan juga di bagian 2.
+-- Kalau Tahap 4 menambah contoh data (approval, dokumen_pengadaan), tambahkan juga di bagian 2.
+-- Nomor TPP dan RAB juga kembali ke awal (dihitung dari nomor terbesar: TPP-2026-00018, RAB-HCIS-2026-0492).
 -- ============================================================
 
 create or replace function reset_demo()
@@ -41,6 +43,25 @@ begin
   insert into pengajuan_sppd (id, no_pengajuan, npp, no_sk, jarak_km, bawa_keluarga, bantuan_sekolah, status, tahap_hcis, diajukan_pada, catatan) values
    (2,'SPPD-MTS-2026-00139','10871','SK-MUT/0462/DIR/XI/2026',140,true, true, 'Verifikasi HCS',         'Susun RAB',        '2026-11-18',null),
    (3,'SPPD-MTS-2026-00141','11302','SK-MUT/0469/DIR/XI/2026',770,false,false,'Proses Accounting & Tax','Diserahkan ke ATA','2026-11-19',null);
+
+  -- Tahap 3 (dilewati kalau tabelnya belum dibuat)
+  if to_regclass('public.tiket_pp') is not null then
+    insert into tiket_pp (id, no_tpp, pengajuan_id, skema, asal, tujuan, tgl_pergi, jam_pergi, tgl_pulang, jam_pulang, nominal_pergi, nominal_pulang, status, diajukan_pada) values
+     (1,'TPP-2026-00018',3,'reimburse','sby','Kab. Gresik, Jawa Timur','2026-11-20',null,'2026-11-22',null,450000,450000,'Diajukan','2026-11-22');
+  end if;
+  if to_regclass('public.rab') is not null then
+    insert into rab (id, no_rab, pengajuan_id, level_kelompok, jumlah_orang, jumlah_hari, tarif_harian, pengepakan, pengepakan_manual, sewa, penginapan, bantuan_sekolah, catatan, dibuat_oleh, dibuat_pada) values
+     (1,'RAB-HCIS-2026-0491',3,'6/7',1,5,575000,2000000,false,10000000,3200000,0,null,'20117','2026-11-20 10:15+07'),
+     (2,'RAB-HCIS-2026-0492',2,'4',3,5,650000,3500000,true,15000000,6400000,2500000,'Pengepakan diisi manual (asal Jawa Barat)','20117','2026-11-24 11:00+07');
+  end if;
+  if to_regclass('public.checklist_kelengkapan') is not null then
+    insert into checklist_kelengkapan (id, pengajuan_id, item, wajib, hasil, catatan, dicek_oleh, dicek_pada) values
+     (1,3,'form',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),
+     (2,3,'sk',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),
+     (3,3,'kk',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),
+     (4,3,'rekening',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),
+     (5,3,'sekolah_asal',false,'Tidak berlaku','Tidak mengajukan bantuan sekolah','20117','2026-11-20 09:00+07');
+  end if;
 
   insert into dokumen (id, pengajuan_id, tpp_id, jenis, nama_file, tipe_file, ukuran_kb, path_storage, diunggah_pada) values
    (5,3,   null,'sk',             'SK_Mutasi_Agus.pdf',  'PDF',790,'sppd/00141/sk.pdf',  '2026-11-19 10:02+07'),

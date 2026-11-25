@@ -44,17 +44,17 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
 
 ## Database (rencana, Supabase)
 - Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (20 tabel; sheet Ringkasan & Relasi).
-- SQL: `supabase-tahap1.sql`, `supabase-tahap2.sql` (dijalankan manual di SQL Editor; termasuk GRANT untuk anon).
+- SQL: `supabase-tahap1.sql`, `supabase-tahap2.sql`, `supabase-tahap3.sql`, lalu `supabase-reset-demo.sql` (dijalankan manual di SQL Editor; termasuk GRANT untuk anon). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`.
 - Bertahap:
   - Tahap 1 (SUDAH): kantor, karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
   - Tahap 2 (SUDAH): jarak_kantor, keluarga, pengajuan_keluarga, notifikasi, riwayat_status
-  - Tahap 3: tarif_*, rab, checklist_kelengkapan, tiket_pp
+  - Tahap 3 (SUDAH): tarif_* (dibaca saat HCIS login), rab (no RAB-HCIS-YYYY-NNNN, upsert per pengajuan), checklist_kelengkapan, tiket_pp (+ dokumen.tpp_id)
   - Tahap 4: approval, dokumen_pengadaan, login beneran (Supabase Auth, NPP → email dummy `npp@jmclick.test`) + Row Level Security per role
 - index.html memanggil REST API Supabase lewat `fetch` (fungsi `sb()`), tanpa library. Data Supabase dipetakan ke `S.subs` / `S.notifs` supaya tampilan tidak berubah.
-- Masih di localStorage (key `sppd-mutasi-proto-v5`): data kasus HCIS (checklist, RAB, PR, PO, GR, Nota Dinas), draft form, Tiket PP. Ganti bertahap jadi baca/tulis Supabase; tampilan & alur JANGAN berubah.
+- Masih di localStorage (key `sppd-mutasi-proto-v5`): PR, PO, GR, Nota Dinas, tanggal approval (Tahap 4), draft form, konfirmasi kampung halaman TPP. Ganti bertahap jadi baca/tulis Supabase; tampilan & alur JANGAN berubah.
 - Kondisi awal demo: Budi (10234) BELUM mengajukan SPPD untuk SK-MUT/0457 (tombol "Isi Form", notifikasi "SK Mutasi terbit" belum dibaca); Rina & Agus = contoh antrean HCIS.
 - Tombol "Reset data demo" (halaman login) memanggil fungsi database `reset_demo()` (`supabase-reset-demo.sql`): hapus semua transaksi (termasuk tabel Tahap 3–4 kalau sudah ada), isi ulang contoh data, lalu hapus localStorage di browser itu. Data master tidak disentuh.
-- Contoh data transaksi ada di 3 tempat dan harus sama: Excel, `supabase-tahap1/2.sql`, dan `reset_demo()`. Kalau Tahap 3–4 menambah contoh data, tambahkan juga ke `reset_demo()`.
+- Contoh data transaksi ada di 3 tempat dan harus sama: Excel, `supabase-tahap1/2/3.sql`, dan `reset_demo()`. Kalau Tahap 4 menambah contoh data, tambahkan juga ke `reset_demo()`.
 - Hanya pakai publishable/anon key di index.html. JANGAN pernah taruh secret/service_role key di kode atau repo.
 
 ## Aturan kerja

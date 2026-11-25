@@ -385,7 +385,8 @@ var KEY = "sppd-mutasi-proto-v5";
 var SB_URL = "https://xlgeqdierinojdsfrekf.supabase.co";
 var SB_KEY = "sb_publishable_kWCOhOXOtsxb62g1-vtBUg_zxYuJDzm";
 var SUB_SELECT = "*,dokumen(jenis,nama_file),karyawan(nama,level,grade),sk_mutasi(no_sk,kantor_asal,kantor_tujuan,jabatan_baru)"+
-  ",pengajuan_keluarga(usia_saat_pengajuan,status,alasan_tolak,keluarga(id,nama,hubungan,tanggal_lahir,nik))";
+  ",pengajuan_keluarga(usia_saat_pengajuan,status,alasan_tolak,keluarga(id,nama,hubungan,tanggal_lahir,nik))"+
+  ",rab(*),checklist_kelengkapan(item,hasil,catatan),tiket_pp(*)";
 var DOC_DB = {sk:"sk", kk:"kk", rek:"rekening", skolAsal:"sekolah_asal", skolBaru:"sekolah_baru"};
 var DOC_APP = {sk:"sk", kk:"kk", rekening:"rek", sekolah_asal:"skolAsal", sekolah_baru:"skolBaru"};
 var dbQueue = Promise.resolve();   /* urutan operasi tulis dari skenario uji */
@@ -453,11 +454,13 @@ function sbLoadSubs(npp){
     var list=rows.map(function(r){ return subFromRow(r, old[r.no_pengajuan], hist[r.id]); });
     if(npp){ var have={}; list.forEach(function(s){ have[s.sk]=1; }); seedSubs(npp).forEach(function(s){ if(!have[s.sk]) list.push(s); }); }
     S.subs=list;
+    /* Tiket PP karyawan = tiket_pp milik SPPD untuk SK aktif */
+    if(npp){ var cur=list.filter(function(s){ return s.sk===SK.no && s.id!=null; })[0]; S.tpp.subs=cur?cur.tpp.map(tppFromRow):[]; }
     list.forEach(function(s){ var c=S.hc[s.ticket]; if(!c || s.id==null) return;
       if(c.id!==s.id){ delete S.hc[s.ticket]; return; }
       /* Tahap di database mundur (mis. habis Reset data demo dari laptop lain): buang data kasus lokal yang lama */
       if(s.tahap<c.stage){ delete S.hc[s.ticket]; return; }
-      if(c.stage!==s.tahap){ c.stage=s.tahap; hcFill(s,c); } });
+      if(c.stage!==s.tahap){ c.stage=s.tahap; hcFill(s,c); } else hcFromDb(s,c); });
   });
 }
 function subFromRow(r, loc, dbHist){
@@ -470,7 +473,9 @@ function subFromRow(r, loc, dbHist){
   var hist=(same&&loc.history)?loc.history.slice():[];
   (dbHist||[]).forEach(function(d,i){ if(d) hist[i]=d; });
   if(!hist[0]) hist[0]=shortDate(r.diajukan_pada);
+  var rabRow=Array.isArray(r.rab)?(r.rab[0]||null):(r.rab||null);
   return {id:r.id, ticket:r.no_pengajuan, npp:r.npp, created:(same&&loc.created)||shortDate(r.diajukan_pada), diajukanISO:r.diajukan_pada,
+    rabDb:rabRow, ckDb:r.checklist_kelengkapan||[], tpp:r.tiket_pp||[],
     statusIdx:si<0?0:si, tahap:Math.max(0,HC_STAGES.indexOf(r.tahap_hcis)), sk:r.no_sk, history:hist,
     emp:{nama:k.nama, npp:r.npp, jabatan:sk.jabatan_baru, level:k.level, grade:k.grade},
     form:{asal:sk.kantor_asal, tujuan:sk.kantor_tujuan, bawa:bawa, anggota:anggota, bantuanSekolah:!!r.bantuan_sekolah, docs:docs}};
@@ -544,9 +549,9 @@ function readNotif(n){
   var id=n.dbId; if(!id) return;
   dbQueue=dbQueue.then(function(){ return sb("notifikasi?id=eq."+id,{method:"PATCH", body:{dibaca:true}}); }).catch(function(e){ sbErr(e); });
 }
-function addRiwayat(id, lama, baru, npp, catatan){
+function addRiwayat(id, lama, baru, npp, catatan, objek){
   if(id==null) return;
-  dbQueue=dbQueue.then(function(){ return sb("riwayat_status",{method:"POST", body:{objek:"pengajuan_sppd", objek_id:id, status_lama:lama||null, status_baru:baru, oleh_npp:npp, catatan:catatan||null}}); })
+  dbQueue=dbQueue.then(function(){ return sb("riwayat_status",{method:"POST", body:{objek:objek||"pengajuan_sppd", objek_id:id, status_lama:lama||null, status_baru:baru, oleh_npp:npp, catatan:catatan||null}}); })
     .catch(function(e){ toast("Gagal mencatat riwayat status: "+sbErr(e)+"."); });
 }
 /* Tanggal per status (Diajukan, Verifikasi HCS, ...) dari riwayat_status */
@@ -556,6 +561,85 @@ function sbLoadHist(ids){
     var m={}; (r||[]).forEach(function(x){ var i=STATUS_FLOW.indexOf(x.status_baru); if(i<0) return; (m[x.objek_id]=m[x.objek_id]||[])[i]=tsDate(x.waktu); });
     return m;
   });
+}
+/* ---------- Supabase Tahap 3: tarif_* (lihat sbLoadTarif), rab, checklist_kelengkapan, tiket_pp ---------- */
+var CK_DB = {form:"form", sk:"sk", kk:"kk", rek:"rekening", skolAsal:"sekolah_asal", skolBaru:"sekolah_baru"};
+var CK_APP = {form:"form", sk:"sk", kk:"kk", rekening:"rek", sekolah_asal:"skolAsal", sekolah_baru:"skolBaru"};
+function nextNoFrom(list, field, re, floor){
+  var n=floor||0; (list||[]).forEach(function(x){ var m=re.exec(x[field]||""); if(m) n=Math.max(n, parseInt(m[1],10)); }); return n+1;
+}
+/* Nomor RAB berikutnya = nomor terbesar di tabel rab + 1 (kembali ke awal setelah Reset data demo) */
+function sbNextRabNo(){
+  return sb("rab?select=no_rab").then(function(r){ return "RAB-HCIS-"+new Date().getFullYear()+"-"+String(nextNoFrom(r,"no_rab",/(\d+)$/,490)).padStart(4,"0"); });
+}
+function sbNextTppNo(){
+  var pre="TPP-"+new Date().getFullYear()+"-";
+  return sb("tiket_pp?select=no_tpp&no_tpp=like."+q(pre+"*")).then(function(r){ return pre+String(nextNoFrom(r,"no_tpp",/(\d+)$/,0)).padStart(5,"0"); });
+}
+/* Isi data kasus HCIS dari database (checklist, isian & hasil RAB) kalau belum ada di browser ini */
+function hcFromDb(sub,c){
+  if(sub.ckDb && sub.ckDb.length && !Object.keys(c.check).length){
+    sub.ckDb.forEach(function(x){ var k=CK_APP[x.item]; if(!k) return;
+      c.check[k]=x.hasil==="Lengkap"?"ada":(x.hasil==="Tidak lengkap"?"tidak":"na"); if(x.catatan) c.notes[k]=x.catatan; });
+  }
+  var d=sub.rabDb; if(!d) return;
+  if(!Object.keys(c.rabIn).length){
+    c.rabIn={hari:String(d.jumlah_hari)};
+    if(d.pengepakan_manual) c.rabIn.pack=String(d.pengepakan);
+    if(+d.bantuan_sekolah) c.rabIn.sekolah=String(d.bantuan_sekolah);
+    if(lvKey(subEmp(sub).level)!==d.level_kelompok) c.rabIn.level=d.level_kelompok.split("/")[0];
+  }
+  if(c.stage>=3 && !c.rab) c.rab=rabFromDb(sub,c,d);
+}
+function rabFromDb(sub,c,d){
+  var r=rabCalc(sub,c.rabIn);
+  r.k=d.level_kelompok; r.orang=+d.jumlah_orang; r.hari=+d.jumlah_hari; r.tunj=+d.tarif_harian; r.uh=+d.uang_harian;
+  r.pack=+d.pengepakan; r.packAuto=!d.pengepakan_manual; r.sewa=+d.sewa; r.hotel=+d.penginapan; r.sekolah=+d.bantuan_sekolah;
+  r.jumlah=+d.total; r.pajak=+d.pajak; r.diterima=+d.diterima; r.no=d.no_rab; r.tgl=tsDate(d.dibuat_pada);
+  return r;
+}
+/* Simpan RAB (1 pengajuan = 1 RAB: kalau sudah ada, diperbarui dan nomornya tetap) */
+function hcSaveRab(sub,c){
+  S.hcErr=rabErrors(sub,c); S.hcDoc=null;
+  if(S.hcErr.length){ render(); toTop(); return; }
+  if(S.busy) return; S.busy=true; toast("Menyimpan RAB…");
+  var r=rabCalc(sub,c.rabIn), si0=sub.statusIdx, old=sub.rabDb;
+  dbQueue.then(function(){ return old?old.no_rab:sbNextRabNo(); }).then(function(no){
+    r.no=no;
+    return sb("rab?on_conflict=pengajuan_id",{method:"POST", prefer:"resolution=merge-duplicates,return=representation", body:{
+      no_rab:no, pengajuan_id:sub.id, level_kelompok:r.k, jumlah_orang:r.orang, jumlah_hari:r.hari, tarif_harian:r.tunj,
+      pengepakan:r.pack, pengepakan_manual:!r.packAuto, sewa:r.sewa, penginapan:r.hotel, bantuan_sekolah:r.sekolah,
+      catatan:r.packAuto?null:"Pengepakan diisi manual (asal "+r.asalR+")", dibuat_oleh:HC_USER.npp, dibuat_pada:new Date().toISOString()}});
+  }).then(function(rows){
+    var d=rows&&rows[0]; S.busy=false; sub.rabDb=d||old;
+    if(d){ r.jumlah=+d.total; r.pajak=+d.pajak; r.diterima=+d.diterima; }
+    r.tgl=today(); c.rab=r; c.dhNote=""; c.stage=3;
+    log("RAB "+r.no+" ("+rp(r.jumlah)+") diajukan ke Dept Head HCIS.","info");
+    sbSetStage(sub,c,si0); render(); toTop();
+  }).catch(function(e){ S.busy=false; S.hcErr=["RAB gagal disimpan: "+sbErr(e)+"."]; render(); toTop(); });
+}
+/* Simpan hasil cek kelengkapan (satu baris per item; diperbarui kalau dicek ulang) */
+function sbSaveChecklist(sub,c){
+  if(sub.id==null) return;
+  var rows=CK_ITEMS.map(function(it){
+    var na=it.opt && !sub.form.bantuanSekolah, v=c.check[it.k];
+    return {pengajuan_id:sub.id, item:CK_DB[it.k], wajib:!na, hasil:na?"Tidak berlaku":(v==="tidak"?"Tidak lengkap":"Lengkap"),
+      catatan:c.notes[it.k]||(na?"Tidak mengajukan bantuan sekolah":null), dicek_oleh:HC_USER.npp, dicek_pada:new Date().toISOString()};
+  });
+  sub.ckDb=rows;
+  dbQueue=dbQueue.then(function(){ return sb("checklist_kelengkapan?on_conflict=pengajuan_id,item",{method:"POST", prefer:"resolution=merge-duplicates", body:rows}); })
+    .catch(function(e){ toast("Gagal menyimpan cek kelengkapan: "+sbErr(e)+"."); });
+}
+function tppFromRow(x){
+  return {id:x.id, no:x.no_tpp, skema:x.skema==="dipesankan_kantor"?"kantor":"reimburse", rute:kantorNama(x.asal)+" → "+x.tujuan,
+    pergi:x.tgl_pergi, pulang:x.tgl_pulang, total:(+x.nominal_pergi||0)+(+x.nominal_pulang||0), diajukan:x.diajukan_pada, status:x.status};
+}
+var TPP_DOC_DB = {t_tiket:"tiket", t_trx:"bukti_transaksi"};
+function tppDocRows(row, f){
+  var out=[]; if(f.skema!=="reimburse") return out;
+  Object.keys(TPP_DOC_DB).forEach(function(k){ var nm=f.docs[k]; if(!nm) return;
+    out.push({pengajuan_id:null, tpp_id:row.id, jenis:TPP_DOC_DB[k], nama_file:nm, tipe_file:tipeFile(nm), ukuran_kb:docKb(f,k), path_storage:"tpp/"+row.no_tpp.slice(-5)+"/"+TPP_DOC_DB[k]+"."+fileExt(nm)}); });
+  return out;
 }
 
 var KANTOR = [
@@ -740,7 +824,7 @@ function takeFile(dk,file){
   if(file.size>10*1024*1024){ setErr(lb+": ukuran file "+(file.size/1048576).toFixed(1)+" MB, melebihi batas 10 MB."); log("Menolak unggahan "+file.name+" karena melebihi 10 MB.","bad"); render(); return; }
   var isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name), isImg=/^image\/(jpeg|png)$/.test(file.type)||/\.(jpe?g|png)$/i.test(file.name);
   if(!isPdf && !isImg){ setErr(lb+": format file harus PDF, JPG, atau PNG."); render(); return; }
-  if(isT){ S.terrors=[]; S.tf.docs[dk]=file.name; } else { S.errors=[]; S.form.docs[dk]=file.name; S.form.sizes=S.form.sizes||{}; S.form.sizes[dk]=Math.max(1,Math.ceil(file.size/1024)); }
+  if(isT){ S.terrors=[]; S.tf.docs[dk]=file.name; S.tf.sizes=S.tf.sizes||{}; S.tf.sizes[dk]=Math.max(1,Math.ceil(file.size/1024)); } else { S.errors=[]; S.form.docs[dk]=file.name; S.form.sizes=S.form.sizes||{}; S.form.sizes[dk]=Math.max(1,Math.ceil(file.size/1024)); }
   log("Menerima unggahan dokumen: "+file.name+".","ok");
   if(!isT && dk==="kk"){ S.form.kk=kkFor(EMP.npp); log("Membaca data Kartu Keluarga (OCR): "+S.form.kk.length+" anggota keluarga terdeteksi.","ok"); if(S.form.bawa==="ya") loadFamily(); }
   if(isPdf){ var rd=new FileReader(); rd.onload=function(){ S.files[dk]={name:file.name, type:"pdf", data:rd.result, pages:0, imgs:[], label:lb}; render(); renderPdf(dk); }; rd.onerror=function(){ S.files[dk]={name:file.name, type:"pdf", err:true}; render(); }; rd.readAsArrayBuffer(file); }
@@ -1375,9 +1459,29 @@ function tppSubmit(){
   if(tppExpired()){ S.terrors=["Batas pengajuan Tiket PP (7 hari setelah SPPD Mutasi diajukan) sudah lewat."]; render(); return; }
   if(!canTpp()){ S.terrors=["Tiket PP hanya bisa diajukan 3 bulan sekali. Anda bisa mengajukan lagi mulai "+fmtDate(nextTpp())+"."]; render(); return; }
   var e=vTppValidate(1).concat(vTppValidate(2)); if(e.length){ S.terrors=e; render(); return; }
-  var f=S.tf, no="TPP-"+new Date().getFullYear()+"-"+String(++S.tpp.seq).padStart(5,"0");
-  S.tpp.subs.push({no:no, skema:f.skema, rute:routeGo(f), pergi:f.pergi, pulang:f.pulang, total:(+f.nomPergi||0)+(+f.nomPulang||0), diajukan:isoToday(), status:"Diajukan"});
+  var f=S.tf, sub=subFor(SK.no), row=null;
+  if(!sub || sub.id==null){ S.terrors=["SPPD Mutasi untuk SK ini belum tersimpan di database, Tiket PP belum bisa diajukan."]; render(); return; }
+  if(S.busy) return; S.busy=true; toast("Mengirim pengajuan Tiket PP…");
+  dbQueue.then(sbNextTppNo).then(function(no){
+    var reim=f.skema==="reimburse";
+    return sb("tiket_pp",{method:"POST", prefer:"return=representation", body:{no_tpp:no, pengajuan_id:sub.id, skema:reim?"reimburse":"dipesankan_kantor",
+      asal:baseKantor(f), tujuan:HOME.nama, tgl_pergi:f.pergi, jam_pergi:f.jamPergi||null, tgl_pulang:f.pulang, jam_pulang:f.jamPulang||null,
+      nominal_pergi:reim?(+f.nomPergi||0):null, nominal_pulang:reim?(+f.nomPulang||0):null, status:"Diajukan", diajukan_pada:isoToday()}});
+  }).then(function(r){
+    row=r[0]; var docs=tppDocRows(row,f);
+    return docs.length?sb("dokumen",{method:"POST", body:docs}):null;
+  }).then(function(){
+    S.busy=false; tppDone(row,f);
+  }).catch(function(e){
+    if(row) sb("tiket_pp?id=eq."+row.id,{method:"DELETE"}).catch(function(){});
+    S.busy=false; S.terrors=["Pengajuan Tiket PP gagal dikirim: "+sbErr(e)+". Coba submit lagi."]; render(); toTop();
+  });
+}
+function tppDone(row,f){
+  var no=row.no_tpp;
+  S.tpp.subs.push(tppFromRow(row));
   S.tppLast=no;
+  addRiwayat(row.id, null, "Diajukan", EMP.npp, null, "tiket_pp");
   log("Menerima pengajuan Tiket PP "+no+" ("+(f.skema==="kantor"?"dipesankan kantor":"reimbursement "+rp((+f.nomPergi||0)+(+f.nomPulang||0)))+").","ok");
   log("Menjadwalkan notifikasi Tiket PP berikutnya pada "+fmtDate(addMonths(isoToday(),3))+".","info");
   addNotif(EMP.npp, "tppsub", "Pengajuan Tiket PP diterima", "Nomor "+no+". Pengajuan berikutnya bisa mulai "+fmtDate(addMonths(isoToday(),3))+".", no);
@@ -1415,18 +1519,30 @@ var HC_USER = {nama:"Dewi Lestari", npp:"20117", jabatan:"Staf HCIS"};
 var HC_STAGES = ["Diterima","Cek kelengkapan","Susun RAB","Approval Dept Head HCIS","Buat PR","Approval OAD & Group Head","Buat PO & GR","Serahkan ke ATA","Diserahkan ke ATA"];
 /* Tabel hak & kebutuhan (dari file Dummy Data Hak & Kebutuhan Karyawan) */
 var LV_KEYS = ["1/2/3","4","5","6/7","8/9"];
-var TPD = {"1/2/3":{hotel:"Bintang 4", makan:400000, saku:450000, jml:850000}, "4":{hotel:"Bintang 3", makan:300000, saku:350000, jml:650000}, "5":{hotel:"Bintang 3", makan:300000, saku:300000, jml:600000}, "6/7":{hotel:"Bintang 3", makan:300000, saku:275000, jml:575000}, "8/9":{hotel:"Bintang 2", makan:300000, saku:250000, jml:550000}};
+/* Tabel hak & kebutuhan: diisi dari tabel tarif_* di Supabase saat HCIS login (sbLoadTarif) */
+var TPD = {};
 var BRACKETS = ["1","2","3–4","≥5"];
-var HOTEL = {"1/2/3":[4000000,4000000,8000000,12000000], "4":[3200000,3200000,6400000,9600000], "5":[3200000,3200000,6400000,9600000], "6/7":[3200000,3200000,6400000,9600000], "8/9":[2000000,2000000,4000000,6000000]};
-var SEWA = {"1/2/3":20000000, "4":15000000, "5":15000000, "6/7":10000000, "8/9":10000000};
+var HOTEL = {};
+var SEWA = {};
 var REGIONS = ["Jabotabek","Jawa Barat","Jawa Tengah dan DIY","Jawa Timur","Sumatera / Kalimantan / Sulawesi","Bali"];
-var PACK = {
-  "1/2/3":[[400000,800000,1800000,3000000,7200000,6000000],[550000,1100000,2700000,4500000,10700000,9000000],[750000,1500000,3600000,5900000,14300000,12000000],[950000,1900000,4500000,7400000,18000000,15000000]],
-  "4":[[300000,600000,1500000,2400000,6000000,5000000],[450000,900000,2300000,3700000,9000000,7500000],[650000,1300000,3000000,5000000,12000000,10000000],[800000,1600000,3800000,6200000,15000000,12500000]],
-  "5":[[250000,500000,1200000,2000000,4800000,4000000],[400000,800000,1800000,3000000,7200000,6000000],[500000,1000000,2400000,4000000,9600000,8000000],[650000,1300000,3000000,5000000,12000000,10000000]],
-  "6/7":[[250000,500000,1200000,2000000,4800000,4000000],[400000,800000,1800000,3000000,7200000,6000000],[500000,1000000,2400000,4000000,9600000,8000000],[650000,1300000,3000000,5000000,12000000,10000000]],
-  "8/9":[[200000,400000,1000000,1500000,3600000,3000000],[300000,600000,1400000,2200000,5400000,4500000],[400000,800000,1800000,3000000,7200000,6000000],[450000,900000,2300000,3700000,9000000,7500000]]
-};
+var PACKS = {};          /* PACKS[wilayah asal][level][bracket][index wilayah tujuan] */
+var PACK = {};           /* = PACKS.Jabotabek (ditampilkan di Tabel Hak & Kebutuhan) */
+var BRACKET_DB = {"1":0, "2":1, "3-4":2, "5 atau lebih":3};
+function berlaku(x){ var t=isoToday(); return x.berlaku_mulai<=t && (!x.berlaku_sampai || x.berlaku_sampai>=t); }
+function byMulai(a,b){ return a.berlaku_mulai<b.berlaku_mulai?-1:(a.berlaku_mulai>b.berlaku_mulai?1:0); }
+function sbLoadTarif(){
+  return Promise.all([sb("tarif_uang_harian?select=*"), sb("tarif_penginapan?select=*"), sb("tarif_sewa?select=*"), sb("tarif_pengepakan?select=*")]).then(function(r){
+    var tpd={}, hotel={}, sewa={}, packs={};
+    (r[0]||[]).filter(berlaku).sort(byMulai).forEach(function(x){ tpd[x.level_kelompok]={hotel:x.kelas_hotel, makan:+x.uang_makan, saku:+x.uang_saku, jml:+x.jumlah_per_hari}; });
+    (r[1]||[]).filter(berlaku).sort(byMulai).forEach(function(x){ (hotel[x.level_kelompok]=hotel[x.level_kelompok]||[0,0,0,0])[BRACKET_DB[x.jumlah_orang]]=+x.nominal; });
+    (r[2]||[]).filter(berlaku).sort(byMulai).forEach(function(x){ sewa[x.level_kelompok]=+x.nominal; });
+    (r[3]||[]).filter(function(x){ return x.berlaku_mulai<=isoToday(); }).sort(byMulai).forEach(function(x){
+      var i=REGIONS.indexOf(x.wilayah_tujuan), b=BRACKET_DB[x.jumlah_orang]; if(i<0||b==null) return;
+      var a=packs[x.wilayah_asal]=packs[x.wilayah_asal]||{}, k=a[x.level_kelompok]=a[x.level_kelompok]||[[],[],[],[]]; k[b][i]=+x.nominal;
+    });
+    TPD=tpd; HOTEL=hotel; SEWA=sewa; PACKS=packs; PACK=packs.Jabotabek||{};
+  });
+}
 var REGION_OF = {jkt:"Jabotabek", bgr:"Jabotabek", ckp:"Jawa Barat", bdg:"Jawa Barat", smg:"Jawa Tengah dan DIY", sby:"Jawa Timur"};
 var CK_ITEMS = [
   {k:"form", label:"Form permohonan SPPD Pindah"},
@@ -1465,8 +1581,9 @@ function hcStage(sub){
 /* Tahap dari database lebih maju daripada data lokal (mis. diproses di laptop lain):
    lengkapi dokumen yang belum ada di browser ini supaya halaman tetap bisa dibuka. */
 function hcFill(sub,c){
+  hcFromDb(sub,c);
   var st=c.stage;
-  if(st>=3 && !c.rab){ var r=rabCalc(sub,c.rabIn); r.no="EB3.HM.03.02."+nextNo("rab"); r.tgl=today(); c.rab=r; }
+  if(st>=3 && !c.rab){ var r=rabCalc(sub,c.rabIn); r.no="RAB-HCIS-"+new Date().getFullYear()+"-"+String(nextNo("rab")).padStart(4,"0"); r.tgl=today(); c.rab=r; }
   if(st>=4 && !c.dh) c.dh=today();
   if(st>=5 && !c.pr){ var pr=prDraft(sub,c); pr.no=String(nextNo("pr")); pr.tgl=today(); c.pr=pr; }
   if(st>=6){ if(!c.prapp.oad) c.prapp.oad=today(); if(!c.prapp.gh) c.prapp.gh=today(); }
@@ -1478,10 +1595,11 @@ function hcChip(st){ var c=st===8?"ok":(st===0?"bad":(st===3||st===5?"warn":""))
 function famCount(sub){ return sub.form.bawa==="ya"?sub.form.anggota.filter(function(m){return !m.rejected;}).length:0; }
 function rabCalc(sub, inp){
   var e=subEmp(sub), lv=inp.level||e.level, k=lvKey(lv), orang=1+famCount(sub), hari=+(inp.hari||5);
-  var tunj=TPD[k].jml, uh=orang*hari*tunj;
+  var tunj=(TPD[k]||{}).jml||0, uh=orang*hari*tunj;
   var asalR=REGION_OF[sub.form.asal], tujR=REGION_OF[sub.form.tujuan], b=bracketIdx(orang);
-  var packAuto=asalR==="Jabotabek", pack=packAuto?PACK[k][b][REGIONS.indexOf(tujR)]:(inp.pack===undefined||inp.pack===""?null:+inp.pack);
-  var sewa=SEWA[k], hotel=HOTEL[k][b], sekolah=sub.form.bantuanSekolah?(+inp.sekolah||0):0;
+  var ptab=PACKS[asalR], pAuto=ptab&&ptab[k]&&ptab[k][b]?ptab[k][b][REGIONS.indexOf(tujR)]:null;
+  var packAuto=pAuto!=null, pack=packAuto?pAuto:(inp.pack===undefined||inp.pack===""?null:+inp.pack);
+  var sewa=SEWA[k]||0, hotel=(HOTEL[k]||[])[b]||0, sekolah=sub.form.bantuanSekolah?(+inp.sekolah||0):0;
   var jumlah=uh+(pack||0)+sewa+hotel+sekolah, pajak=Math.round(jumlah*0.05);
   var ket=[];
   ket.push(packAuto?"Pengepakan barang: "+asalR+" ke "+tujR+" untuk "+orang+" orang (tabel Biaya Pengepakan).":"Pengepakan barang: tarif asal "+asalR+" belum ada di tabel, diisi manual oleh HCIS.");
@@ -1658,17 +1776,14 @@ function hcAct(a,t){
   if(a==="hcckok"){
     var miss=CK_ITEMS.filter(function(it){ return c.check[it.k]==="tidak"; });
     if(miss.length){ S.hcErr=miss.map(function(it){return it.label+" ditandai Tidak ada.";}); }
-    else { c.stage=2; c.ckDate=today(); log("Kelengkapan "+t+" dinyatakan lengkap oleh HCIS.","ok"); }
+    else { c.stage=2; c.ckDate=today(); sbSaveChecklist(sub,c); log("Kelengkapan "+t+" dinyatakan lengkap oleh HCIS.","ok"); }
   }
   if(a==="hcckreq"){
     var m2=CK_ITEMS.filter(function(it){ return c.check[it.k]==="tidak"; }).map(function(it){return it.label;});
     if(!m2.length){ toast("Tidak ada dokumen yang ditandai Tidak ada."); }
-    else { log("HCIS meminta kelengkapan ke "+e.nama+": "+m2.join(", ")+".","bad"); hcNotifyEmp(sub,"HCS meminta kelengkapan dokumen","Lengkapi: "+m2.join(", ")+"."); toast("Permintaan kelengkapan dikirim ke karyawan."); }
+    else { sbSaveChecklist(sub,c); log("HCIS meminta kelengkapan ke "+e.nama+": "+m2.join(", ")+".","bad"); hcNotifyEmp(sub,"HCS meminta kelengkapan dokumen","Lengkapi: "+m2.join(", ")+"."); toast("Permintaan kelengkapan dikirim ke karyawan."); }
   }
-  if(a==="hcrab"){
-    var r=rabCalc(sub,c.rabIn); S.hcErr=rabErrors(sub,c);
-    if(!S.hcErr.length){ r.no="EB3.HM.03.02."+nextNo("rab"); r.tgl=today(); c.rab=r; c.dhNote=""; c.stage=3; log("RAB "+r.no+" ("+rp(r.jumlah)+") diajukan ke Dept Head HCIS.","info"); }
-  }
+  if(a==="hcrab"){ hcSaveRab(sub,c); return; }   /* disimpan ke tabel rab dulu, lalu pindah tahap */
   if(a==="hcdhok"){ c.dh=today(); c.stage=4; log("Dept Head HCIS menyetujui RAB "+c.rab.no+".","ok"); }
   if(a==="hcdhno"){ c.dhNote="RAB "+c.rab.no+" dikembalikan: periksa kembali komponen biaya dan jumlah hari."; c.stage=2; log("Dept Head HCIS mengembalikan RAB "+c.rab.no+" untuk revisi.","bad"); }
   if(a==="hcpr"){ var pr=prDraft(sub,c); pr.no=String(nextNo("pr")); pr.tgl=today(); c.pr=pr; c.stage=5; log("PR "+pr.no+" dibuat dan dikirim ke OAD dan Group Head.","info"); }
@@ -1772,14 +1887,14 @@ function resetDemo(){
   .catch(function(e){ S.busy=false; S.resetAsk=false; render(); toast("Reset gagal: "+sbErr(e)+"."); });
 }
 function vHcHak(){
-  var h=hdr("Tabel Hak & Kebutuhan","HCIS / Tabel Hak & Kebutuhan")+'<p class="sub" style="margin:0">Sumber perhitungan RAB otomatis. Data dari file Dummy Data Hak & Kebutuhan Karyawan.</p>';
+  var h=hdr("Tabel Hak & Kebutuhan","HCIS / Tabel Hak & Kebutuhan")+'<p class="sub" style="margin:0">Sumber perhitungan RAB otomatis. Data dari tabel tarif di database (dummy Keputusan Direksi, tarif yang sedang berlaku).</p>';
   h+='<div class="card stack"><span class="sec">Tunjangan perjalanan dinas (per orang per hari)</span><div class="tblw"><table class="ftable"><thead><tr><th>Level</th><th>Akomodasi</th><th>Uang makan</th><th>Uang saku & transport lokal</th><th>Jumlah per hari</th></tr></thead><tbody>'+
-    LV_KEYS.map(function(k){ var x=TPD[k]; return '<tr><td class="n">'+k+'</td><td>'+x.hotel+'</td><td>'+rp(x.makan)+'</td><td>'+rp(x.saku)+'</td><td><b>'+rp(x.jml)+'</b></td></tr>'; }).join("")+
+    LV_KEYS.filter(function(k){ return TPD[k]; }).map(function(k){ var x=TPD[k]; return '<tr><td class="n">'+k+'</td><td>'+x.hotel+'</td><td>'+rp(x.makan)+'</td><td>'+rp(x.saku)+'</td><td><b>'+rp(x.jml)+'</b></td></tr>'; }).join("")+
     '</tbody></table></div><span class="sub small">Transportasi semua level: udara kelas ekonomi, darat kelas eksekutif. Uang harian di RAB = jumlah orang × jumlah hari × jumlah per hari.</span></div>';
   h+='<div class="card stack"><span class="sec">Bantuan biaya penginapan sementara & sewa rumah</span><div class="tblw"><table class="ftable"><thead><tr><th>Level</th><th>1 orang</th><th>2 orang</th><th>3–4 orang</th><th>≥5 orang</th><th>Sewa rumah (1 thn)</th></tr></thead><tbody>'+
-    LV_KEYS.map(function(k){ return '<tr><td class="n">'+k+'</td>'+HOTEL[k].map(function(v){return '<td>'+rp(v)+'</td>';}).join("")+'<td><b>'+rp(SEWA[k])+'</b></td></tr>'; }).join("")+'</tbody></table></div></div>';
+    LV_KEYS.filter(function(k){ return HOTEL[k]; }).map(function(k){ return '<tr><td class="n">'+k+'</td>'+HOTEL[k].map(function(v){return '<td>'+rp(v)+'</td>';}).join("")+'<td><b>'+rp(SEWA[k])+'</b></td></tr>'; }).join("")+'</tbody></table></div></div>';
   h+='<div class="card stack"><span class="sec">Biaya pengepakan (asal Jabotabek)</span><div class="tblw"><table class="ftable"><thead><tr><th>Level</th><th>Orang</th>'+REGIONS.map(function(r){return '<th>'+r+'</th>';}).join("")+'</tr></thead><tbody>'+
-    LV_KEYS.map(function(k){ return PACK[k].map(function(row,i){ return '<tr><td class="n">'+(i===0?k:'')+'</td><td>'+BRACKETS[i]+'</td>'+row.map(function(v){return '<td>'+fmtN(v)+'</td>';}).join("")+'</tr>'; }).join(""); }).join("")+
+    LV_KEYS.filter(function(k){ return PACK[k]; }).map(function(k){ return PACK[k].map(function(row,i){ return '<tr><td class="n">'+(i===0?k:'')+'</td><td>'+BRACKETS[i]+'</td>'+row.map(function(v){return '<td>'+fmtN(v)+'</td>';}).join("")+'</tr>'; }).join(""); }).join("")+
     '</tbody></table></div><span class="sub small">Tabel baru memuat asal Jabotabek. Untuk asal lain, HCIS mengisi biaya pengepakan secara manual di RAB.</span></div>';
   return h;
 }
@@ -1893,7 +2008,7 @@ function doLogin(){
     if(role==="hcis" && emp.unit!=="Human Capital Services") return fail("NPP "+v+" bukan pegawai Human Capital Services, tidak bisa masuk sebagai HCIS.");
     if(role==="hcis"){
       HC_USER={nama:emp.nama, npp:emp.npp, jabatan:emp.jabatan};
-      return sbLoadSubs(null).then(function(){
+      return Promise.all([sbLoadSubs(null), sbLoadTarif()]).then(function(){
         S.busy=false; S.loginErr=""; S.hist=[]; S.role="hcis";
         log("Autentikasi HCIS berhasil untuk NPP "+v+".","ok"); go("hchome",null,true);
       });
