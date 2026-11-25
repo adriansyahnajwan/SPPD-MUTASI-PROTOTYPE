@@ -386,36 +386,58 @@ var SB_URL = "https://xlgeqdierinojdsfrekf.supabase.co";
 var SB_KEY = "sb_publishable_kWCOhOXOtsxb62g1-vtBUg_zxYuJDzm";
 var SUB_SELECT = "*,dokumen(jenis,nama_file),karyawan(nama,level,grade),sk_mutasi(no_sk,kantor_asal,kantor_tujuan,jabatan_baru)"+
   ",pengajuan_keluarga(usia_saat_pengajuan,status,alasan_tolak,keluarga(id,nama,hubungan,tanggal_lahir,nik))"+
-  ",rab(*),checklist_kelengkapan(item,hasil,catatan),tiket_pp(*)";
+  ",rab(*,dokumen_pengadaan(*)),checklist_kelengkapan(item,hasil,catatan),tiket_pp(*)";
 var DOC_DB = {sk:"sk", kk:"kk", rek:"rekening", skolAsal:"sekolah_asal", skolBaru:"sekolah_baru"};
 var DOC_APP = {sk:"sk", kk:"kk", rekening:"rek", sekolah_asal:"skolAsal", sekolah_baru:"skolBaru"};
 var dbQueue = Promise.resolve();   /* urutan operasi tulis dari skenario uji */
-function sb(path, opt){
+/* Sesi login Supabase Auth (Tahap 4). Hanya di memori: muat ulang halaman = login lagi. */
+var SESSION = null;
+function sbRaw(path, opt){
   opt=opt||{}; var h={apikey:SB_KEY, "Content-Type":"application/json"}; if(opt.prefer) h.Prefer=opt.prefer;
+  if(SESSION) h.Authorization="Bearer "+SESSION.access_token;
   return fetch(SB_URL+"/rest/v1/"+path, {method:opt.method||"GET", headers:h, body:opt.body?JSON.stringify(opt.body):undefined})
     .then(function(r){ return r.text().then(function(t){
       var d=null; try{ d=t?JSON.parse(t):null; }catch(x){}
-      if(!r.ok){ var e=new Error((d&&d.message)||("HTTP "+r.status)); e.code=d&&d.code; throw e; }
+      if(!r.ok){ var e=new Error((d&&d.message)||("HTTP "+r.status)); e.code=d&&d.code; e.status=r.status; throw e; }
       return d;
     }); });
 }
+/* Panggil REST API; kalau token login kedaluwarsa, perbarui sekali lalu ulangi */
+function sb(path, opt){
+  return sbRaw(path,opt).catch(function(e){
+    if(SESSION && e.status===401 && /jwt|expired/i.test(e.message||"")) return authRefresh().then(function(){ return sbRaw(path,opt); });
+    throw e;
+  });
+}
+function authCall(grant, body){
+  return fetch(SB_URL+"/auth/v1/token?grant_type="+grant, {method:"POST", headers:{apikey:SB_KEY, "Content-Type":"application/json"}, body:JSON.stringify(body)})
+    .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){
+      if(!r.ok){ var e=new Error(d.error_description||d.msg||d.message||("HTTP "+r.status)); e.code=d.error_code||d.error||"auth"; e.status=r.status; throw e; }
+      SESSION={access_token:d.access_token, refresh_token:d.refresh_token}; return d;
+    }); });
+}
+/* Login cukup NPP + password. Supabase Auth wajib punya email, jadi NPP dipetakan ke ID internal
+   <npp>@jmclick.test di sini saja; pengguna tidak pernah melihat atau mengetik email. */
+function authLogin(npp, pw){ return authCall("password", {email:npp+"@jmclick.test", password:pw}); }
+function authRefresh(){ return authCall("refresh_token", {refresh_token:SESSION.refresh_token}); }
+function authLogout(){
+  var s=SESSION; SESSION=null; if(!s) return;
+  fetch(SB_URL+"/auth/v1/logout", {method:"POST", headers:{apikey:SB_KEY, Authorization:"Bearer "+s.access_token}}).catch(function(){});
+}
 function sbErr(e){
   try{ console.error("[SPPD] Supabase:", e); }catch(x){}
-  if(e && e.code==="42501") return "akses database ditolak (izin tabel belum diberikan)";
   if(e && e.code==="PGRST202") return "fungsi reset_demo belum ada di database (jalankan supabase-reset-demo.sql)";
   if(e && e.code==="23505" && /no_sk/.test(e.message||"")) return "SPPD Mutasi untuk SK ini sudah pernah diajukan";
+  if(e && e.code==="42501") return "akses ditolak untuk akun ini";
+  if(e && (e.code==="invalid_credentials" || e.code==="invalid_grant")) return "NPP atau password salah";
   if(e instanceof TypeError) return "tidak bisa terhubung ke database, periksa koneksi internet";
   return (e && e.message) || "kesalahan tidak dikenal";
 }
 function q(v){ return encodeURIComponent(v); }
 function inList(arr){ return q("("+arr.map(function(x){ return '"'+x+'"'; }).join(",")+")"); }
 function shortDate(iso){ if(!iso) return "-"; var d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}); }
-function sbNextTicket(){
-  var pre="SPPD-MTS-"+new Date().getFullYear()+"-";
-  return sb("pengajuan_sppd?select=no_pengajuan&no_pengajuan=like."+q(pre+"*")+"&order=no_pengajuan.desc&limit=1").then(function(r){
-    var n=r&&r[0]?parseInt(r[0].no_pengajuan.slice(-5),10)||0:0; return pre+String(n+1).padStart(5,"0");
-  });
-}
+/* Nomor SPPD-MTS berikutnya dibuat di database (karyawan tidak bisa melihat pengajuan orang lain) */
+function sbNextTicket(){ return sb("rpc/next_no_pengajuan",{method:"POST", body:{}}); }
 /* Simpan 1 pengajuan; nomor SPPD-MTS diambil dari nomor terakhir di database */
 function sbInsertSub(body){
   var tries=0;
@@ -446,12 +468,14 @@ function sbLoadSks(npp){
 }
 /* Baca pengajuan dari Supabase → bentuk S.subs yang dipakai tampilan */
 function sbLoadSubs(npp){
-  var rows;
+  var rows, hist;
   return sb("pengajuan_sppd?select="+SUB_SELECT+(npp?"&npp=eq."+q(npp):"")+"&order=diajukan_pada.desc,id.desc").then(function(r){
     rows=r||[]; return sbLoadHist(rows.map(function(x){ return x.id; }));
-  }).then(function(hist){
+  }).then(function(h){
+    hist=h; return npp?[]:sbLoadApprovals(rows);   /* approval hanya terlihat oleh HCIS */
+  }).then(function(appr){
     var old={}; S.subs.forEach(function(s){ old[s.ticket]=s; });
-    var list=rows.map(function(r){ return subFromRow(r, old[r.no_pengajuan], hist[r.id]); });
+    var list=rows.map(function(r){ var s=subFromRow(r, old[r.no_pengajuan], hist[r.id]); s.apprDb=apprFor(appr, s); return s; });
     if(npp){ var have={}; list.forEach(function(s){ have[s.sk]=1; }); seedSubs(npp).forEach(function(s){ if(!have[s.sk]) list.push(s); }); }
     S.subs=list;
     /* Tiket PP karyawan = tiket_pp milik SPPD untuk SK aktif */
@@ -475,7 +499,7 @@ function subFromRow(r, loc, dbHist){
   if(!hist[0]) hist[0]=shortDate(r.diajukan_pada);
   var rabRow=Array.isArray(r.rab)?(r.rab[0]||null):(r.rab||null);
   return {id:r.id, ticket:r.no_pengajuan, npp:r.npp, created:(same&&loc.created)||shortDate(r.diajukan_pada), diajukanISO:r.diajukan_pada,
-    rabDb:rabRow, ckDb:r.checklist_kelengkapan||[], tpp:r.tiket_pp||[],
+    rabDb:rabRow, pengDb:(rabRow&&rabRow.dokumen_pengadaan)||[], ckDb:r.checklist_kelengkapan||[], tpp:r.tiket_pp||[],
     statusIdx:si<0?0:si, tahap:Math.max(0,HC_STAGES.indexOf(r.tahap_hcis)), sk:r.no_sk, history:hist,
     emp:{nama:k.nama, npp:r.npp, jabatan:sk.jabatan_baru, level:k.level, grade:k.grade},
     form:{asal:sk.kantor_asal, tujuan:sk.kantor_tujuan, bawa:bawa, anggota:anggota, bantuanSekolah:!!r.bantuan_sekolah, docs:docs}};
@@ -572,10 +596,7 @@ function nextNoFrom(list, field, re, floor){
 function sbNextRabNo(){
   return sb("rab?select=no_rab").then(function(r){ return "RAB-HCIS-"+new Date().getFullYear()+"-"+String(nextNoFrom(r,"no_rab",/(\d+)$/,490)).padStart(4,"0"); });
 }
-function sbNextTppNo(){
-  var pre="TPP-"+new Date().getFullYear()+"-";
-  return sb("tiket_pp?select=no_tpp&no_tpp=like."+q(pre+"*")).then(function(r){ return pre+String(nextNoFrom(r,"no_tpp",/(\d+)$/,0)).padStart(5,"0"); });
-}
+function sbNextTppNo(){ return sb("rpc/next_no_tpp",{method:"POST", body:{}}); }
 /* Isi data kasus HCIS dari database (checklist, isian & hasil RAB) kalau belum ada di browser ini */
 function hcFromDb(sub,c){
   if(sub.ckDb && sub.ckDb.length && !Object.keys(c.check).length){
@@ -590,6 +611,7 @@ function hcFromDb(sub,c){
     if(lvKey(subEmp(sub).level)!==d.level_kelompok) c.rabIn.level=d.level_kelompok.split("/")[0];
   }
   if(c.stage>=3 && !c.rab) c.rab=rabFromDb(sub,c,d);
+  if(c.rab) hcFromPengadaan(sub,c);
 }
 function rabFromDb(sub,c,d){
   var r=rabCalc(sub,c.rabIn);
@@ -615,6 +637,7 @@ function hcSaveRab(sub,c){
     if(d){ r.jumlah=+d.total; r.pajak=+d.pajak; r.diterima=+d.diterima; }
     r.tgl=today(); c.rab=r; c.dhNote=""; c.stage=3;
     log("RAB "+r.no+" ("+rp(r.jumlah)+") diajukan ke Dept Head HCIS.","info");
+    sbApprove("RAB",r.no,1,"dept_head_hcis","Menunggu");
     sbSetStage(sub,c,si0); render(); toTop();
   }).catch(function(e){ S.busy=false; S.hcErr=["RAB gagal disimpan: "+sbErr(e)+"."]; render(); toTop(); });
 }
@@ -633,6 +656,78 @@ function sbSaveChecklist(sub,c){
 function tppFromRow(x){
   return {id:x.id, no:x.no_tpp, skema:x.skema==="dipesankan_kantor"?"kantor":"reimburse", rute:kantorNama(x.asal)+" → "+x.tujuan,
     pergi:x.tgl_pergi, pulang:x.tgl_pulang, total:(+x.nominal_pergi||0)+(+x.nominal_pulang||0), diajukan:x.diajukan_pada, status:x.status};
+}
+/* ---------- Supabase Tahap 4: approval, dokumen_pengadaan (login & RLS: lihat sb/authLogin) ---------- */
+var APPROVER = {dept_head_hcis:"20101", oad:"30045", group_head:"20001"};   /* diganti dari tabel akun saat HCIS login */
+function sbLoadApprovers(){
+  return sb("akun?select=npp,role&aktif=is.true&order=npp").then(function(r){ (r||[]).forEach(function(x){ if(x.role in APPROVER) APPROVER[x.role]=x.npp; }); });
+}
+function sbLoadApprovals(rows){
+  var nos=[]; rows.forEach(function(r){ var d=Array.isArray(r.rab)?r.rab[0]:r.rab; if(!d) return; nos.push(d.no_rab);
+    (d.dokumen_pengadaan||[]).forEach(function(p){ if(p.jenis==="PR") nos.push(p.nomor); }); });
+  if(!nos.length) return Promise.resolve([]);
+  return sb("approval?select=*&objek_no=in."+inList(nos)+"&order=urutan");
+}
+function apprFor(appr, s){
+  var nos=[]; if(s.rabDb) nos.push(s.rabDb.no_rab); (s.pengDb||[]).forEach(function(p){ if(p.jenis==="PR") nos.push(p.nomor); });
+  return (appr||[]).filter(function(a){ return nos.indexOf(a.objek_no)>=0; });
+}
+/* Simpan keputusan approval (satu baris per objek + urutan; diperbarui kalau berubah) */
+function sbApprove(objek, no, urutan, peran, keputusan, catatan){
+  if(!no) return;
+  var body={objek:objek, objek_no:no, urutan:urutan, approver_npp:APPROVER[peran], peran:peran, keputusan:keputusan,
+    catatan:catatan||null, waktu:keputusan==="Menunggu"?null:new Date().toISOString()};
+  dbQueue=dbQueue.then(function(){ return sb("approval?on_conflict=objek,objek_no,urutan",{method:"POST", prefer:"resolution=merge-duplicates", body:body}); })
+    .catch(function(e){ toast("Gagal menyimpan approval: "+sbErr(e)+"."); });
+}
+function sbPrFinal(c){
+  var id=c.pr&&c.pr.dbId; if(!id) return;
+  dbQueue=dbQueue.then(function(){ return sb("dokumen_pengadaan?id=eq."+id,{method:"PATCH", body:{status:"Final"}}); })
+    .catch(function(e){ toast("Gagal memperbarui status PR: "+sbErr(e)+"."); });
+}
+/* Isi PR/PO/GR/Nota Dinas dan tanggal approval dari database kalau belum ada di browser ini */
+function hcFromPengadaan(sub,c){
+  var by={}, ap=sub.apprDb||[], e=subEmp(sub);
+  (sub.pengDb||[]).forEach(function(d){ by[d.jenis]=d; });
+  function ok(objek,no,urut){ return ap.filter(function(a){ return a.objek===objek && a.objek_no===no && a.urutan===urut && a.keputusan==="Disetujui"; })[0]; }
+  var a1=ok("RAB",c.rab.no,1); if(a1 && !c.dh) c.dh=tsDate(a1.waktu);
+  if(by.PR && !c.pr){ var pr=prDraft(sub,c); pr.no=by.PR.nomor; pr.tgl=shortDate(by.PR.tanggal); pr.value=+by.PR.nilai; pr.dbId=by.PR.id; c.pr=pr; }
+  if(c.pr){ var o=ok("PR",c.pr.no,1), g=ok("PR",c.pr.no,2); if(o && !c.prapp.oad) c.prapp.oad=tsDate(o.waktu); if(g && !c.prapp.gh) c.prapp.gh=tsDate(g.waktu); }
+  if(by.PO && !c.po) c.po={no:by.PO.nomor, vendorNo:"11000"+e.npp, vendor:String(e.nama||"").toUpperCase(), net:+by.PO.nilai, tgl:shortDate(by.PO.tanggal), prNo:c.pr?c.pr.no:"", dbId:by.PO.id};
+  if(by.GR && !c.gr) c.gr={matDoc:by.GR.nomor+" - 1", gl:"6119020103", amount:+by.GR.nilai, posting:shortDate(by.GR.tanggal), poNo:c.po?c.po.no:"", dbId:by.GR.id};
+  if(by.ND && !c.nd) c.nd={no:by.ND.nomor, tgl:shortDate(by.ND.tanggal), total:+by.ND.nilai, dbId:by.ND.id};
+}
+var DOC_OF_ACT = {hcpr:"PR", hcpo:"PO", hcgr:"GR", hcata:"ND"};
+var DOC_FLOOR = {PR:1000310120, PO:4000301040, GR:5000392720, ND:3450};
+/* Nomor PR/PO/GR/ND berikutnya = nomor terbesar per jenis + 1 (kembali ke awal setelah Reset data demo) */
+function sbNextDocNo(jenis){
+  return sb("dokumen_pengadaan?select=nomor&jenis=eq."+jenis).then(function(r){ var n=nextNoFrom(r,"nomor",/(\d+)$/,DOC_FLOOR[jenis]); return jenis==="ND"?"EB.KU06."+n:String(n); });
+}
+/* Buat PR / PO / GR / Nota Dinas: simpan ke dokumen_pengadaan dulu, baru ubah tampilan & tahap */
+function hcDocAct(a, sub, c){
+  var jenis=DOC_OF_ACT[a], t=sub.ticket, e=subEmp(sub), st0=c.stage, si0=sub.statusIdx, no;
+  S.hcErr=[]; S.hcDoc=null;
+  if(!sub.rabDb || !sub.rabDb.id){ S.hcErr=["RAB pengajuan ini belum tersimpan di database."]; render(); toTop(); return; }
+  if(S.busy) return; S.busy=true; toast("Menyimpan "+(jenis==="ND"?"Nota Dinas":jenis)+"…");
+  var ref={PR:null, PO:c.pr&&c.pr.dbId, GR:c.po&&c.po.dbId, ND:c.gr&&c.gr.dbId}[jenis]||null;
+  dbQueue.then(function(){ return sbNextDocNo(jenis); }).then(function(n){
+    no=n;
+    return sb("dokumen_pengadaan",{method:"POST", prefer:"return=representation", body:{jenis:jenis, nomor:no, rab_id:sub.rabDb.id, referensi_id:ref,
+      tanggal:isoToday(), nilai:c.rab.jumlah, status:jenis==="PR"?"Menunggu approval":"Final", dibuat_oleh:HC_USER.npp,
+      path_storage:"pengadaan/"+jenis.toLowerCase()+"-"+(jenis==="ND"?no.split(".").pop():no)+".pdf"}});
+  }).then(function(r){
+    var row=r&&r[0], id=row&&row.id; S.busy=false; if(row) sub.pengDb=(sub.pengDb||[]).concat([row]);
+    if(jenis==="PR"){ var pr=prDraft(sub,c); pr.no=no; pr.tgl=today(); pr.dbId=id; c.pr=pr; c.stage=5;
+      sbApprove("PR",no,1,"oad","Menunggu"); sbApprove("PR",no,2,"group_head","Menunggu");
+      log("PR "+pr.no+" dibuat dan dikirim ke OAD dan Group Head.","info"); }
+    if(jenis==="PO"){ c.po={no:no, vendorNo:"11000"+e.npp, vendor:e.nama.toUpperCase(), net:c.rab.jumlah, tgl:today(), prNo:c.pr.no, dbId:id}; log("PO "+c.po.no+" diterbitkan.","ok"); }
+    if(jenis==="GR"){ c.gr={matDoc:no+" - 1", gl:"6119020103", amount:c.rab.jumlah, posting:today(), poNo:c.po.no, dbId:id}; log("GR "+c.gr.matDoc+" diposting.","ok"); }
+    if(jenis==="ND"){ c.nd={no:no, tgl:today(), total:c.rab.jumlah, dbId:id}; c.stage=8; hcSetEmpStatus(sub,2);
+      log("Berkas "+t+" diserahkan ke Accounting & Tax (Nota Dinas "+c.nd.no+").","ok");
+      hcNotifyEmp(sub,"Pengajuan diteruskan ke Accounting & Tax","Nomor "+t+" sudah diverifikasi HCS dan sedang diproses Accounting & Tax."); }
+    if(c.stage!==st0 || sub.statusIdx!==si0) sbSetStage(sub,c,si0);
+    render(); toTop();
+  }).catch(function(e2){ S.busy=false; S.hcErr=["Dokumen gagal disimpan: "+sbErr(e2)+"."]; render(); toTop(); });
 }
 var TPP_DOC_DB = {t_tiket:"tiket", t_trx:"bukti_transaksi"};
 function tppDocRows(row, f){
@@ -1784,15 +1879,12 @@ function hcAct(a,t){
     else { sbSaveChecklist(sub,c); log("HCIS meminta kelengkapan ke "+e.nama+": "+m2.join(", ")+".","bad"); hcNotifyEmp(sub,"HCS meminta kelengkapan dokumen","Lengkapi: "+m2.join(", ")+"."); toast("Permintaan kelengkapan dikirim ke karyawan."); }
   }
   if(a==="hcrab"){ hcSaveRab(sub,c); return; }   /* disimpan ke tabel rab dulu, lalu pindah tahap */
-  if(a==="hcdhok"){ c.dh=today(); c.stage=4; log("Dept Head HCIS menyetujui RAB "+c.rab.no+".","ok"); }
-  if(a==="hcdhno"){ c.dhNote="RAB "+c.rab.no+" dikembalikan: periksa kembali komponen biaya dan jumlah hari."; c.stage=2; log("Dept Head HCIS mengembalikan RAB "+c.rab.no+" untuk revisi.","bad"); }
-  if(a==="hcpr"){ var pr=prDraft(sub,c); pr.no=String(nextNo("pr")); pr.tgl=today(); c.pr=pr; c.stage=5; log("PR "+pr.no+" dibuat dan dikirim ke OAD dan Group Head.","info"); }
-  if(a==="hcoad"){ c.prapp.oad=today(); log("OAD menyetujui PR "+c.pr.no+" (release level 1).","ok"); }
-  if(a==="hcgh"){ c.prapp.gh=today(); c.stage=6; log("Group Head Human Capital Services menyetujui PR "+c.pr.no+" (release level 2).","ok"); }
-  if(a==="hcpo"){ c.po={no:String(nextNo("po")), vendorNo:"11000"+e.npp, vendor:e.nama.toUpperCase(), net:c.rab.jumlah, tgl:today(), prNo:c.pr.no}; log("PO "+c.po.no+" diterbitkan.","ok"); }
-  if(a==="hcgr"){ c.gr={matDoc:String(nextNo("gr"))+" - 1", gl:"6119020103", amount:c.rab.jumlah, posting:today(), poNo:c.po.no}; log("GR "+c.gr.matDoc+" diposting.","ok"); }
+  if(DOC_OF_ACT[a]){ hcDocAct(a,sub,c); return; }   /* PR/PO/GR/Nota Dinas disimpan ke dokumen_pengadaan dulu */
+  if(a==="hcdhok"){ c.dh=today(); c.stage=4; sbApprove("RAB",c.rab.no,1,"dept_head_hcis","Disetujui"); log("Dept Head HCIS menyetujui RAB "+c.rab.no+".","ok"); }
+  if(a==="hcdhno"){ c.dhNote="RAB "+c.rab.no+" dikembalikan: periksa kembali komponen biaya dan jumlah hari."; c.stage=2; sbApprove("RAB",c.rab.no,1,"dept_head_hcis","Ditolak",c.dhNote); log("Dept Head HCIS mengembalikan RAB "+c.rab.no+" untuk revisi.","bad"); }
+  if(a==="hcoad"){ c.prapp.oad=today(); sbApprove("PR",c.pr.no,1,"oad","Disetujui"); log("OAD menyetujui PR "+c.pr.no+" (release level 1).","ok"); }
+  if(a==="hcgh"){ c.prapp.gh=today(); c.stage=6; sbApprove("PR",c.pr.no,2,"group_head","Disetujui"); sbPrFinal(c); log("Group Head Human Capital Services menyetujui PR "+c.pr.no+" (release level 2).","ok"); }
   if(a==="hcnext7"){ c.stage=7; }
-  if(a==="hcata"){ c.nd={no:"EB.KU06."+nextNo("nd"), tgl:today(), total:c.rab.jumlah}; c.stage=8; hcSetEmpStatus(sub,2); log("Berkas "+t+" diserahkan ke Accounting & Tax (Nota Dinas "+c.nd.no+").","ok"); hcNotifyEmp(sub,"Pengajuan diteruskan ke Accounting & Tax","Nomor "+t+" sudah diverifikasi HCS dan sedang diproses Accounting & Tax."); }
   if(c.stage!==st0 || sub.statusIdx!==si0) sbSetStage(sub,c,si0);
   render(); toTop();
 }
@@ -2001,14 +2093,26 @@ function doLogin(){
   if(!/^\d{5}$/.test(v)){ S.loginVal=v; S.loginErr="NPP harus 5 digit angka."; render(); return; }
   if(S.busy) return;
   var role=S.loginRole||"karyawan", btn=document.querySelector('[data-act="login"]');
+  var pw=(document.getElementById("pw")||{}).value||"";
+  if(!pw){ S.loginVal=v; S.loginErr="Password wajib diisi."; render(); return; }
   S.loginVal=v; S.busy=true; if(btn){ btn.disabled=true; btn.textContent="Memeriksa NPP…"; }
-  function fail(msg){ S.busy=false; S.loginErr=msg; render(); }
-  Promise.all([sbLoadEmp(v), sbLoadJarak()]).then(function(res){ var emp=res[0];
+  function fail(msg){ authLogout(); S.busy=false; S.loginErr=msg; render(); }
+  /* Tahap 4: login lewat Supabase Auth, lalu role dari tabel akun menentukan halaman */
+  authLogin(v, pw).then(function(){
+    return sb("akun?select=role,aktif&npp=eq."+q(v));
+  }).then(function(ak){
+    var acc=ak&&ak[0];
+    if(!acc) return fail("NPP "+v+" belum punya akun JM-Click.");
+    if(!acc.aktif) return fail("Akun NPP "+v+" tidak aktif. Hubungi admin.");
+    if(acc.role==="oad" || acc.role==="ata") return fail("Halaman "+(acc.role==="oad"?"Office Administration (OAD)":"Accounting & Tax (ATA)")+" belum tersedia di prototipe ini.");
+    if(role==="hcis" && ["hcis","dept_head_hcis","group_head"].indexOf(acc.role)<0) return fail("Akun NPP "+v+" bukan akun HCIS, tidak bisa masuk sebagai HCIS.");
+    if(role==="karyawan" && acc.role!=="karyawan") return fail("Akun NPP "+v+" adalah akun HCIS. Pilih HCIS untuk masuk.");
+    sb("akun?npp=eq."+q(v),{method:"PATCH", body:{login_terakhir:new Date().toISOString()}}).catch(function(e){ sbErr(e); });
+    return Promise.all([sbLoadEmp(v), sbLoadJarak()]).then(function(res){ var emp=res[0];
     if(!emp) return fail("NPP "+v+" tidak terdaftar di data karyawan.");
-    if(role==="hcis" && emp.unit!=="Human Capital Services") return fail("NPP "+v+" bukan pegawai Human Capital Services, tidak bisa masuk sebagai HCIS.");
     if(role==="hcis"){
       HC_USER={nama:emp.nama, npp:emp.npp, jabatan:emp.jabatan};
-      return Promise.all([sbLoadSubs(null), sbLoadTarif()]).then(function(){
+      return Promise.all([sbLoadSubs(null), sbLoadTarif(), sbLoadApprovers()]).then(function(){
         S.busy=false; S.loginErr=""; S.hist=[]; S.role="hcis";
         log("Autentikasi HCIS berhasil untuk NPP "+v+".","ok"); go("hchome",null,true);
       });
@@ -2028,6 +2132,7 @@ function doLogin(){
         S.busy=false; S.loginErr=""; S.hist=[]; S.role="karyawan";
         log("Autentikasi berhasil untuk NPP "+v+".","ok"); checkTppNotif(); go("home",null,true);
       });
+    });
     });
   }).catch(function(e){ fail("Login gagal: "+sbErr(e)+"."); });
 }
@@ -2061,7 +2166,7 @@ document.addEventListener("click",function(e){
     case "tsubmit": tppSubmit(); break;
     case "tpreset": tppPreset(t.getAttribute("data-k")); break;
     case "lrole": S.loginRole=t.getAttribute("data-v"); S.loginErr=""; render(); break;
-    case "logout": S.screen="login"; S.hist=[]; S.preview=null; S.hcDoc=null; S.loginErr=""; S.loginRole=S.role||"karyawan"; render(); toTop(); break;
+    case "logout": authLogout(); S.screen="login"; S.hist=[]; S.preview=null; S.hcDoc=null; S.loginErr=""; S.loginRole=S.role||"karyawan"; render(); toTop(); break;
     case "hchome": go("hchome"); refreshSubs(); break;
     case "hchak": go("hchak"); break;
     case "hcopen": S.hcOpen=t.getAttribute("data-t"); S.hcErr=[]; go("hccase"); break;

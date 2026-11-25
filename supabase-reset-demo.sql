@@ -17,7 +17,9 @@
 --  tertukar dengan pengajuan baru yang kebetulan mendapat id sama.
 --
 -- KHUSUS PROTOTIPE (data dummy). Hapus/ganti fungsi ini di Tahap 4 sebelum ada data asli.
--- Kalau Tahap 4 menambah contoh data (approval, dokumen_pengadaan), tambahkan juga di bagian 2.
+-- Contoh data Tahap 4 (approval, dokumen_pengadaan) ikut diisi ulang. Akun & user login tidak disentuh.
+-- Fungsi ini sengaja boleh dipanggil TANPA login (tombol ada di halaman login). Siapa pun yang
+-- membuka situs bisa mereset data demo; hapus grant ke anon kalau tidak diinginkan.
 -- Nomor TPP dan RAB juga kembali ke awal (dihitung dari nomor terbesar: TPP-2026-00018, RAB-HCIS-2026-0492).
 -- ============================================================
 
@@ -61,6 +63,22 @@ begin
      (3,3,'kk',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),
      (4,3,'rekening',true,'Lengkap',null,'20117','2026-11-20 09:00+07'),
      (5,3,'sekolah_asal',false,'Tidak berlaku','Tidak mengajukan bantuan sekolah','20117','2026-11-20 09:00+07');
+  end if;
+
+  -- Tahap 4 (dilewati kalau tabelnya belum dibuat)
+  if to_regclass('public.approval') is not null then
+    insert into approval (id, objek, objek_no, urutan, approver_npp, peran, keputusan, catatan, waktu) values
+     (1,'RAB','RAB-HCIS-2026-0491',1,'20101','dept_head_hcis','Disetujui',null,'2026-11-20 14:00+07'),
+     (2,'PR', '1000310121',        1,'30045','oad',           'Disetujui',null,'2026-11-21 09:30+07'),
+     (3,'PR', '1000310121',        2,'20001','group_head',    'Disetujui',null,'2026-11-21 13:45+07'),
+     (4,'RAB','RAB-HCIS-2026-0492',1,'20101','dept_head_hcis','Menunggu', null,null);
+  end if;
+  if to_regclass('public.dokumen_pengadaan') is not null and to_regclass('public.rab') is not null then
+    insert into dokumen_pengadaan (id, jenis, nomor, rab_id, referensi_id, tanggal, nilai, status, dibuat_oleh, path_storage) values
+     (1,'PR','1000310121',  1,null,'2026-11-20',18075000,'Final','20117','pengadaan/pr-1000310121.pdf'),
+     (2,'PO','4000301041',  1,1,   '2026-11-21',18075000,'Final','20117','pengadaan/po-4000301041.pdf'),
+     (3,'GR','5000392721',  1,2,   '2026-11-21',18075000,'Final','20117','pengadaan/gr-5000392721.pdf'),
+     (4,'ND','EB.KU06.3451',1,3,   '2026-11-21',18075000,'Final','20117','pengadaan/nd-3451.pdf');
   end if;
 
   insert into dokumen (id, pengajuan_id, tpp_id, jenis, nama_file, tipe_file, ukuran_kb, path_storage, diunggah_pada) values
