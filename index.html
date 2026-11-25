@@ -401,6 +401,7 @@ function sb(path, opt){
 function sbErr(e){
   try{ console.error("[SPPD] Supabase:", e); }catch(x){}
   if(e && e.code==="42501") return "akses database ditolak (izin tabel belum diberikan)";
+  if(e && e.code==="PGRST202") return "fungsi reset_demo belum ada di database (jalankan supabase-reset-demo.sql)";
   if(e && e.code==="23505" && /no_sk/.test(e.message||"")) return "SPPD Mutasi untuk SK ini sudah pernah diajukan";
   if(e instanceof TypeError) return "tidak bisa terhubung ke database, periksa koneksi internet";
   return (e && e.message) || "kesalahan tidak dikenal";
@@ -454,6 +455,8 @@ function sbLoadSubs(npp){
     S.subs=list;
     list.forEach(function(s){ var c=S.hc[s.ticket]; if(!c || s.id==null) return;
       if(c.id!==s.id){ delete S.hc[s.ticket]; return; }
+      /* Tahap di database mundur (mis. habis Reset data demo dari laptop lain): buang data kasus lokal yang lama */
+      if(s.tahap<c.stage){ delete S.hc[s.ticket]; return; }
       if(c.stage!==s.tahap){ c.stage=s.tahap; hcFill(s,c); } });
   });
 }
@@ -924,7 +927,7 @@ function vLogin(){
   '<div class="f"><label for="pw" style="font-size:13px;font-weight:600">Password</label><div class="inwrap pw"><input id="pw" type="password" value="contoh123" placeholder="Password"><button type="button" class="eyebtn" data-act="pwtoggle" aria-label="Tampilkan password" aria-pressed="false">'+ic("eye",20)+'</button></div></div>'+
   '<button class="btn navy block" type="button" data-act="login" style="margin-top:6px">Login</button>'+
   '<div class="dreset">'+(S.resetAsk?
-    '<div class="ask" role="alertdialog" aria-label="Konfirmasi reset data demo"><p><b>Reset data demo?</b> Pengajuan SPPD, dokumen, keluarga yang diajukan, notifikasi, dan riwayat status di database dikembalikan ke data awal (Excel), dan data simulasi di browser ini dihapus. Tindakan ini tidak bisa dibatalkan.</p>'+
+    '<div class="ask" role="alertdialog" aria-label="Konfirmasi reset data demo"><p><b>Reset data demo?</b> Semua pengajuan, dokumen, notifikasi, dan riwayat yang dibuat saat demo dihapus, dan demo kembali ke kondisi awal: Budi belum mengajukan SPPD, Rina dan Agus ada di antrean HCIS. Data simulasi di browser ini juga dihapus. Tindakan ini tidak bisa dibatalkan.</p>'+
     '<div class="row"><button class="btn sm" type="button" data-act="dresetno"'+(S.busy?' disabled':'')+'>Batal</button><button class="btn sm pri" type="button" data-act="dresetyes"'+(S.busy?' disabled':'')+'>'+(S.busy?'Mereset…':'Ya, reset')+'</button></div></div>'
     :'<button class="link" type="button" data-act="dreset">Reset data demo</button>')+'</div></div></div>';
 }
@@ -1755,82 +1758,18 @@ function openHcFile(t,k){
   if(!S.files[key]){ var imgs=[]; for(var i=1;i<=n;i++) imgs.push(makeDummy(docLabel(k),name,i,n)); S.files[key]={name:name, type:"dummy", thumb:imgs[0], pages:n, imgs:imgs, label:docLabel(k)+" · "+subEmp(sub).nama}; }
   S.preview=key; render();
 }
-/* Contoh data pengajuan_sppd & dokumen (sama dengan Rancangan_Database_SPPD_Mutasi_fix.xlsx) */
-var SEED_SUBS = [
-  {id:1, no_pengajuan:"SPPD-MTS-2026-00151", npp:"10234", no_sk:"SK-MUT/0457/DIR/XI/2026", jarak_km:425, bawa_keluarga:true, bantuan_sekolah:true, status:"Diajukan", tahap_hcis:"Diterima", diajukan_pada:"2026-11-24", catatan:null},
-  {id:2, no_pengajuan:"SPPD-MTS-2026-00139", npp:"10871", no_sk:"SK-MUT/0462/DIR/XI/2026", jarak_km:140, bawa_keluarga:true, bantuan_sekolah:true, status:"Verifikasi HCS", tahap_hcis:"Susun RAB", diajukan_pada:"2026-11-18", catatan:null},
-  {id:3, no_pengajuan:"SPPD-MTS-2026-00141", npp:"11302", no_sk:"SK-MUT/0469/DIR/XI/2026", jarak_km:770, bawa_keluarga:false, bantuan_sekolah:false, status:"Proses Accounting & Tax", tahap_hcis:"Diserahkan ke ATA", diajukan_pada:"2026-11-19", catatan:null}
-];
-var SEED_DOCS = [
-  {id:1, pengajuan_id:1, jenis:"sk", nama_file:"SK_Mutasi_Budi.pdf", tipe_file:"PDF", ukuran_kb:820, path_storage:"sppd/00151/sk.pdf", diunggah_pada:"2026-11-24T09:20:00+07:00"},
-  {id:2, pengajuan_id:1, jenis:"kk", nama_file:"KK_Budi.pdf", tipe_file:"PDF", ukuran_kb:1450, path_storage:"sppd/00151/kk.pdf", diunggah_pada:"2026-11-24T09:21:00+07:00"},
-  {id:3, pengajuan_id:1, jenis:"rekening", nama_file:"Rekening_Budi.jpg", tipe_file:"JPG", ukuran_kb:640, path_storage:"sppd/00151/rek.jpg", diunggah_pada:"2026-11-24T09:22:00+07:00"},
-  {id:4, pengajuan_id:1, jenis:"sekolah_asal", nama_file:"Surat_Pindah_Raka.pdf", tipe_file:"PDF", ukuran_kb:510, path_storage:"sppd/00151/skol-asal.pdf", diunggah_pada:"2026-11-24T09:24:00+07:00"},
-  {id:5, pengajuan_id:3, jenis:"sk", nama_file:"SK_Mutasi_Agus.pdf", tipe_file:"PDF", ukuran_kb:790, path_storage:"sppd/00141/sk.pdf", diunggah_pada:"2026-11-19T10:02:00+07:00"},
-  {id:6, pengajuan_id:null, tpp_id:1, jenis:"tiket", nama_file:"Tiket_Agus.pdf", tipe_file:"PDF", ukuran_kb:300, path_storage:"tpp/00018/tiket.pdf", diunggah_pada:"2026-11-22T15:10:00+07:00"},
-  {id:7, pengajuan_id:null, tpp_id:1, jenis:"bukti_transaksi", nama_file:"Bukti_Bayar_Agus.png", tipe_file:"PNG", ukuran_kb:210, path_storage:"tpp/00018/trx.png", diunggah_pada:"2026-11-22T15:11:00+07:00"}
-];
-var SEED_PK = [
-  {id:1, pengajuan_id:1, keluarga_id:1, usia_saat_pengajuan:36, status:"Diterima", alasan_tolak:null},
-  {id:2, pengajuan_id:1, keluarga_id:2, usia_saat_pengajuan:11, status:"Diterima", alasan_tolak:null},
-  {id:3, pengajuan_id:1, keluarga_id:3, usia_saat_pengajuan:7, status:"Diterima", alasan_tolak:null},
-  {id:4, pengajuan_id:1, keluarga_id:4, usia_saat_pengajuan:26, status:"Ditolak", alasan_tolak:"Usia anak 25 tahun atau lebih per tanggal pengajuan"},
-  {id:5, pengajuan_id:2, keluarga_id:5, usia_saat_pengajuan:38, status:"Diterima", alasan_tolak:null},
-  {id:6, pengajuan_id:2, keluarga_id:6, usia_saat_pengajuan:9, status:"Diterima", alasan_tolak:null}
-];
-var SEED_NOTIF = [
-  {id:1, penerima_npp:"10234", judul:"SK Mutasi terbit", pesan:"Silakan isi form SPPD Mutasi.", referensi:"SK-MUT/0457/DIR/XI/2026", dibaca:true, dibuat_pada:"2026-11-12T08:00:00+07:00"},
-  {id:2, penerima_npp:"10234", judul:"Pengajuan terkirim", pesan:"SPPD Anda sudah diterima HCIS.", referensi:"SPPD-MTS-2026-00151", dibaca:false, dibuat_pada:"2026-11-24T09:25:00+07:00"},
-  {id:3, penerima_npp:"11302", judul:"Pengingat Tiket PP", pesan:"Batas pengajuan Tiket PP pertama tinggal 2 hari.", referensi:"SPPD-MTS-2026-00141", dibaca:true, dibuat_pada:"2026-11-24T07:00:00+07:00"}
-];
-var SEED_RIWAYAT = [
-  {id:1, objek:"pengajuan_sppd", objek_id:3, status_lama:null, status_baru:"Diajukan", oleh_npp:"11302", waktu:"2026-11-19T10:05:00+07:00", catatan:null},
-  {id:2, objek:"pengajuan_sppd", objek_id:3, status_lama:"Diajukan", status_baru:"Verifikasi HCS", oleh_npp:"20117", waktu:"2026-11-19T14:00:00+07:00", catatan:"Mulai diproses HCIS"},
-  {id:3, objek:"pengajuan_sppd", objek_id:3, status_lama:"Verifikasi HCS", status_baru:"Proses Accounting & Tax", oleh_npp:"20117", waktu:"2026-11-21T15:30:00+07:00", catatan:"Diserahkan ke ATA"}
-];
-/* Tombol "Reset data demo" di halaman login: kosongkan tabel transaksi, isi ulang dari Excel, hapus localStorage.
-   Tabel master (karyawan, sk_mutasi, kantor, jarak_kantor, keluarga) tidak disentuh. */
+/* Tombol "Reset data demo" di halaman login. Semua logika ada di fungsi database reset_demo()
+   (supabase-reset-demo.sql): hapus semua transaksi, isi ulang contoh data Excel
+   (Budi belum mengajukan; Rina & Agus di antrean HCIS). Lalu localStorage di browser ini dibersihkan. */
 function resetDemo(){
   if(S.busy) return; S.busy=true; render();
-  var docs=SEED_DOCS.map(function(d){ var x=clone(d); if(!("tpp_id" in x)) x.tpp_id=null; return x; });
-  dbQueue.then(function(){ return sb("riwayat_status?id=gte.0",{method:"DELETE"}); })
-  .then(function(){ return sb("notifikasi?id=gte.0",{method:"DELETE"}); })
-  .then(function(){ return sb("dokumen?id=gte.0",{method:"DELETE"}); })
-  .then(function(){ return sb("pengajuan_sppd?id=gte.0",{method:"DELETE"}); })   /* pengajuan_keluarga ikut terhapus (cascade) */
-  .then(function(){ return sb("pengajuan_sppd",{method:"POST", body:SEED_SUBS}); })
-  .then(function(){ return sb("dokumen",{method:"POST", body:docs}); })
-  .then(function(){ return sb("pengajuan_keluarga",{method:"POST", body:SEED_PK}); })
-  .then(function(){ return sb("notifikasi",{method:"POST", body:SEED_NOTIF}); })
-  .then(function(){ return sb("riwayat_status",{method:"POST", body:SEED_RIWAYAT}); })
+  dbQueue.then(function(){ return sb("rpc/reset_demo",{method:"POST", body:{}}); })
   .then(function(){
     try{ localStorage.removeItem(KEY); }catch(x){}
+    if(SKS[0] && SKS[0].asliTujuan) SKS[0].tujuan=SKS[0].asliTujuan;
     S=fresh(); render(); toast("Data demo dikembalikan ke kondisi awal.");
   })
   .catch(function(e){ S.busy=false; S.resetAsk=false; render(); toast("Reset gagal: "+sbErr(e)+"."); });
-}
-/* Kembalikan antrian HCIS ke contoh data Excel. Pengajuan Budi yang sudah ada tidak diganti. */
-function hcSeed(){
-  if(S.busy) return; S.busy=true; toast("Mengisi antrian HCIS…");
-  var budiSk=SEED_SUBS[0].no_sk, others=SEED_SUBS.slice(1), keepBudi=false, rows;
-  dbQueue.then(function(){ return sb("pengajuan_sppd?select=id&no_sk=eq."+q(budiSk)); })
-  .then(function(r){ keepBudi=!!(r&&r.length); return sb("pengajuan_sppd?no_sk=in."+inList(others.map(function(x){return x.no_sk;})), {method:"DELETE"}); })
-  .then(function(){
-    rows=keepBudi?others:SEED_SUBS;
-    var ids=rows.map(function(x){return x.id;});
-    var docs=SEED_DOCS.filter(function(d){ return ids.indexOf(d.pengajuan_id)>=0; });
-    rows.forEach(function(x){ delete S.hc[x.no_pengajuan]; });
-    var pk=SEED_PK.filter(function(x){ return ids.indexOf(x.pengajuan_id)>=0; });
-    return sb("pengajuan_sppd",{method:"POST", body:rows})
-      .then(function(){ return docs.length?sb("dokumen",{method:"POST", body:docs}):null; })
-      .then(function(){ return pk.length?sb("pengajuan_keluarga",{method:"POST", body:pk}):null; });
-  })
-  .then(function(){ return sbLoadSubs(null); })
-  .then(function(){
-    S.busy=false; if(!keepBudi){ S.hasDraft=false; S.form=emptyForm(); }
-    log("Skenario uji dimuat: antrian HCIS berisi 3 pengajuan.","info");
-    go("hchome");
-  })
-  .catch(function(e){ S.busy=false; toast("Gagal mengisi antrian: "+sbErr(e)+"."); });
 }
 function vHcHak(){
   var h=hdr("Tabel Hak & Kebutuhan","HCIS / Tabel Hak & Kebutuhan")+'<p class="sub" style="margin:0">Sumber perhitungan RAB otomatis. Data dari file Dummy Data Hak & Kebutuhan Karyawan.</p>';
@@ -1851,7 +1790,7 @@ function vHcPanel(){
   h+='</ol>'+(cur<0?'<span class="sub small">Buka salah satu pengajuan untuk melihat tahapnya.</span>':'')+'</section>';
   h+='<section class="pcard"><h3>Aktivitas System <span class="lane">Lane System</span></h3><ul class="log">';
   S.log.slice(0,30).forEach(function(l){ h+='<li class="'+l.c+'"><time>'+esc(l.t)+'</time><span>'+esc(l.x)+'</span></li>'; });
-  h+='</ul></section><section class="pcard"><h3>Skenario uji</h3><div class="scen"><button class="btn" data-act="hcseed">Isi antrian HCIS (3 pengajuan contoh)</button><button class="btn" data-act="logout">Masuk sebagai Karyawan</button></div></section>';
+  h+='</ul></section><section class="pcard"><h3>Skenario uji</h3><div class="scen"><button class="btn" data-act="logout">Masuk sebagai Karyawan</button></div></section>';
   h+='<section class="pcard"><h3>Aturan yang disimulasikan</h3><ul class="rules"><li>Cek kelengkapan mengikuti Bukti Kelengkapan Pemohon; dokumen yang diunggah terisi "Ada" otomatis.</li><li>RAB dihitung dari tabel hak & kebutuhan: level, jumlah orang yang pindah, tujuan.</li><li>Uang harian = orang × hari × tunjangan per hari; pajak 5%.</li><li>Anak usia ≥ 25 tahun tidak dihitung.</li><li>Approval Dept Head HCIS hanya terlihat oleh HCIS.</li><li>PR disetujui berurutan: OAD (level 1) lalu Group Head (level 2).</li><li>PO dan GR dibuat setelah PR disetujui, lalu berkas diserahkan ke ATA.</li><li>Status karyawan: Verifikasi HCS saat mulai dicek, Proses Accounting & Tax setelah diserahkan ke ATA.</li></ul></section>';
   return h;
 }
@@ -2011,7 +1950,6 @@ document.addEventListener("click",function(e){
     case "hchome": go("hchome"); refreshSubs(); break;
     case "hchak": go("hchak"); break;
     case "hcopen": S.hcOpen=t.getAttribute("data-t"); S.hcErr=[]; go("hccase"); break;
-    case "hcseed": hcSeed(); break;
     case "hcfile": openHcFile(t.getAttribute("data-t"), t.getAttribute("data-k")); break;
     case "hcdoc": S.hcDoc={t:t.getAttribute("data-t"), k:t.getAttribute("data-k")}; render(); break;
     case "hcprev": hcPreview(t.getAttribute("data-t"), t.getAttribute("data-k")); break;

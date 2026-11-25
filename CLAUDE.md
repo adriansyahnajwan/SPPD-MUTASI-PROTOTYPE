@@ -52,7 +52,9 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
   - Tahap 4: approval, dokumen_pengadaan, login beneran (Supabase Auth, NPP → email dummy `npp@jmclick.test`) + Row Level Security per role
 - index.html memanggil REST API Supabase lewat `fetch` (fungsi `sb()`), tanpa library. Data Supabase dipetakan ke `S.subs` / `S.notifs` supaya tampilan tidak berubah.
 - Masih di localStorage (key `sppd-mutasi-proto-v5`): data kasus HCIS (checklist, RAB, PR, PO, GR, Nota Dinas), draft form, Tiket PP. Ganti bertahap jadi baca/tulis Supabase; tampilan & alur JANGAN berubah.
-- Tombol "Reset data demo" (halaman login) mengembalikan tabel transaksi ke data Excel (konstanta SEED_* di index.html) dan menghapus localStorage. Kalau data Excel berubah, ubah SEED_* juga.
+- Kondisi awal demo: Budi (10234) BELUM mengajukan SPPD untuk SK-MUT/0457 (tombol "Isi Form", notifikasi "SK Mutasi terbit" belum dibaca); Rina & Agus = contoh antrean HCIS.
+- Tombol "Reset data demo" (halaman login) memanggil fungsi database `reset_demo()` (`supabase-reset-demo.sql`): hapus semua transaksi (termasuk tabel Tahap 3–4 kalau sudah ada), isi ulang contoh data, lalu hapus localStorage di browser itu. Data master tidak disentuh.
+- Contoh data transaksi ada di 3 tempat dan harus sama: Excel, `supabase-tahap1/2.sql`, dan `reset_demo()`. Kalau Tahap 3–4 menambah contoh data, tambahkan juga ke `reset_demo()`.
 - Hanya pakai publishable/anon key di index.html. JANGAN pernah taruh secret/service_role key di kode atau repo.
 
 ## Aturan kerja

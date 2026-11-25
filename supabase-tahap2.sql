@@ -97,17 +97,13 @@ insert into keluarga (id, npp, nik, nama, hubungan, tanggal_lahir) values
  (5,'10871','3273011206880004','Fajar Nugroho', 'Suami','1988-06-12'),
  (6,'10871','3273014509170002','Alya Nugroho',  'Anak', '2017-09-05');
 
+-- Budi belum mengajukan SPPD (kondisi awal demo), jadi hanya keluarga Rina yang tercatat.
 insert into pengajuan_keluarga (id, pengajuan_id, keluarga_id, usia_saat_pengajuan, status, alasan_tolak) values
- (1,1,1,36,'Diterima',null),
- (2,1,2,11,'Diterima',null),
- (3,1,3, 7,'Diterima',null),
- (4,1,4,26,'Ditolak','Usia anak 25 tahun atau lebih per tanggal pengajuan'),
  (5,2,5,38,'Diterima',null),
  (6,2,6, 9,'Diterima',null);
 
 insert into notifikasi (id, penerima_npp, judul, pesan, referensi, dibaca, dibuat_pada) values
- (1,'10234','SK Mutasi terbit','Silakan isi form SPPD Mutasi.','SK-MUT/0457/DIR/XI/2026',true,'2026-11-12 08:00+07'),
- (2,'10234','Pengajuan terkirim','SPPD Anda sudah diterima HCIS.','SPPD-MTS-2026-00151',false,'2026-11-24 09:25+07'),
+ (1,'10234','SK Mutasi terbit','Silakan isi form SPPD Mutasi.','SK-MUT/0457/DIR/XI/2026',false,'2026-11-12 08:00+07'),
  (3,'11302','Pengingat Tiket PP','Batas pengajuan Tiket PP pertama tinggal 2 hari.','SPPD-MTS-2026-00141',true,'2026-11-24 07:00+07');
 
 insert into riwayat_status (id, objek, objek_id, status_lama, status_baru, oleh_npp, waktu, catatan) values

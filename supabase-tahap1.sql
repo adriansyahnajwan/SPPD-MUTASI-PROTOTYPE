@@ -119,18 +119,14 @@ insert into sk_mutasi (no_sk, npp, tanggal_sk, tanggal_efektif, kantor_asal, kan
  ('SK-MUT/0462/DIR/XI/2026','10871','2026-11-10','2026-12-01','bdg','jkt','Staf Operasi','Staf Senior Operasi','sk/SK-MUT-0462.pdf'),
  ('SK-MUT/0469/DIR/XI/2026','11302','2026-11-13','2026-12-15','jkt','sby','Staf Operasi','Staf Senior Operasi','sk/SK-MUT-0469.pdf');
 
--- batas_tpp tidak diisi: dihitung otomatis (baris 3 → 2026-11-26)
+-- Kondisi awal demo: Budi (10234) BELUM mengajukan SPPD untuk SK-MUT/0457 (tombol "Isi Form").
+-- Rina & Agus = contoh antrean HCIS. batas_tpp tidak diisi: dihitung otomatis (id 3 → 2026-11-26)
 insert into pengajuan_sppd (id, no_pengajuan, npp, no_sk, jarak_km, bawa_keluarga, bantuan_sekolah, status, tahap_hcis, diajukan_pada, catatan) values
- (1,'SPPD-MTS-2026-00151','10234','SK-MUT/0457/DIR/XI/2026',425,true, true, 'Diajukan',               'Diterima',         '2026-11-24',null),
  (2,'SPPD-MTS-2026-00139','10871','SK-MUT/0462/DIR/XI/2026',140,true, true, 'Verifikasi HCS',         'Susun RAB',        '2026-11-18',null),
  (3,'SPPD-MTS-2026-00141','11302','SK-MUT/0469/DIR/XI/2026',770,false,false,'Proses Accounting & Tax','Diserahkan ke ATA','2026-11-19',null);
 
 -- Waktu unggah dianggap WIB (+07)
 insert into dokumen (id, pengajuan_id, tpp_id, jenis, nama_file, tipe_file, ukuran_kb, path_storage, diunggah_pada) values
- (1,1,   null,'sk',             'SK_Mutasi_Budi.pdf',   'PDF', 820,'sppd/00151/sk.pdf',        '2026-11-24 09:20+07'),
- (2,1,   null,'kk',             'KK_Budi.pdf',          'PDF',1450,'sppd/00151/kk.pdf',        '2026-11-24 09:21+07'),
- (3,1,   null,'rekening',       'Rekening_Budi.jpg',    'JPG', 640,'sppd/00151/rek.jpg',       '2026-11-24 09:22+07'),
- (4,1,   null,'sekolah_asal',   'Surat_Pindah_Raka.pdf','PDF', 510,'sppd/00151/skol-asal.pdf', '2026-11-24 09:24+07'),
  (5,3,   null,'sk',             'SK_Mutasi_Agus.pdf',   'PDF', 790,'sppd/00141/sk.pdf',        '2026-11-19 10:02+07'),
  (6,null,1,   'tiket',          'Tiket_Agus.pdf',       'PDF', 300,'tpp/00018/tiket.pdf',      '2026-11-22 15:10+07'),
  (7,null,1,   'bukti_transaksi','Bukti_Bayar_Agus.png', 'PNG', 210,'tpp/00018/trx.png',        '2026-11-22 15:11+07');
