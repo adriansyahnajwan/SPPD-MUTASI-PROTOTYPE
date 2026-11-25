@@ -44,13 +44,15 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
 
 ## Database (rencana, Supabase)
 - Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (20 tabel; sheet Ringkasan & Relasi).
-- SQL Tahap 1: `supabase-tahap1.sql`.
+- SQL: `supabase-tahap1.sql`, `supabase-tahap2.sql` (dijalankan manual di SQL Editor; termasuk GRANT untuk anon).
 - Bertahap:
-  - Tahap 1: karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
-  - Tahap 2: keluarga, notifikasi, riwayat_status
+  - Tahap 1 (SUDAH): kantor, karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
+  - Tahap 2 (SUDAH): jarak_kantor, keluarga, pengajuan_keluarga, notifikasi, riwayat_status
   - Tahap 3: tarif_*, rab, checklist_kelengkapan, tiket_pp
   - Tahap 4: approval, dokumen_pengadaan, login beneran (Supabase Auth, NPP → email dummy `npp@jmclick.test`) + Row Level Security per role
-- Saat ini data masih di localStorage (key `sppd-mutasi-proto-v5`) dan konstanta di kode. Ganti bertahap jadi baca/tulis Supabase; tampilan & alur JANGAN berubah.
+- index.html memanggil REST API Supabase lewat `fetch` (fungsi `sb()`), tanpa library. Data Supabase dipetakan ke `S.subs` / `S.notifs` supaya tampilan tidak berubah.
+- Masih di localStorage (key `sppd-mutasi-proto-v5`): data kasus HCIS (checklist, RAB, PR, PO, GR, Nota Dinas), draft form, Tiket PP. Ganti bertahap jadi baca/tulis Supabase; tampilan & alur JANGAN berubah.
+- Tombol "Reset data demo" (halaman login) mengembalikan tabel transaksi ke data Excel (konstanta SEED_* di index.html) dan menghapus localStorage. Kalau data Excel berubah, ubah SEED_* juga.
 - Hanya pakai publishable/anon key di index.html. JANGAN pernah taruh secret/service_role key di kode atau repo.
 
 ## Aturan kerja
