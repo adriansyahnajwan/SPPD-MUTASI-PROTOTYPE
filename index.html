@@ -254,6 +254,11 @@ div.f{display:flex;flex-direction:column;gap:6px}
 .hero p{margin:0;opacity:.85;max-width:360px}
 .lform{display:flex;flex-direction:column;justify-content:center;gap:14px;padding:40px;max-width:420px;width:100%;margin:0 auto}
 .lform h2{font-size:24px;color:var(--primary)}
+.dreset{margin-top:18px;padding-top:12px;border-top:1px solid var(--line,#e3e8ef);text-align:center;font-size:12px}
+.dreset .link{font-size:12px;font-weight:600;padding:2px 4px;color:var(--muted,#5a6579)}
+.dreset .ask{background:#fff6e5;border:1px solid #f2d39b;border-radius:10px;padding:10px 12px;text-align:left;display:flex;flex-direction:column;gap:8px}
+.dreset .ask p{margin:0;color:#6b4a00}
+.dreset .ask .row{justify-content:flex-end;gap:8px}
 @media (max-width:820px){.loginw{grid-template-columns:1fr;overflow:auto}.hero{padding:28px}.hero .disc{width:140px;height:140px}.logo.lg{transform:scale(.7)}}
 .ferr{color:var(--bad);font-size:12.5px;font-weight:600;margin-top:-6px}
 .content.wide{max-width:1180px}
@@ -375,6 +380,107 @@ div.f{display:flex;flex-direction:column;gap:6px}
 (function(){
 "use strict";
 var KEY = "sppd-mutasi-proto-v5";
+/* ---------- Supabase (Tahap 1: karyawan, sk_mutasi, pengajuan_sppd, dokumen) ----------
+   Hanya publishable key. JANGAN taruh secret/service_role key di sini. */
+var SB_URL = "https://xlgeqdierinojdsfrekf.supabase.co";
+var SB_KEY = "sb_publishable_kWCOhOXOtsxb62g1-vtBUg_zxYuJDzm";
+var SUB_SELECT = "*,dokumen(jenis,nama_file),karyawan(nama,level,grade),sk_mutasi(no_sk,kantor_asal,kantor_tujuan,jabatan_baru)";
+var DOC_DB = {sk:"sk", kk:"kk", rek:"rekening", skolAsal:"sekolah_asal", skolBaru:"sekolah_baru"};
+var DOC_APP = {sk:"sk", kk:"kk", rekening:"rek", sekolah_asal:"skolAsal", sekolah_baru:"skolBaru"};
+var dbQueue = Promise.resolve();   /* urutan operasi tulis dari skenario uji */
+function sb(path, opt){
+  opt=opt||{}; var h={apikey:SB_KEY, "Content-Type":"application/json"}; if(opt.prefer) h.Prefer=opt.prefer;
+  return fetch(SB_URL+"/rest/v1/"+path, {method:opt.method||"GET", headers:h, body:opt.body?JSON.stringify(opt.body):undefined})
+    .then(function(r){ return r.text().then(function(t){
+      var d=null; try{ d=t?JSON.parse(t):null; }catch(x){}
+      if(!r.ok){ var e=new Error((d&&d.message)||("HTTP "+r.status)); e.code=d&&d.code; throw e; }
+      return d;
+    }); });
+}
+function sbErr(e){
+  try{ console.error("[SPPD] Supabase:", e); }catch(x){}
+  if(e && e.code==="42501") return "akses database ditolak (izin tabel belum diberikan)";
+  if(e && e.code==="23505" && /no_sk/.test(e.message||"")) return "SPPD Mutasi untuk SK ini sudah pernah diajukan";
+  if(e instanceof TypeError) return "tidak bisa terhubung ke database, periksa koneksi internet";
+  return (e && e.message) || "kesalahan tidak dikenal";
+}
+function q(v){ return encodeURIComponent(v); }
+function inList(arr){ return q("("+arr.map(function(x){ return '"'+x+'"'; }).join(",")+")"); }
+function shortDate(iso){ if(!iso) return "-"; var d=new Date(iso+"T00:00:00"); return isNaN(d)?iso:d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"}); }
+function sbNextTicket(){
+  var pre="SPPD-MTS-"+new Date().getFullYear()+"-";
+  return sb("pengajuan_sppd?select=no_pengajuan&no_pengajuan=like."+q(pre+"*")+"&order=no_pengajuan.desc&limit=1").then(function(r){
+    var n=r&&r[0]?parseInt(r[0].no_pengajuan.slice(-5),10)||0:0; return pre+String(n+1).padStart(5,"0");
+  });
+}
+/* Simpan 1 pengajuan; nomor SPPD-MTS diambil dari nomor terakhir di database */
+function sbInsertSub(body){
+  var tries=0;
+  function attempt(){
+    return sbNextTicket().then(function(t){ body.no_pengajuan=t; return sb("pengajuan_sppd",{method:"POST", prefer:"return=representation", body:body}); })
+      .then(function(r){ return r[0]; })
+      .catch(function(e){ if(e.code==="23505" && /no_pengajuan/.test(e.message||"") && ++tries<4) return attempt(); throw e; });
+  }
+  return attempt();
+}
+function fileExt(name){ return String(name||"").split(".").pop().toLowerCase(); }
+function tipeFile(name){ var x=fileExt(name); return x==="pdf"?"PDF":(x==="png"?"PNG":"JPG"); }
+function docKb(form,k){
+  if(form.sizes && form.sizes[k]) return form.sizes[k];
+  var fl=S.files[k], n=0; if(fl && fl.imgs) fl.imgs.forEach(function(u){ n+=String(u||"").length*0.75; });
+  return Math.max(1, Math.ceil(n/1024));
+}
+function docRows(id, ticket, form){
+  var out=[]; DOCS.forEach(function(d){ var nm=form.docs&&form.docs[d.k]; if(!nm) return;
+    out.push({pengajuan_id:id, jenis:DOC_DB[d.k], nama_file:nm, tipe_file:tipeFile(nm), ukuran_kb:docKb(form,d.k), path_storage:"sppd/"+ticket.slice(-5)+"/"+DOC_DB[d.k]+"."+fileExt(nm)}); });
+  return out;
+}
+function sbLoadEmp(npp){ return sb("karyawan?select=*&npp=eq."+q(npp)).then(function(r){ return r&&r[0]||null; }); }
+function sbLoadSks(npp){
+  return sb("sk_mutasi?select=*&npp=eq."+q(npp)+"&order=tanggal_efektif.desc").then(function(r){
+    return (r||[]).map(function(x,i){ return {no:x.no_sk, tanggal:fmtDate(x.tanggal_sk), efektif:x.tanggal_efektif, jabSeb:x.jabatan_lama, asal:x.kantor_asal, jabSet:x.jabatan_baru, tujuan:x.kantor_tujuan, asliTujuan:x.kantor_tujuan, current:i===0}; });
+  });
+}
+/* Baca pengajuan dari Supabase → bentuk S.subs yang dipakai tampilan */
+function sbLoadSubs(npp){
+  return sb("pengajuan_sppd?select="+SUB_SELECT+(npp?"&npp=eq."+q(npp):"")+"&order=diajukan_pada.desc,id.desc").then(function(rows){
+    var old={}; S.subs.forEach(function(s){ old[s.ticket]=s; });
+    var list=(rows||[]).map(function(r){ return subFromRow(r, old[r.no_pengajuan]); });
+    if(npp){ var have={}; list.forEach(function(s){ have[s.sk]=1; }); seedSubs(npp).forEach(function(s){ if(!have[s.sk]) list.push(s); }); }
+    S.subs=list;
+    list.forEach(function(s){ var c=S.hc[s.ticket]; if(!c || s.id==null) return;
+      if(c.id!==s.id){ delete S.hc[s.ticket]; return; }
+      if(c.stage!==s.tahap){ c.stage=s.tahap; hcFill(s,c); } });
+  });
+}
+function subFromRow(r, loc){
+  var sk=r.sk_mutasi||{}, k=r.karyawan||{}, docs={}, si=STATUS_FLOW.indexOf(r.status), same=loc&&loc.id===r.id;
+  (r.dokumen||[]).forEach(function(d){ var a=DOC_APP[d.jenis]; if(a) docs[a]=d.nama_file; });
+  var bawa=r.bawa_keluarga?"ya":"tidak", lf=same&&loc.form;
+  var anggota=bawa==="ya"?(lf&&lf.anggota&&lf.anggota.length?lf.anggota:famFor(r.npp)):[];
+  var hist=(same&&loc.history)?loc.history.slice():[]; if(!hist[0]) hist[0]=shortDate(r.diajukan_pada);
+  return {id:r.id, ticket:r.no_pengajuan, npp:r.npp, created:(same&&loc.created)||shortDate(r.diajukan_pada), diajukanISO:r.diajukan_pada,
+    statusIdx:si<0?0:si, tahap:Math.max(0,HC_STAGES.indexOf(r.tahap_hcis)), sk:r.no_sk, history:hist,
+    emp:{nama:k.nama, npp:r.npp, jabatan:sk.jabatan_baru, level:k.level, grade:k.grade},
+    form:{asal:sk.kantor_asal, tujuan:sk.kantor_tujuan, bawa:bawa, anggota:anggota, bantuanSekolah:!!r.bantuan_sekolah, docs:docs}};
+}
+function sbSetStage(sub, c){
+  sub.tahap=c.stage;
+  if(sub.id==null) return;
+  var id=sub.id, body={tahap_hcis:HC_STAGES[c.stage], status:STATUS_FLOW[sub.statusIdx]};
+  dbQueue=dbQueue.then(function(){ return sb("pengajuan_sppd?id=eq."+id, {method:"PATCH", body:body}); })
+    .catch(function(e){ toast("Gagal menyimpan tahap ke database: "+sbErr(e)+"."); });
+}
+function sbDeleteSk(no){ return sb("pengajuan_sppd?no_sk=eq."+q(no), {method:"DELETE"}); }
+/* Muat ulang pengajuan dari Supabase (mis. ada kiriman baru dari laptop lain) */
+function refreshSubs(){
+  if(S.busy || S.screen==="login") return;
+  var npp=S.role==="hcis"?null:EMP.npp, scr=S.screen;
+  dbQueue.then(function(){ return sbLoadSubs(npp); })
+    .then(function(){ if(S.screen===scr && !S.busy && !S.preview && !S.hcDoc) render(); })
+    .catch(function(e){ toast("Gagal memuat data dari database: "+sbErr(e)+"."); });
+}
+
 var KANTOR = [
   {id:"jkt", nama:"Kantor Pusat (Jakarta Timur)", q:"Jakarta Timur"},
   {id:"bgr", nama:"Kantor Cabang Bogor", q:"Kota Bogor"},
@@ -410,6 +516,13 @@ var KK_DEFAULT = [
   {hub:"Anak", nama:"Nadia Santoso", tgl:"2019-01-14", nik:"3175045401190001"}
 ];
 var KK_ADULT = {hub:"Anak", nama:"Dimas Santoso", tgl:"2000-03-10", nik:"3175041003000005"};
+/* Data KK per NPP (sementara di kode; pindah ke tabel keluarga di Tahap 2) */
+var KK_BY_NPP = {
+  "10234": KK_DEFAULT,
+  "10871": [{hub:"Suami",nama:"Hendra Wijaya",tgl:"1988-03-02",nik:"3273010203880001"},{hub:"Anak",nama:"Alya Wijaya",tgl:"2016-06-11",nik:"3273015106160002"}]
+};
+function kkFor(npp){ return JSON.parse(JSON.stringify(KK_BY_NPP[npp]||[])); }
+function famFor(npp){ return kkFor(npp).map(function(m,i){ m.id=i+1; checkAge(m,false); return m; }); }
 
 var LEVELS = ["Staf","Staf Senior","Asisten Manajer","Manajer"];
 var BENEFIT = [
@@ -427,11 +540,13 @@ var KD = [
 function levelOf(j){ for(var i=LEVELS.length-1;i>=0;i--){ if(j.indexOf(LEVELS[i])===0) return LEVELS[i]; } return "Staf"; }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function emptyForm(){ return {asal:SK.asal, tujuan:SK.tujuan, bawa:"", anggota:[], kk:null, docs:{sk:null,kk:null,rek:null,skolAsal:null,skolBaru:null}, bantuanSekolah:false}; }
-function seedSubs(){
+/* Riwayat SPPD sebelum sistem digital (belum ada di tabel pengajuan_sppd); hanya tampil di halaman karyawan */
+function seedSubs(npp){
+  if(npp && npp!=="10234") return [];
   return [
-    {ticket:"SPPD-MTS-2023-00087", created:"14 Mar 2023, 10.12", statusIdx:3, sk:SKS[1].no, history:["14 Mar 2023","16 Mar 2023","20 Mar 2023","27 Mar 2023"],
+    {ticket:"SPPD-MTS-2023-00087", npp:"10234", created:"14 Mar 2023, 10.12", statusIdx:3, sk:"SK-MUT/0112/DIR/III/2023", history:["14 Mar 2023","16 Mar 2023","20 Mar 2023","27 Mar 2023"],
       form:{asal:"bdg", tujuan:"jkt", bawa:"ya", anggota:[clone(KK_DEFAULT[0]),clone(KK_DEFAULT[1])], bantuanSekolah:false}},
-    {ticket:"SPPD-MTS-2021-00031", created:"10 Jun 2021, 09.40", statusIdx:3, sk:SKS[2].no, history:["10 Jun 2021","11 Jun 2021","15 Jun 2021","18 Jun 2021"],
+    {ticket:"SPPD-MTS-2021-00031", npp:"10234", created:"10 Jun 2021, 09.40", statusIdx:3, sk:"SK-MUT/0088/DIR/VI/2021", history:["10 Jun 2021","11 Jun 2021","15 Jun 2021","18 Jun 2021"],
       form:{asal:"sby", tujuan:"bdg", bawa:"tidak", anggota:[], bantuanSekolah:false}}
   ];
 }
@@ -449,18 +564,18 @@ function seedNotifs(){
   ];
 }
 function fresh(){
-  SK.tujuan="smg";
+  if(SK.asliTujuan) SK.tujuan=SK.asliTujuan;
   return {screen:"login", notifs:seedNotifs(), form:emptyForm(), step:1, errors:[], reviewOk:false, hasDraft:false, draftAt:null,
-    subs:seedSubs().concat(othersSeed()), seq:142, detail:null, lastTicket:null, log:seedLog(), visited:{}, nid:3, hist:[], files:{}, preview:null,
-    skTujuan:"smg", redirected:false, flt:{q:"",status:"",year:""}, loginErr:"", loginVal:EMP.npp, tppSk:null,
+    subs:seedSubs(), seq:142, detail:null, lastTicket:null, log:seedLog(), visited:{}, nid:3, hist:[], files:{}, preview:null, empNpp:null, busy:false,
+    skTujuan:null, redirected:false, flt:{q:"",status:"",year:""}, loginErr:"", loginVal:EMP.npp, tppSk:null,
     tpp:{confirmed:false, subs:[], notifiedFor:null, seq:20}, tf:emptyTpp(), tstep:1, terrors:[], treviewOk:false, tppLast:null,
     role:"karyawan", loginRole:"karyawan", hc:{}, hcSeq:{rab:490, pr:1000310120, po:4000301040, gr:5000392720, nd:3450}, hcOpen:null, hcErr:[], hcFlt:"aktif", hcQ:"", hcDoc:null};
 }
 var S = fresh();
-var PERSIST = ["notifs","form","hasDraft","draftAt","subs","seq","log","nid","skTujuan","redirected","tpp","hc","hcSeq","role"];
+var PERSIST = ["notifs","form","hasDraft","draftAt","subs","seq","log","nid","skTujuan","redirected","tpp","hc","hcSeq","role","empNpp"];
 try{
   var raw = localStorage.getItem(KEY);
-  if(raw){ var p = JSON.parse(raw); PERSIST.forEach(function(k){ if(p[k]!==undefined) S[k]=p[k]; }); SK.tujuan=S.skTujuan||"smg"; }
+  if(raw){ var p = JSON.parse(raw); PERSIST.forEach(function(k){ if(p[k]!==undefined) S[k]=p[k]; }); }
 }catch(e){}
 function persist(){ try{ var o={}; PERSIST.forEach(function(k){ o[k]=S[k]; }); localStorage.setItem(KEY, JSON.stringify(o)); }catch(e){} }
 
@@ -555,11 +670,11 @@ function renderAllPages(k){
 function takeFile(dk,file){
   var isT=dk.indexOf("t_")===0, lb=isT?TDOCS[dk]:docLabel(dk), setErr=function(m){ if(isT) S.terrors=[m]; else S.errors=[m]; };
   if(file.size>10*1024*1024){ setErr(lb+": ukuran file "+(file.size/1048576).toFixed(1)+" MB, melebihi batas 10 MB."); log("Menolak unggahan "+file.name+" karena melebihi 10 MB.","bad"); render(); return; }
-  var isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name), isImg=/^image\//.test(file.type);
+  var isPdf=/pdf$/i.test(file.type)||/\.pdf$/i.test(file.name), isImg=/^image\/(jpeg|png)$/.test(file.type)||/\.(jpe?g|png)$/i.test(file.name);
   if(!isPdf && !isImg){ setErr(lb+": format file harus PDF, JPG, atau PNG."); render(); return; }
-  if(isT){ S.terrors=[]; S.tf.docs[dk]=file.name; } else { S.errors=[]; S.form.docs[dk]=file.name; }
+  if(isT){ S.terrors=[]; S.tf.docs[dk]=file.name; } else { S.errors=[]; S.form.docs[dk]=file.name; S.form.sizes=S.form.sizes||{}; S.form.sizes[dk]=Math.max(1,Math.ceil(file.size/1024)); }
   log("Menerima unggahan dokumen: "+file.name+".","ok");
-  if(!isT && dk==="kk"){ S.form.kk=clone(KK_DEFAULT); log("Membaca data Kartu Keluarga (OCR): "+S.form.kk.length+" anggota keluarga terdeteksi.","ok"); if(S.form.bawa==="ya") loadFamily(); }
+  if(!isT && dk==="kk"){ S.form.kk=kkFor(EMP.npp); log("Membaca data Kartu Keluarga (OCR): "+S.form.kk.length+" anggota keluarga terdeteksi.","ok"); if(S.form.bawa==="ya") loadFamily(); }
   if(isPdf){ var rd=new FileReader(); rd.onload=function(){ S.files[dk]={name:file.name, type:"pdf", data:rd.result, pages:0, imgs:[], label:lb}; render(); renderPdf(dk); }; rd.onerror=function(){ S.files[dk]={name:file.name, type:"pdf", err:true}; render(); }; rd.readAsArrayBuffer(file); }
   else { var r=new FileReader(); r.onload=function(){ S.files[dk]={name:file.name, type:"img", thumb:r.result, pages:1, imgs:[r.result], label:lb}; render(); }; r.readAsDataURL(file); }
 }
@@ -576,7 +691,7 @@ function checkAge(m, announce){
   }
 }
 function loadFamily(){
-  var src=S.form.kk||clone(KK_DEFAULT);
+  var src=S.form.kk||kkFor(EMP.npp);
   S.form.anggota=src.map(function(m,i){ var x=clone(m); x.id=i+1; return x; });
   S.form.anggota.forEach(function(m){ checkAge(m,true); });
   if(!eligibleKids().length) S.form.bantuanSekolah=false;
@@ -645,9 +760,24 @@ function toTpp(){
 function submit(){
   var all=[].concat(v1(),vDocs(),vFam());
   if(all.length){ S.errors=all; log("Submit ditolak sistem: data belum memenuhi ketentuan.","bad"); render(); return; }
-  S.seq++; var t="SPPD-MTS-"+new Date().getFullYear()+"-"+String(S.seq).padStart(5,"0");
-  var snap=clone(S.form); delete snap.kk;
-  S.subs.unshift({ticket:t, created:today()+", "+now(), diajukanISO:isoToday(), statusIdx:0, sk:SK.no, form:snap, history:[today()]});
+  if(S.busy) return; S.busy=true; toast("Mengirim pengajuan…");
+  var snap=clone(S.form); delete snap.kk; var row=null;
+  dbQueue.then(function(){
+    return sbInsertSub({npp:EMP.npp, no_sk:SK.no, jarak_km:distKm(snap.asal,snap.tujuan), bawa_keluarga:snap.bawa==="ya", bantuan_sekolah:!!snap.bantuanSekolah, status:"Diajukan", tahap_hcis:"Diterima", diajukan_pada:isoToday()});
+  }).then(function(r){
+    row=r; var docs=docRows(r.id, r.no_pengajuan, snap);
+    return docs.length?sb("dokumen",{method:"POST", body:docs}):null;
+  }).then(function(){
+    S.busy=false; submitDone(row, snap);
+  }).catch(function(e){
+    if(row) sb("pengajuan_sppd?id=eq."+row.id,{method:"DELETE"}).catch(function(){});
+    S.busy=false; S.errors=["Pengajuan gagal dikirim: "+sbErr(e)+". Coba submit lagi."]; log("Gagal menyimpan pengajuan ke database.","bad"); render(); toTop();
+  });
+}
+function submitDone(row, snap){
+  var t=row.no_pengajuan; delete snap.sizes;
+  S.subs.unshift({id:row.id, npp:EMP.npp, tahap:0, ticket:t, created:today()+", "+now(), diajukanISO:row.diajukan_pada||isoToday(), statusIdx:0, sk:SK.no, form:snap, history:[today()],
+    emp:{nama:EMP.nama, npp:EMP.npp, jabatan:SK.jabSet, level:EMP.level, grade:EMP.grade}});
   if(snap.bawa==="tidak"){ var dl=addDays(isoToday(),7); S.notifs.unshift({id:S.nid++, type:"tpp", title:"Ajukan Tiket PP paling lambat "+fmtDate(dl), body:"Anda tidak membawa keluarga. Batas pengajuan Tiket Pulang Pergi 7 hari setelah SPPD Mutasi diajukan.", time:now(), read:false}); log("Membuka hak Tiket PP. Batas pengajuan pertama "+fmtDate(dl)+".","info"); }
   S.lastTicket=t; S.hasDraft=false; S.draftAt=null; S.redirected=false; S.form=emptyForm(); S.step=1;
   log("Menerima pengajuan dan menerbitkan nomor pelacakan "+t+".","ok");
@@ -656,11 +786,12 @@ function submit(){
   persist(); S.hist=[{screen:"home"},{screen:"travel"},{screen:"sppd"}]; go("success", null, true);
 }
 function preset(kind){
-  SK.tujuan = kind==="jarak" ? "bgr" : "smg"; S.skTujuan=SK.tujuan;
+  SK.tujuan = kind==="jarak" ? "bgr" : (SK.asliTujuan||SK.tujuan); S.skTujuan = kind==="jarak" ? "bgr" : null;
   S.subs=S.subs.filter(function(s){return s.sk!==SK.no;}); S.redirected=false;
+  var skNo=SK.no; dbQueue=dbQueue.then(function(){ return sbDeleteSk(skNo); }).catch(function(e){ toast("Gagal mereset pengajuan di database: "+sbErr(e)+"."); });
   var f=emptyForm();
   f.docs={sk:"SK_Mutasi_0457.pdf",kk:"KK_Budi_2026.pdf",rek:"rekening_payroll.jpg",skolAsal:null,skolBaru:null};
-  f.kk=clone(KK_DEFAULT); if(kind==="umur") f.kk.push(clone(KK_ADULT));
+  f.kk=kkFor(EMP.npp); if(kind==="umur") f.kk.push(clone(KK_ADULT));
   S.files={sk:dummyFile("sk",f.docs.sk,2), kk:dummyFile("kk",f.docs.kk,1), rek:dummyFile("rek",f.docs.rek,1)};
   S.form=f; S.hasDraft=false; S.step=1;
   var label={valid:"data valid (Jakarta → Semarang, bawa keluarga)", umur:"KK berisi anak usia ≥ 25 tahun", jarak:"SK tujuan Bogor (jarak < 100 km)", tidak:"tidak membawa keluarga"}[kind];
@@ -721,7 +852,11 @@ function vLogin(){
   '<label class="f" for="npp">NPP<input id="npp" type="text" inputmode="numeric" maxlength="5" value="'+esc(S.loginErr?S.loginVal:def)+'" autocomplete="off" placeholder="5 digit NPP"></label>'+
   (S.loginErr?'<span class="ferr" role="alert">'+esc(S.loginErr)+'</span>':'')+
   '<div class="f"><label for="pw" style="font-size:13px;font-weight:600">Password</label><div class="inwrap pw"><input id="pw" type="password" value="contoh123" placeholder="Password"><button type="button" class="eyebtn" data-act="pwtoggle" aria-label="Tampilkan password" aria-pressed="false">'+ic("eye",20)+'</button></div></div>'+
-  '<button class="btn navy block" type="button" data-act="login" style="margin-top:6px">Login</button></div></div>';
+  '<button class="btn navy block" type="button" data-act="login" style="margin-top:6px">Login</button>'+
+  '<div class="dreset">'+(S.resetAsk?
+    '<div class="ask" role="alertdialog" aria-label="Konfirmasi reset data demo"><p><b>Reset data demo?</b> Semua pengajuan SPPD dan dokumen di database dikembalikan ke data awal (Excel), dan data simulasi di browser ini dihapus. Tindakan ini tidak bisa dibatalkan.</p>'+
+    '<div class="row"><button class="btn sm" type="button" data-act="dresetno"'+(S.busy?' disabled':'')+'>Batal</button><button class="btn sm pri" type="button" data-act="dresetyes"'+(S.busy?' disabled':'')+'>'+(S.busy?'Mereset…':'Ya, reset')+'</button></div></div>'
+    :'<button class="link" type="button" data-act="dreset">Reset data demo</button>')+'</div></div></div>';
 }
 function vHome(){
   var pending=!submittedForSK(), st=rowStatus(SK);
@@ -1175,13 +1310,23 @@ function tppSubmit(){
   S.hist=[{screen:"home"},{screen:"travel"},{screen:"tpp"}]; go("tppok",null,true);
 }
 function tppPreset(kind){
-  SK.tujuan="smg"; S.skTujuan="smg";
-  S.subs=S.subs.filter(function(s){return s.sk!==SK.no;}); S.redirected=false; S.hasDraft=false; S.draftAt=null; S.form=emptyForm();
-  S.tpp.subs=[]; S.tpp.notifiedFor=null; S.tpp.remindedFor=null; S.tpp.confirmed=false;
+  if(S.busy) return;
+  SK.tujuan=SK.asliTujuan||SK.tujuan; S.skTujuan=null;
   var t=isoToday(), d0={ready:0, soon:5, expired:8, recent:34, due:97}[kind];
   var dIso=addDays(t,-d0), dTxt=new Date(dIso+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"});
-  S.subs.unshift({ticket:"SPPD-MTS-2026-00150", created:dTxt+", 09.15", diajukanISO:dIso, statusIdx:d0>0?1:0, sk:SK.no, history:d0>0?[dTxt,dTxt]:[dTxt],
-    form:{asal:SK.asal, tujuan:SK.tujuan, bawa:"tidak", anggota:[], bantuanSekolah:false}});
+  var skNo=SK.no; S.busy=true; toast("Memuat skenario…");
+  dbQueue.then(function(){ return sbDeleteSk(skNo); }).then(function(){
+    return sbInsertSub({npp:EMP.npp, no_sk:skNo, jarak_km:distKm(SK.asal,SK.tujuan), bawa_keluarga:false, bantuan_sekolah:false,
+      status:d0>0?"Verifikasi HCS":"Diajukan", tahap_hcis:d0>0?"Cek kelengkapan":"Diterima", diajukan_pada:dIso});
+  }).then(function(row){ S.busy=false; tppPresetDone(kind, row, t, d0, dIso, dTxt); })
+  .catch(function(e){ S.busy=false; toast("Skenario gagal dimuat: "+sbErr(e)+"."); });
+}
+function tppPresetDone(kind, row, t, d0, dIso, dTxt){
+  S.subs=S.subs.filter(function(s){return s.sk!==SK.no;}); S.redirected=false; S.hasDraft=false; S.draftAt=null; S.form=emptyForm();
+  S.tpp.subs=[]; S.tpp.notifiedFor=null; S.tpp.remindedFor=null; S.tpp.confirmed=false;
+  S.subs.unshift({id:row.id, npp:EMP.npp, tahap:d0>0?1:0, ticket:row.no_pengajuan, created:dTxt+", 09.15", diajukanISO:dIso, statusIdx:d0>0?1:0, sk:SK.no, history:d0>0?[dTxt,dTxt]:[dTxt],
+    emp:{nama:EMP.nama, npp:EMP.npp, jabatan:SK.jabSet, level:EMP.level, grade:EMP.grade},
+    form:{asal:SK.asal, tujuan:SK.tujuan, bawa:"tidak", anggota:[], bantuanSekolah:false, docs:{}}});
   var label={ready:"SPPD Mutasi tanpa keluarga baru dikirim hari ini", soon:"SPPD dikirim 5 hari lalu, batas Tiket PP tinggal 2 hari", expired:"SPPD dikirim 8 hari lalu, Tiket PP belum diajukan", recent:"Tiket PP terakhir diajukan 1 bulan lalu", due:"sudah 3 bulan sejak Tiket PP terakhir"}[kind];
   if(kind==="recent"){ var r=addMonths(t,-1); S.tpp.subs.push({no:"TPP-2026-00018", skema:"kantor", rute:kantorNama(SK.tujuan)+" → "+HOME.nama, pergi:addDays(r,3), pulang:addDays(r,6), total:0, diajukan:r, status:"Selesai"}); }
   if(kind==="due"){ var q=addDays(addMonths(t,-3),-1); S.tpp.subs.push({no:"TPP-2026-00011", skema:"reimburse", rute:kantorNama(SK.tujuan)+" → "+HOME.nama, pergi:addDays(q,2), pulang:addDays(q,5), total:1850000, diajukan:q, status:"Selesai"}); }
@@ -1228,12 +1373,33 @@ function subEmp(sub){
   if(sub.emp) return sub.emp;
   var sk=skBy(sub.sk)||SK; return {nama:EMP.nama, npp:EMP.npp, jabatan:sk.jabSet, level:EMP.level, grade:EMP.grade};
 }
-function isMine(sub){ return !sub.emp; }
+function isMine(sub){ return sub.emp ? (!!S.empNpp && sub.npp===S.empNpp) : true; }
 function hcCase(t){
-  if(!S.hc[t]) S.hc[t]={stage:0, check:{}, notes:{}, rabIn:{}, rab:null, dh:null, pr:null, prapp:{oad:null, gh:null}, po:null, gr:null, nd:null, dhNote:""};
-  return S.hc[t];
+  var sub=subBy(t), c=S.hc[t];
+  if(c && sub && sub.id!=null && c.id!==sub.id){ delete S.hc[t]; c=null; }
+  if(!c){
+    c=S.hc[t]={id:sub?sub.id:null, stage:sub?hcStage(sub):0, check:{}, notes:{}, rabIn:{}, rab:null, dh:null, pr:null, prapp:{oad:null, gh:null}, po:null, gr:null, nd:null, dhNote:""};
+    if(sub) hcFill(sub,c);
+  }
+  return c;
 }
-function hcStage(sub){ if(S.hc[sub.ticket]) return S.hc[sub.ticket].stage; return sub.statusIdx>=2?8:0; }
+function hcStage(sub){
+  var c=S.hc[sub.ticket]; if(c && (sub.id==null || c.id===sub.id)) return c.stage;
+  if(sub.tahap!=null) return sub.tahap;
+  return sub.statusIdx>=2?8:0;
+}
+/* Tahap dari database lebih maju daripada data lokal (mis. diproses di laptop lain):
+   lengkapi dokumen yang belum ada di browser ini supaya halaman tetap bisa dibuka. */
+function hcFill(sub,c){
+  var st=c.stage;
+  if(st>=3 && !c.rab){ var r=rabCalc(sub,c.rabIn); r.no="EB3.HM.03.02."+nextNo("rab"); r.tgl=today(); c.rab=r; }
+  if(st>=4 && !c.dh) c.dh=today();
+  if(st>=5 && !c.pr){ var pr=prDraft(sub,c); pr.no=String(nextNo("pr")); pr.tgl=today(); c.pr=pr; }
+  if(st>=6){ if(!c.prapp.oad) c.prapp.oad=today(); if(!c.prapp.gh) c.prapp.gh=today(); }
+  if(st>=7){ var e=subEmp(sub);
+    if(!c.po) c.po={no:String(nextNo("po")), vendorNo:"11000"+e.npp, vendor:String(e.nama||"").toUpperCase(), net:c.rab.jumlah, tgl:today(), prNo:c.pr.no};
+    if(!c.gr) c.gr={matDoc:String(nextNo("gr"))+" - 1", gl:"6119020103", amount:c.rab.jumlah, posting:today(), poNo:c.po.no}; }
+}
 function hcChip(st){ var c=st===8?"ok":(st===0?"bad":(st===3||st===5?"warn":"")); return '<span class="chip '+c+'">'+esc(HC_STAGES[st])+'</span>'; }
 function famCount(sub){ return sub.form.bawa==="ya"?sub.form.anggota.filter(function(m){return !m.rejected;}).length:0; }
 function rabCalc(sub, inp){
@@ -1413,7 +1579,7 @@ function hcPreview(t,k){
   S.hcDoc={t:t, k:k, draft:true}; render();
 }
 function hcAct(a,t){
-  var sub=subBy(t); if(!sub) return; var c=hcCase(t), e=subEmp(sub); S.hcErr=[]; S.hcDoc=null;
+  var sub=subBy(t); if(!sub) return; var c=hcCase(t), e=subEmp(sub), st0=c.stage, si0=sub.statusIdx; S.hcErr=[]; S.hcDoc=null;
   if(a==="hcstart"){ c.stage=1; hcSetEmpStatus(sub,1); log("HCIS mulai memverifikasi "+t+" ("+e.nama+").","info"); hcNotifyEmp(sub,"Pengajuan sedang diverifikasi HCS","Nomor "+t+" sedang dicek kelengkapannya oleh HCIS."); }
   if(a==="hcckok"){
     var miss=CK_ITEMS.filter(function(it){ return c.check[it.k]==="tidak"; });
@@ -1438,6 +1604,7 @@ function hcAct(a,t){
   if(a==="hcgr"){ c.gr={matDoc:String(nextNo("gr"))+" - 1", gl:"6119020103", amount:c.rab.jumlah, posting:today(), poNo:c.po.no}; log("GR "+c.gr.matDoc+" diposting.","ok"); }
   if(a==="hcnext7"){ c.stage=7; }
   if(a==="hcata"){ c.nd={no:"EB.KU06."+nextNo("nd"), tgl:today(), total:c.rab.jumlah}; c.stage=8; hcSetEmpStatus(sub,2); log("Berkas "+t+" diserahkan ke Accounting & Tax (Nota Dinas "+c.nd.no+").","ok"); hcNotifyEmp(sub,"Pengajuan diteruskan ke Accounting & Tax","Nomor "+t+" sudah diverifikasi HCS dan sedang diproses Accounting & Tax."); }
+  if(c.stage!==st0 || sub.statusIdx!==si0) sbSetStage(sub,c);
   render(); toTop();
 }
 function docData(sub,c,e,k,draft){
@@ -1517,30 +1684,55 @@ function openHcFile(t,k){
   if(!S.files[key]){ var imgs=[]; for(var i=1;i<=n;i++) imgs.push(makeDummy(docLabel(k),name,i,n)); S.files[key]={name:name, type:"dummy", thumb:imgs[0], pages:n, imgs:imgs, label:docLabel(k)+" · "+subEmp(sub).nama}; }
   S.preview=key; render();
 }
-function othersSeed(){ return [
-    {ticket:"SPPD-MTS-2026-00139", created:"12 Nov 2026, 14.20", diajukanISO:"2026-11-12", statusIdx:0, sk:"SK-MUT/0449/DIR/XI/2026", history:["12 Nov 2026"],
-      emp:{nama:"Rina Pratiwi", npp:"10871", jabatan:"Staf Keuangan", level:"4", grade:"BOD-5"},
-      form:{asal:"bdg", tujuan:"jkt", bawa:"ya", anggota:[{hub:"Suami",nama:"Hendra Wijaya",tgl:"1988-03-02",nik:"3273010203880001"},{hub:"Anak",nama:"Alya Wijaya",tgl:"2016-06-11",nik:"3273015106160002"}], bantuanSekolah:true, docs:{sk:"SK_Mutasi_0449.pdf",kk:"KK_Rina.pdf",rek:"rekening_rina.jpg",skolAsal:"ket_pindah_SD_Alya.pdf",skolBaru:"daftar_SD_Alya.pdf"}}},
-    {ticket:"SPPD-MTS-2026-00141", created:"14 Nov 2026, 09.05", diajukanISO:"2026-11-14", statusIdx:0, sk:"SK-MUT/0452/DIR/XI/2026", history:["14 Nov 2026"],
-      emp:{nama:"Agus Salim", npp:"11302", jabatan:"Staf Teknik", level:"6", grade:"BOD-6"},
-      form:{asal:"jkt", tujuan:"sby", bawa:"tidak", anggota:[], bantuanSekolah:false, docs:{sk:"SK_Mutasi_0452.pdf",kk:"KK_Agus.pdf",rek:"rekening_agus.jpg"}}}
-
-  ]; }
+/* Contoh data pengajuan_sppd & dokumen (sama dengan Rancangan_Database_SPPD_Mutasi_fix.xlsx) */
+var SEED_SUBS = [
+  {id:1, no_pengajuan:"SPPD-MTS-2026-00151", npp:"10234", no_sk:"SK-MUT/0457/DIR/XI/2026", jarak_km:425, bawa_keluarga:true, bantuan_sekolah:true, status:"Diajukan", tahap_hcis:"Diterima", diajukan_pada:"2026-11-24", catatan:null},
+  {id:2, no_pengajuan:"SPPD-MTS-2026-00139", npp:"10871", no_sk:"SK-MUT/0462/DIR/XI/2026", jarak_km:140, bawa_keluarga:true, bantuan_sekolah:true, status:"Verifikasi HCS", tahap_hcis:"Susun RAB", diajukan_pada:"2026-11-18", catatan:null},
+  {id:3, no_pengajuan:"SPPD-MTS-2026-00141", npp:"11302", no_sk:"SK-MUT/0469/DIR/XI/2026", jarak_km:770, bawa_keluarga:false, bantuan_sekolah:false, status:"Proses Accounting & Tax", tahap_hcis:"Diserahkan ke ATA", diajukan_pada:"2026-11-19", catatan:null}
+];
+var SEED_DOCS = [
+  {id:1, pengajuan_id:1, jenis:"sk", nama_file:"SK_Mutasi_Budi.pdf", tipe_file:"PDF", ukuran_kb:820, path_storage:"sppd/00151/sk.pdf", diunggah_pada:"2026-11-24T09:20:00+07:00"},
+  {id:2, pengajuan_id:1, jenis:"kk", nama_file:"KK_Budi.pdf", tipe_file:"PDF", ukuran_kb:1450, path_storage:"sppd/00151/kk.pdf", diunggah_pada:"2026-11-24T09:21:00+07:00"},
+  {id:3, pengajuan_id:1, jenis:"rekening", nama_file:"Rekening_Budi.jpg", tipe_file:"JPG", ukuran_kb:640, path_storage:"sppd/00151/rek.jpg", diunggah_pada:"2026-11-24T09:22:00+07:00"},
+  {id:4, pengajuan_id:1, jenis:"sekolah_asal", nama_file:"Surat_Pindah_Raka.pdf", tipe_file:"PDF", ukuran_kb:510, path_storage:"sppd/00151/skol-asal.pdf", diunggah_pada:"2026-11-24T09:24:00+07:00"},
+  {id:5, pengajuan_id:3, jenis:"sk", nama_file:"SK_Mutasi_Agus.pdf", tipe_file:"PDF", ukuran_kb:790, path_storage:"sppd/00141/sk.pdf", diunggah_pada:"2026-11-19T10:02:00+07:00"},
+  {id:6, pengajuan_id:null, tpp_id:1, jenis:"tiket", nama_file:"Tiket_Agus.pdf", tipe_file:"PDF", ukuran_kb:300, path_storage:"tpp/00018/tiket.pdf", diunggah_pada:"2026-11-22T15:10:00+07:00"},
+  {id:7, pengajuan_id:null, tpp_id:1, jenis:"bukti_transaksi", nama_file:"Bukti_Bayar_Agus.png", tipe_file:"PNG", ukuran_kb:210, path_storage:"tpp/00018/trx.png", diunggah_pada:"2026-11-22T15:11:00+07:00"}
+];
+/* Tombol "Reset data demo" di halaman login: kosongkan pengajuan_sppd & dokumen, isi ulang dari Excel, hapus localStorage */
+function resetDemo(){
+  if(S.busy) return; S.busy=true; render();
+  var docs=SEED_DOCS.map(function(d){ var x=clone(d); if(!("tpp_id" in x)) x.tpp_id=null; return x; });
+  dbQueue.then(function(){ return sb("dokumen?id=gte.0",{method:"DELETE"}); })
+  .then(function(){ return sb("pengajuan_sppd?id=gte.0",{method:"DELETE"}); })
+  .then(function(){ return sb("pengajuan_sppd",{method:"POST", body:SEED_SUBS}); })
+  .then(function(){ return sb("dokumen",{method:"POST", body:docs}); })
+  .then(function(){
+    try{ localStorage.removeItem(KEY); }catch(x){}
+    S=fresh(); render(); toast("Data demo dikembalikan ke kondisi awal.");
+  })
+  .catch(function(e){ S.busy=false; S.resetAsk=false; render(); toast("Reset gagal: "+sbErr(e)+"."); });
+}
+/* Kembalikan antrian HCIS ke contoh data Excel. Pengajuan Budi yang sudah ada tidak diganti. */
 function hcSeed(){
-  var mine=S.subs.filter(function(s){return s.sk===SK.no;})[0];
-  S.subs=S.subs.filter(function(s){ return !(s.emp && /^SPPD-MTS-2026-001(39|41)$/.test(s.ticket)); });
-  if(!mine){
-    SK.tujuan="smg"; S.skTujuan="smg";
-    var fam=KK_DEFAULT.concat([KK_ADULT]).map(function(m,i){ var x=clone(m); x.id=i+1; checkAge(x,false); return x; });
-    S.subs.unshift({ticket:"SPPD-MTS-2026-00143", created:"18 Nov 2026, 10.24", diajukanISO:"2026-11-18", statusIdx:0, sk:SK.no, history:["18 Nov 2026"],
-      form:{asal:"jkt", tujuan:"smg", bawa:"ya", anggota:fam, bantuanSekolah:true, docs:{sk:"SK_Mutasi_0457.pdf",kk:"KK_Budi_2026.pdf",rek:"rekening_payroll.jpg",skolAsal:"ket_pindah_SDN05.pdf",skolBaru:"ket_daftar_SDN02_Smg.pdf"}}});
-    S.hasDraft=false; S.form=emptyForm();
-  }
-  S.subs=S.subs.concat(othersSeed());
-  ["SPPD-MTS-2026-00139","SPPD-MTS-2026-00141"].forEach(function(t){ delete S.hc[t]; });
-  if(!mine) delete S.hc["SPPD-MTS-2026-00143"];
-  log("Skenario uji dimuat: antrian HCIS berisi 3 pengajuan.","info");
-  go("hchome");
+  if(S.busy) return; S.busy=true; toast("Mengisi antrian HCIS…");
+  var budiSk=SEED_SUBS[0].no_sk, others=SEED_SUBS.slice(1), keepBudi=false, rows;
+  dbQueue.then(function(){ return sb("pengajuan_sppd?select=id&no_sk=eq."+q(budiSk)); })
+  .then(function(r){ keepBudi=!!(r&&r.length); return sb("pengajuan_sppd?no_sk=in."+inList(others.map(function(x){return x.no_sk;})), {method:"DELETE"}); })
+  .then(function(){
+    rows=keepBudi?others:SEED_SUBS;
+    var ids=rows.map(function(x){return x.id;});
+    var docs=SEED_DOCS.filter(function(d){ return ids.indexOf(d.pengajuan_id)>=0; });
+    rows.forEach(function(x){ delete S.hc[x.no_pengajuan]; });
+    return sb("pengajuan_sppd",{method:"POST", body:rows}).then(function(){ return docs.length?sb("dokumen",{method:"POST", body:docs}):null; });
+  })
+  .then(function(){ return sbLoadSubs(null); })
+  .then(function(){
+    S.busy=false; if(!keepBudi){ S.hasDraft=false; S.form=emptyForm(); }
+    log("Skenario uji dimuat: antrian HCIS berisi 3 pengajuan.","info");
+    go("hchome");
+  })
+  .catch(function(e){ S.busy=false; toast("Gagal mengisi antrian: "+sbErr(e)+"."); });
 }
 function vHcHak(){
   var h=hdr("Tabel Hak & Kebutuhan","HCIS / Tabel Hak & Kebutuhan")+'<p class="sub" style="margin:0">Sumber perhitungan RAB otomatis. Data dari file Dummy Data Hak & Kebutuhan Karyawan.</p>';
@@ -1655,9 +1847,37 @@ function renderModal(){
 function doLogin(){
   var v=(document.getElementById("npp").value||"").trim();
   if(!/^\d{5}$/.test(v)){ S.loginVal=v; S.loginErr="NPP harus 5 digit angka."; render(); return; }
-  S.loginErr=""; S.loginVal=v; S.hist=[];
-  if((S.loginRole||"karyawan")==="hcis"){ S.role="hcis"; log("Autentikasi HCIS berhasil untuk NPP "+v+".","ok"); go("hchome",null,true); return; }
-  S.role="karyawan"; log("Autentikasi berhasil untuk NPP "+v+".","ok"); checkTppNotif(); go("home",null,true);
+  if(S.busy) return;
+  var role=S.loginRole||"karyawan", btn=document.querySelector('[data-act="login"]');
+  S.loginVal=v; S.busy=true; if(btn){ btn.disabled=true; btn.textContent="Memeriksa NPP…"; }
+  function fail(msg){ S.busy=false; S.loginErr=msg; render(); }
+  sbLoadEmp(v).then(function(emp){
+    if(!emp) return fail("NPP "+v+" tidak terdaftar di data karyawan.");
+    if(role==="hcis" && emp.unit!=="Human Capital Services") return fail("NPP "+v+" bukan pegawai Human Capital Services, tidak bisa masuk sebagai HCIS.");
+    if(role==="hcis"){
+      HC_USER={nama:emp.nama, npp:emp.npp, jabatan:emp.jabatan};
+      return sbLoadSubs(null).then(function(){
+        S.busy=false; S.loginErr=""; S.hist=[]; S.role="hcis";
+        log("Autentikasi HCIS berhasil untuk NPP "+v+".","ok"); go("hchome",null,true);
+      });
+    }
+    return sbLoadSks(v).then(function(sks){
+      if(!sks.length) return fail("Belum ada SK mutasi untuk NPP "+v+", jadi halaman SPPD Mutasi belum bisa dibuka.");
+      EMP={nama:emp.nama, npp:emp.npp, unit:emp.unit, level:emp.level, grade:emp.grade||"-", jabatan:emp.jabatan};
+      if(emp.kampung_halaman) HOME={nama:emp.kampung_halaman, q:emp.kampung_halaman.replace(/^(Kab\.|Kota)\s+/,"")};
+      SKS=sks; SK=SKS[0];
+      if(S.empNpp!==v){
+        /* NPP berbeda dari sesi sebelumnya di browser ini: mulai data lokal dari awal */
+        S.empNpp=v; S.skTujuan=null; S.form=emptyForm(); S.hasDraft=false; S.draftAt=null; S.redirected=false; S.step=1;
+        S.notifs=seedNotifs(); S.nid=3; S.tpp={confirmed:false, subs:[], notifiedFor:null, seq:20}; S.flt={q:"",status:"",year:""}; S.files={};
+      }
+      if(S.skTujuan) SK.tujuan=S.skTujuan;
+      return dbQueue.then(function(){ return sbLoadSubs(v); }).then(function(){
+        S.busy=false; S.loginErr=""; S.hist=[]; S.role="karyawan";
+        log("Autentikasi berhasil untuk NPP "+v+".","ok"); checkTppNotif(); go("home",null,true);
+      });
+    });
+  }).catch(function(e){ fail("Login gagal: "+sbErr(e)+"."); });
 }
 document.addEventListener("click",function(e){
   var t=e.target.closest("[data-act]"); if(!t) return;
@@ -1665,6 +1885,9 @@ document.addEventListener("click",function(e){
   switch(a){
     case "reset": try{localStorage.removeItem(KEY);}catch(x){} S=fresh(); render(); toast("Simulasi direset ke kondisi awal."); break;
     case "login": doLogin(); break;
+    case "dreset": S.resetAsk=true; render(); break;
+    case "dresetno": S.resetAsk=false; render(); break;
+    case "dresetyes": resetDemo(); break;
     case "pwtoggle": var pw=document.getElementById("pw"); if(pw){ var show=pw.type==="password"; pw.type=show?"text":"password"; t.innerHTML=ic(show?"eyeOpen":"eye",20); t.setAttribute("aria-pressed",String(show)); t.setAttribute("aria-label",show?"Sembunyikan password":"Tampilkan password"); } break;
     case "home": go("home"); break;
     case "bell": go("notif"); break;
@@ -1687,7 +1910,7 @@ document.addEventListener("click",function(e){
     case "tpreset": tppPreset(t.getAttribute("data-k")); break;
     case "lrole": S.loginRole=t.getAttribute("data-v"); S.loginErr=""; render(); break;
     case "logout": S.screen="login"; S.hist=[]; S.preview=null; S.hcDoc=null; S.loginErr=""; S.loginRole=S.role||"karyawan"; render(); toTop(); break;
-    case "hchome": go("hchome"); break;
+    case "hchome": go("hchome"); refreshSubs(); break;
     case "hchak": go("hchak"); break;
     case "hcopen": S.hcOpen=t.getAttribute("data-t"); S.hcErr=[]; go("hccase"); break;
     case "hcseed": hcSeed(); break;
@@ -1696,7 +1919,7 @@ document.addEventListener("click",function(e){
     case "hcprev": hcPreview(t.getAttribute("data-t"), t.getAttribute("data-k")); break;
     case "closehcdoc": if(e.target===t || t.tagName==="BUTTON"){ S.hcDoc=null; render(); } break;
     case "hcstart": case "hcckok": case "hcckreq": case "hcrab": case "hcdhok": case "hcdhno": case "hcpr": case "hcoad": case "hcgh": case "hcpo": case "hcgr": case "hcnext7": case "hcata": hcAct(a, t.getAttribute("data-t")); break;
-    case "sppd": go("sppd"); break;
+    case "sppd": go("sppd"); refreshSubs(); break;
     case "tpp": go("tpp",{tppSk:t.getAttribute("data-sk")||(S.redirected?SK.no:null)}); break;
     case "start": startForm(); break;
     case "draft": saveDraft(); render(); break;
