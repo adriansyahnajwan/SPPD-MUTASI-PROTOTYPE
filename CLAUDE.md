@@ -23,11 +23,13 @@ Beranda → sidebar "Travel Management" (bisa dilipat) → SPPD Mutasi, Tiket PP
 - Status karyawan: Draft → Diajukan → Verifikasi HCS → Proses Accounting & Tax → Selesai.
 
 ## Tiket Pulang Pergi (TPP)
-- Hanya untuk SPPD yang sudah diajukan dan TIDAK membawa keluarga.
-- TPP pertama maks. 7 hari setelah SPPD diajukan (pengingat H-2; lewat batas = hangus). Setelah itu 1x tiap 3 bulan, ada notifikasi.
-- Rute hanya kantor BARU (tujuan SK) ↔ kampung halaman (dikonfirmasi, tidak bisa diubah).
-- Skema: dipesankan kantor (tanggal & jam pergi/pulang) atau reimburse (tanggal, nominal, upload tiket & bukti transaksi).
-- Nomor TPP-YYYY-NNNNN.
+- Hanya untuk SPPD yang sudah diajukan dan TIDAK membawa keluarga. Tidak ada approval GM/atasan unit kerja: langsung masuk antrean HCIS.
+- Istilah (dokumen resmi): **Pulang** = kantor baru → domisili (berangkat ke keluarga); **Pergi** = domisili → kantor baru (kembali bertugas). Urutan di form/review/detail selalu Pulang lalu Pergi; tgl_pergi ≥ tgl_pulang.
+- Kuota 1x per triwulan (TW I–IV tahun berjalan), dijaga juga di database (unique index per SPPD + tahun + triwulan, kecuali Ditolak). TPP pertama maks. 7 hari setelah SPPD diajukan (pengingat H-2); lewat batas = hak TW itu hangus, TW berikutnya boleh mengajukan. Notifikasi saat TW baru dimulai.
+- Form: jenis (dipesankan kantor / reimburse), alat transportasi (Pesawat / Kereta / Bus; Kapal belum diatur), kelas otomatis (Pesawat = Ekonomi, Kereta/Bus = Eksekutif; tidak bisa diubah), lokasi unit kerja (kantor baru), domisili (kampung halaman, dikonfirmasi), jarak tempuh (tabel jarak_domisili), TW pengajuan (otomatis), tanggal pulang & pergi.
+- Dipesankan kantor: + jam keberangkatan pulang & pergi; tidak upload apa pun. Reimburse: nominal + e-ticket + bukti transaksi untuk pulang dan pergi (4 file).
+- SK, KK, dan rekening payroll (dari pengajuan SPPD) terlampir otomatis sebagai kartu "Dari sistem".
+- Status karyawan TPP: Diajukan / Diproses / Selesai / Ditolak. Nomor TPP-YYYY-NNNNN.
 
 ## Halaman HCIS (9 tahap)
 Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat PR → Approval OAD & Group Head → Buat PO & GR → Serahkan ke ATA → Diserahkan ke ATA.
@@ -44,8 +46,8 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
 - Dokumen sekolah wajib jika mengajukan bantuan sekolah.
 
 ## Database (rencana, Supabase)
-- Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (20 tabel; sheet Ringkasan & Relasi).
-- SQL: `supabase-tahap1.sql` → `tahap2` → `tahap3` → `tahap4`, lalu `supabase-reset-demo.sql`. Database yang sudah berjalan sebelum kolom `karyawan.file_kk` ada: jalankan `supabase-file-kk.sql` (sekali, aman diulang) (dijalankan manual di SQL Editor). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`. SQL Editor membatalkan semua isi file kalau ada satu error; cek hasilnya lewat API setelah dijalankan.
+- Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (21 tabel termasuk jarak_domisili; sheet Ringkasan & Relasi).
+- SQL: `supabase-tahap1.sql` → `tahap2` → `tahap3` → `tahap4` → `supabase-file-kk.sql` → `supabase-tpp1-karyawan.sql`, lalu `supabase-reset-demo.sql`. Database yang sudah berjalan sebelum kolom `karyawan.file_kk` ada: jalankan `supabase-file-kk.sql` (sekali, aman diulang) (dijalankan manual di SQL Editor). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`. SQL Editor membatalkan semua isi file kalau ada satu error; cek hasilnya lewat API setelah dijalankan.
 - Bertahap:
   - Tahap 1 (SUDAH): kantor, karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
   - Tahap 2 (SUDAH): jarak_kantor, keluarga, pengajuan_keluarga, notifikasi, riwayat_status

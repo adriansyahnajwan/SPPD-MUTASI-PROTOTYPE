@@ -1,7 +1,7 @@
 -- ============================================================
 -- SPPD Mutasi JM-Click · Fungsi reset_demo()
 -- Dipanggil tombol "Reset data demo" di halaman login (POST /rest/v1/rpc/reset_demo).
--- Jalankan SETELAH supabase-tahap1.sql, supabase-tahap2.sql, dan (kalau ada) supabase-tahap3.sql.
+-- Jalankan SETELAH semua file SQL tahap (tahap1-4, file-kk, tpp1-karyawan, ...).
 -- Setiap kali file tahap baru dijalankan, jalankan ulang file ini.
 -- Cara pakai: Supabase > SQL Editor > New query > paste semua > Run
 --
@@ -49,8 +49,11 @@ begin
 
   -- Tahap 3 (dilewati kalau tabelnya belum dibuat)
   if to_regclass('public.tiket_pp') is not null then
-    insert into tiket_pp (id, no_tpp, pengajuan_id, skema, asal, tujuan, tgl_pergi, jam_pergi, tgl_pulang, jam_pulang, nominal_pergi, nominal_pulang, status, diajukan_pada) values
-     (1,'TPP-2026-00018',3,'reimburse','sby','Kab. Gresik, Jawa Timur','2026-11-20',null,'2026-11-22',null,450000,450000,'Diajukan','2026-11-22');
+    -- Pulang = kantor baru -> domisili (tgl_pulang); Pergi = domisili -> kantor baru (tgl_pergi)
+    insert into tiket_pp (id, no_tpp, pengajuan_id, skema, alat_transportasi, triwulan, tahun, jarak_km, asal, tujuan,
+                          tgl_pulang, jam_pulang, tgl_pergi, jam_pergi, nominal_pulang, nominal_pergi, status, diajukan_pada) values
+     (1,'TPP-2026-00018',3,'reimburse','Bus',4,2026,27.4,'sby','Kab. Gresik, Jawa Timur',
+      '2026-11-20',null,'2026-11-22',null,450000,450000,'Diajukan','2026-11-22');
   end if;
   if to_regclass('public.rab') is not null then
     insert into rab (id, no_rab, pengajuan_id, level_kelompok, jumlah_orang, jumlah_hari, tarif_harian, pengepakan, pengepakan_manual, sewa, penginapan, bantuan_sekolah, catatan, dibuat_oleh, dibuat_pada) values
@@ -82,8 +85,13 @@ begin
 
   insert into dokumen (id, pengajuan_id, tpp_id, jenis, nama_file, tipe_file, ukuran_kb, path_storage, diunggah_pada) values
    (5,3,   null,'sk',             'SK_Mutasi_Agus.pdf',  'PDF',790,'sppd/00141/sk.pdf',  '2026-11-19 10:02+07'),
-   (6,null,1,   'tiket',          'Tiket_Agus.pdf',      'PDF',300,'tpp/00018/tiket.pdf','2026-11-22 15:10+07'),
-   (7,null,1,   'bukti_transaksi','Bukti_Bayar_Agus.png','PNG',210,'tpp/00018/trx.png',  '2026-11-22 15:11+07');
+   (6,null,1,   'tiket_pulang',   'Tiket_Pulang_Agus.pdf',     'PDF',300,'tpp/00018/tiket_pulang.pdf','2026-11-22 15:10+07'),
+   (7,null,1,   'bukti_pulang',   'Bukti_Bayar_Pulang_Agus.png','PNG',210,'tpp/00018/bukti_pulang.png','2026-11-22 15:11+07'),
+   (8,null,1,   'tiket_pergi',    'Tiket_Pergi_Agus.pdf',      'PDF',290,'tpp/00018/tiket_pergi.pdf', '2026-11-22 15:12+07'),
+   (9,null,1,   'bukti_pergi',    'Bukti_Bayar_Pergi_Agus.png','PNG',205,'tpp/00018/bukti_pergi.png', '2026-11-22 15:13+07');
+  -- Pastikan nomor id otomatis berikutnya tidak bentrok dengan id contoh di atas
+  perform setval(pg_get_serial_sequence('dokumen','id'),
+                 greatest(coalesce(pg_sequence_last_value(pg_get_serial_sequence('dokumen','id')::regclass),0),(select max(id) from dokumen)));
 
   insert into pengajuan_keluarga (id, pengajuan_id, keluarga_id, usia_saat_pengajuan, status, alasan_tolak) values
    (5,2,5,38,'Diterima',null),
