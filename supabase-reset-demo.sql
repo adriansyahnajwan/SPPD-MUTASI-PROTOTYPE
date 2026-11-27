@@ -7,7 +7,7 @@
 --
 -- Yang dilakukan (dalam satu transaksi):
 --  1. Hapus SEMUA data transaksi: pengajuan_sppd, dokumen, pengajuan_keluarga,
---     notifikasi, riwayat_status, dan tabel Tahap 3-4 (tiket_pp, rab, approval,
+--     notifikasi, riwayat_status, dan tabel Tahap 3-4 & TPP (tiket_pp, rab, rab_tpp, approval,
 --     dokumen_pengadaan, checklist_kelengkapan) kalau tabelnya sudah ada.
 --  2. Isi ulang contoh data dari Rancangan_Database_SPPD_Mutasi_fix.xlsx:
 --     Budi (10234) BELUM mengajukan SPPD; Rina (10871) pengajuan baru yang mulai dari awal
@@ -34,7 +34,7 @@ declare
   t text;
 begin
   -- 1. Kosongkan transaksi (urutan: anak dulu, baru induk)
-  foreach t in array array['dokumen_pengadaan','approval','rab','checklist_kelengkapan',
+  foreach t in array array['dokumen_pengadaan','approval','rab_tpp','rab','checklist_kelengkapan',
                            'riwayat_status','notifikasi','pengajuan_keluarga','dokumen',
                            'tiket_pp','pengajuan_sppd'] loop
     if to_regclass('public.'||t) is not null then

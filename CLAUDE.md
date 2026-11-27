@@ -29,10 +29,17 @@ Beranda → sidebar "Travel Management" (bisa dilipat) → SPPD Mutasi, Tiket PP
 - Form: jenis (dipesankan kantor / reimburse), alat transportasi (Pesawat / Kereta / Bus; Kapal belum diatur), kelas otomatis (Pesawat = Ekonomi, Kereta/Bus = Eksekutif; tidak bisa diubah), lokasi unit kerja (kantor baru), domisili (kampung halaman, dikonfirmasi), jarak tempuh (tabel jarak_domisili), TW pengajuan (otomatis), tanggal pulang & pergi.
 - Dipesankan kantor: + jam keberangkatan pulang & pergi; tidak upload apa pun. Reimburse: nominal + e-ticket + bukti transaksi untuk pulang dan pergi (4 file).
 - SK, KK, dan rekening payroll (dari pengajuan SPPD) terlampir otomatis sebagai kartu "Dari sistem".
-- Status karyawan TPP: Diajukan / Diproses / Selesai / Ditolak. Nomor TPP-YYYY-NNNNN.
+- Status karyawan TPP: Diajukan / Diproses / Selesai / Ditolak (Diproses sejak HCIS mulai cek; Selesai/Ditolak menunggu halaman ATA). Nomor TPP-YYYY-NNNNN.
+- Dipesankan kantor: setelah HCIS menerbitkan e-ticket, karyawan dapat notifikasi "E-ticket sudah terbit" dan bisa mengunduh e-ticket pulang/pergi (PDF contoh) di riwayat Tiket PP.
 
 ## Halaman HCIS (9 tahap)
 Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat PR → Approval OAD & Group Head → Buat PO & GR → Serahkan ke ATA → Diserahkan ke ATA.
+- SPPD Mutasi dan Tiket PP ada di antrean yang sama (kolom Jenis: "SPPD Mutasi" / "Tiket PP") dan memakai 9 tahap yang sama.
+- Tiket PP di HCIS:
+  - Cek kelengkapan: Form permohonan TPP, Copy form SPPD, SK, KK, Rekening payroll, Tiket transportasi PP, Tagihan travel agent (hanya dipesankan kantor). Dipesankan kantor: HCIS mengisi detail tiket per perjalanan (operator, rute, tanggal, jam, biaya), unggah e-ticket pulang/pergi + tagihan travel agent, lalu "Terbitkan e-ticket" (baru bisa lanjut setelah itu).
+  - RAB TPP (tabel rab_tpp, nomor RAB-TPP-YYYY-NNNN): judul "RENCANA ANGGARAN BIAYA (RAB) PENGGANTIAN TIKET TRANSPORTASI UNTUK FASILITAS PULANG DAN PERGI KARYAWAN PENUGASAN", 2 baris Pulang/Pergi (angkutan + kelas, tujuan, hari/tgl, biaya), Total, Terbilang, Ket "TWx tahun", tanpa pajak. Biaya: reimburse = nominal karyawan; dipesankan kantor = biaya dari detail tiket.
+  - Serahkan ke ATA: dulu "Permohonan Penggantian Biaya ≤ Rp 50.000.000" (PB, nomor EB3.HM.02.N; Kepada HCS Group Head, Dari HCIS Dept Head), baru Nota Dinas ke ATA. Rantai dokumen: PR → PO → GR → PB → ND.
+  - PR/PO/GR/ND memakai format SPPD dengan teks Tiket PP; pembayaran ND: dipesankan kantor = rekening travel agent, reimburse = rekening payroll.
 - Antrean dengan KPI & filter; detail kasus dengan stepper dan ringkasan.
 - RAB dihitung dari tabel hak: uang harian = orang × hari × tarif level; pengepakan dari tabel (asal Jabotabek) atau manual; sewa; penginapan; bantuan sekolah (manual); pajak 5%; diterima = total − pajak. Anak yang ditolak tidak dihitung.
 - Setiap tahap punya 2 tombol: "Pratinjau …" dan tombol lanjut langsung. Pratinjau opsional.
@@ -46,8 +53,8 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
 - Dokumen sekolah wajib jika mengajukan bantuan sekolah.
 
 ## Database (rencana, Supabase)
-- Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (21 tabel termasuk jarak_domisili; sheet Ringkasan & Relasi).
-- SQL: `supabase-tahap1.sql` → `tahap2` → `tahap3` → `tahap4` → `supabase-file-kk.sql` → `supabase-tpp1-karyawan.sql`, lalu `supabase-reset-demo.sql`. Database yang sudah berjalan sebelum kolom `karyawan.file_kk` ada: jalankan `supabase-file-kk.sql` (sekali, aman diulang) (dijalankan manual di SQL Editor). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`. SQL Editor membatalkan semua isi file kalau ada satu error; cek hasilnya lewat API setelah dijalankan.
+- Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (22 tabel termasuk jarak_domisili & rab_tpp; sheet Ringkasan & Relasi).
+- SQL: `supabase-tahap1.sql` → `tahap2` → `tahap3` → `tahap4` → `supabase-file-kk.sql` → `supabase-tpp1-karyawan.sql` → `supabase-tpp2-hcis.sql`, lalu `supabase-reset-demo.sql`. Database yang sudah berjalan sebelum kolom `karyawan.file_kk` ada: jalankan `supabase-file-kk.sql` (sekali, aman diulang) (dijalankan manual di SQL Editor). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`. SQL Editor membatalkan semua isi file kalau ada satu error; cek hasilnya lewat API setelah dijalankan.
 - Bertahap:
   - Tahap 1 (SUDAH): kantor, karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
   - Tahap 2 (SUDAH): jarak_kantor, keluarga, pengajuan_keluarga, notifikasi, riwayat_status
