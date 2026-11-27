@@ -34,7 +34,8 @@ create table karyawan (
   grade               text,
   kantor_kode         text not null references kantor(kode),
   kampung_halaman     text,              -- rute Tiket PP; tidak bisa diubah karyawan
-  no_rekening_payroll text               -- hanya dibaca ATA
+  no_rekening_payroll text,              -- hanya dibaca ATA
+  file_kk             text                -- path file Kartu Keluarga di storage (dilampirkan otomatis di form SPPD)
 );
 
 -- 2. SK MUTASI (master, nantinya dari sistem SK)
@@ -102,15 +103,15 @@ insert into kantor (kode, nama, kota, wilayah, alamat) values
  ('smg','Kantor Cabang Semarang','Kota Semarang','Jawa Tengah dan DIY','(alamat resmi menyusul)'),
  ('sby','Kantor Cabang Surabaya','Kota Surabaya','Jawa Timur','(alamat resmi menyusul)');
 
-insert into karyawan (npp, nama, unit, jabatan, level, grade, kantor_kode, kampung_halaman, no_rekening_payroll) values
- ('10234','Budi Santoso','Divisi Operasi','Staf Senior Operasi','5','BOD-4','jkt','Kab. Klaten, Jawa Tengah','(data payroll)'),
- ('10871','Rina Pratiwi','Divisi Operasi','Staf Operasi','4','BOD-5','bdg','Kota Malang, Jawa Timur','(data payroll)'),
- ('11302','Agus Salim','Divisi Operasi','Staf Operasi','6','BOD-5','jkt','Kab. Gresik, Jawa Timur','(data payroll)'),
- ('20117','Dewi Lestari','Human Capital Services','Staf HCIS','5','BOD-4','jkt',null,'(data payroll)'),
- ('20101','Hendra Gunawan','Human Capital Services','Dept Head HCIS','3','BOD-2','jkt',null,'(data payroll)'),
- ('20001','Siti Rahmawati','Human Capital Services','Group Head HCS','2','BOD-1','jkt',null,'(data payroll)'),
- ('30045','Rudi Hartono','Office Administration','Staf OAD','5','BOD-4','jkt',null,'(data payroll)'),
- ('40012','Yusuf Pratama','Accounting & Tax','Staf ATA','5','BOD-4','jkt',null,'(data payroll)');
+insert into karyawan (npp, nama, unit, jabatan, level, grade, kantor_kode, kampung_halaman, no_rekening_payroll, file_kk) values
+ ('10234','Budi Santoso','Divisi Operasi','Staf Senior Operasi','5','BOD-4','jkt','Kab. Klaten, Jawa Tengah','(data payroll)','kk/KK-10234.pdf'),
+ ('10871','Rina Pratiwi','Divisi Operasi','Staf Operasi','4','BOD-5','bdg','Kota Malang, Jawa Timur','(data payroll)','kk/KK-10871.pdf'),
+ ('11302','Agus Salim','Divisi Operasi','Staf Operasi','6','BOD-5','jkt','Kab. Gresik, Jawa Timur','(data payroll)','kk/KK-11302.pdf'),
+ ('20117','Dewi Lestari','Human Capital Services','Staf HCIS','5','BOD-4','jkt',null,'(data payroll)','kk/KK-20117.pdf'),
+ ('20101','Hendra Gunawan','Human Capital Services','Dept Head HCIS','3','BOD-2','jkt',null,'(data payroll)','kk/KK-20101.pdf'),
+ ('20001','Siti Rahmawati','Human Capital Services','Group Head HCS','2','BOD-1','jkt',null,'(data payroll)','kk/KK-20001.pdf'),
+ ('30045','Rudi Hartono','Office Administration','Staf OAD','5','BOD-4','jkt',null,'(data payroll)','kk/KK-30045.pdf'),
+ ('40012','Yusuf Pratama','Accounting & Tax','Staf ATA','5','BOD-4','jkt',null,'(data payroll)','kk/KK-40012.pdf');
 
 insert into sk_mutasi (no_sk, npp, tanggal_sk, tanggal_efektif, kantor_asal, kantor_tujuan, jabatan_lama, jabatan_baru, file_sk) values
  ('SK-MUT/0457/DIR/XI/2026','10234','2026-11-12','2026-12-01','jkt','smg','Staf Senior Operasi','Asisten Manajer Operasi','sk/SK-MUT-0457.pdf'),

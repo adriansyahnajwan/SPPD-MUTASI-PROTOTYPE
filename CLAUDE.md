@@ -19,6 +19,7 @@ Tombol "Keluar" ada di kedua topbar.
 Beranda → sidebar "Travel Management" (bisa dilipat) → SPPD Mutasi, Tiket PP, Benefit, Panduan, Referensi (SK Mutasi & Keputusan Direksi), Master Data (menyusul).
 - SPPD Mutasi: tabel riwayat (Tanggal Efektif, Jabatan/Unit Sebelum, Jabatan/Unit Setelah, Status, Action) + filter teks/status/tahun.
 - Form 4 langkah: Data Mutasi (dari SK, read-only, jarak jalur darat) → Dokumen → Keluarga (Ya: ambil dari KK; Tidak: tetap submit, lalu berhak Tiket PP) → Review → nomor SPPD-MTS-YYYY-NNNNN.
+- Langkah Dokumen: SK Mutasi (sk_mutasi.file_sk) dan Kartu Keluarga (karyawan.file_kk) terlampir otomatis sebagai kartu "Dari sistem" (tombol Lihat, tanpa ganti/hapus) dan tidak masuk tabel dokumen. Karyawan hanya wajib upload foto rekening payroll; dokumen sekolah wajib jika mengajukan bantuan sekolah. Di review & cek kelengkapan HCIS, SK/KK diberi keterangan "diambil dari Data Karyawan".
 - Status karyawan: Draft → Diajukan → Verifikasi HCS → Proses Accounting & Tax → Selesai.
 
 ## Tiket Pulang Pergi (TPP)
@@ -44,7 +45,7 @@ Diterima → Cek kelengkapan → Susun RAB → Approval Dept Head HCIS → Buat 
 
 ## Database (rencana, Supabase)
 - Rancangan lengkap: `Rancangan_Database_SPPD_Mutasi_fix.xlsx` (20 tabel; sheet Ringkasan & Relasi).
-- SQL: `supabase-tahap1.sql` → `tahap2` → `tahap3` → `tahap4`, lalu `supabase-reset-demo.sql` (dijalankan manual di SQL Editor). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`. SQL Editor membatalkan semua isi file kalau ada satu error; cek hasilnya lewat API setelah dijalankan.
+- SQL: `supabase-tahap1.sql` → `tahap2` → `tahap3` → `tahap4`, lalu `supabase-reset-demo.sql`. Database yang sudah berjalan sebelum kolom `karyawan.file_kk` ada: jalankan `supabase-file-kk.sql` (sekali, aman diulang) (dijalankan manual di SQL Editor). Setiap ada file tahap baru, jalankan ulang `supabase-reset-demo.sql`. SQL Editor membatalkan semua isi file kalau ada satu error; cek hasilnya lewat API setelah dijalankan.
 - Bertahap:
   - Tahap 1 (SUDAH): kantor, karyawan, sk_mutasi, pengajuan_sppd, dokumen (form karyawan muncul di antrean HCIS lintas laptop)
   - Tahap 2 (SUDAH): jarak_kantor, keluarga, pengajuan_keluarga, notifikasi, riwayat_status

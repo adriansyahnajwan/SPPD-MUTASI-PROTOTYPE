@@ -384,7 +384,7 @@ var KEY = "sppd-mutasi-proto-v5";
    Hanya publishable key. JANGAN taruh secret/service_role key di sini. */
 var SB_URL = "https://xlgeqdierinojdsfrekf.supabase.co";
 var SB_KEY = "sb_publishable_kWCOhOXOtsxb62g1-vtBUg_zxYuJDzm";
-var SUB_SELECT = "*,dokumen(jenis,nama_file),karyawan(nama,level,grade),sk_mutasi(no_sk,kantor_asal,kantor_tujuan,jabatan_baru)"+
+var SUB_SELECT = "*,dokumen(jenis,nama_file),karyawan(nama,level,grade,file_kk),sk_mutasi(no_sk,kantor_asal,kantor_tujuan,jabatan_baru,file_sk)"+
   ",pengajuan_keluarga(usia_saat_pengajuan,status,alasan_tolak,keluarga(id,nama,hubungan,tanggal_lahir,nik))"+
   ",rab(*,dokumen_pengadaan(*)),checklist_kelengkapan(item,hasil,catatan),tiket_pp(*)";
 var DOC_DB = {sk:"sk", kk:"kk", rek:"rekening", skolAsal:"sekolah_asal", skolBaru:"sekolah_baru"};
@@ -456,14 +456,14 @@ function docKb(form,k){
   return Math.max(1, Math.ceil(n/1024));
 }
 function docRows(id, ticket, form){
-  var out=[]; DOCS.forEach(function(d){ var nm=form.docs&&form.docs[d.k]; if(!nm) return;
+  var out=[]; DOCS.forEach(function(d){ var nm=form.docs&&form.docs[d.k]; if(!nm || d.auto) return;   /* SK & KK diambil dari data karyawan */
     out.push({pengajuan_id:id, jenis:DOC_DB[d.k], nama_file:nm, tipe_file:tipeFile(nm), ukuran_kb:docKb(form,d.k), path_storage:"sppd/"+ticket.slice(-5)+"/"+DOC_DB[d.k]+"."+fileExt(nm)}); });
   return out;
 }
 function sbLoadEmp(npp){ return sb("karyawan?select=*&npp=eq."+q(npp)).then(function(r){ return r&&r[0]||null; }); }
 function sbLoadSks(npp){
   return sb("sk_mutasi?select=*&npp=eq."+q(npp)+"&order=tanggal_efektif.desc").then(function(r){
-    return (r||[]).map(function(x,i){ return {no:x.no_sk, tanggal:fmtDate(x.tanggal_sk), efektif:x.tanggal_efektif, jabSeb:x.jabatan_lama, asal:x.kantor_asal, jabSet:x.jabatan_baru, tujuan:x.kantor_tujuan, asliTujuan:x.kantor_tujuan, current:i===0}; });
+    return (r||[]).map(function(x,i){ return {no:x.no_sk, fileSk:x.file_sk, tanggal:fmtDate(x.tanggal_sk), efektif:x.tanggal_efektif, jabSeb:x.jabatan_lama, asal:x.kantor_asal, jabSet:x.jabatan_baru, tujuan:x.kantor_tujuan, asliTujuan:x.kantor_tujuan, current:i===0}; });
   });
 }
 /* Baca pengajuan dari Supabase → bentuk S.subs yang dipakai tampilan */
@@ -490,6 +490,7 @@ function sbLoadSubs(npp){
 function subFromRow(r, loc, dbHist){
   var sk=r.sk_mutasi||{}, k=r.karyawan||{}, docs={}, si=STATUS_FLOW.indexOf(r.status), same=loc&&loc.id===r.id;
   (r.dokumen||[]).forEach(function(d){ var a=DOC_APP[d.jenis]; if(a) docs[a]=d.nama_file; });
+  if(sk.file_sk) docs.sk=baseName(sk.file_sk); if(k.file_kk) docs.kk=baseName(k.file_kk);   /* SK & KK dari data karyawan */
   var bawa=r.bawa_keluarga?"ya":"tidak", lf=same&&loc.form;
   var pk=(r.pengajuan_keluarga||[]).filter(function(x){ return x.keluarga; }).sort(function(a,b){ return a.keluarga.id-b.keluarga.id; })
     .map(function(x,i){ var f=x.keluarga; return {id:i+1, kid:f.id, hub:f.hubungan, nama:f.nama, tgl:f.tanggal_lahir, nik:f.nik, rejected:x.status==="Ditolak", reason:x.alasan_tolak||""}; });
@@ -759,8 +760,8 @@ var STORIES = ["Trigger notifikasi","Akses fitur SPPD Mutasi","Pengisian form ke
 var STATUS_FLOW = ["Diajukan","Verifikasi HCS","Proses Accounting & Tax","Selesai"];
 var STATUS_ALL = ["Belum diisi","Draft"].concat(STATUS_FLOW);
 var DOCS = [
-  {k:"sk", label:"SK Mutasi", req:true},
-  {k:"kk", label:"Kartu Keluarga terupdate", req:true},
+  {k:"sk", label:"SK Mutasi", req:true, auto:true},               /* dari sk_mutasi.file_sk */
+  {k:"kk", label:"Kartu Keluarga terupdate", req:true, auto:true}, /* dari karyawan.file_kk */
   {k:"rek", label:"Foto rekening payroll", req:true},
   {k:"skolAsal", label:"Surat keterangan pindah dari sekolah asal", req:false},
   {k:"skolBaru", label:"Surat keterangan pendaftaran sekolah baru", req:false}
@@ -792,6 +793,16 @@ var KD = [
 function levelOf(j){ for(var i=LEVELS.length-1;i>=0;i--){ if(j.indexOf(LEVELS[i])===0) return LEVELS[i]; } return "Staf"; }
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function emptyForm(){ return {asal:SK.asal, tujuan:SK.tujuan, bawa:"", anggota:[], kk:null, docs:{sk:null,kk:null,rek:null,skolAsal:null,skolBaru:null}, bantuanSekolah:false}; }
+function baseName(p){ return p?String(p).split("/").pop():null; }
+/* SK Mutasi & Kartu Keluarga tidak diunggah karyawan: dilampirkan otomatis dari database
+   (sk_mutasi.file_sk dan karyawan.file_kk). Pratinjau memakai file contoh (dummy). */
+function attachSysDocs(f){
+  f.docs.sk=baseName(SK.fileSk); f.docs.kk=baseName(EMP.fileKk);
+  if(!f.kk) f.kk=kkFor(EMP.npp);   /* anggota keluarga "terbaca" dari KK di data karyawan */
+  ["sk","kk"].forEach(function(k){ var nm=f.docs[k]; if(!nm) return;
+    if(!S.files[k] || S.files[k].name!==nm) S.files[k]=dummyFile(k,nm,k==="sk"?2:1);
+    S.files[k].sys=true; S.files[k].label=docLabel(k)+" · diambil dari Data Karyawan"; });
+}
 /* Riwayat SPPD sebelum sistem digital (belum ada di tabel pengajuan_sppd); hanya tampil di halaman karyawan */
 function seedSubs(npp){
   if(npp && npp!=="10234") return [];
@@ -945,7 +956,7 @@ function loadFamily(){
   log("Mengambil data anggota keluarga dari Kartu Keluarga: "+S.form.anggota.length+" orang.","info");
 }
 function v1(){ var d=distKm(S.form.asal,S.form.tujuan); return (d!==null && d<100)?[distMsg(d)]:[]; }
-function vDocs(){ var e=[]; DOCS.forEach(function(d){ if(d.req && !S.form.docs[d.k]) e.push(d.label+" wajib diunggah."); }); return e; }
+function vDocs(){ var e=[]; DOCS.forEach(function(d){ if(d.req && !S.form.docs[d.k]) e.push(d.auto?d.label+" belum tersedia di data karyawan. Hubungi HC.":d.label+" wajib diunggah."); }); return e; }
 function vFam(){
   var e=[], f=S.form;
   if(!f.bawa) e.push("Pilih apakah Anda membawa keluarga ke lokasi kantor baru.");
@@ -983,7 +994,7 @@ function startForm(){
   if(submittedForSK()){ toast("SPPD Mutasi untuk SK ini sudah diajukan."); go("sppd"); return; }
   if(!S.hasDraft){ S.form=emptyForm(); S.step=1; log("Membuka form SPPD Mutasi untuk "+SK.no+". Lokasi kantor diisi otomatis dari SK."); }
   else log("Memuat draft yang tersimpan ("+S.draftAt+").");
-  S.form.asal=SK.asal; S.form.tujuan=SK.tujuan;
+  S.form.asal=SK.asal; S.form.tujuan=SK.tujuan; attachSysDocs(S.form);
   go("form",{reviewOk:false});
 }
 function saveDraft(silent){
@@ -1279,6 +1290,12 @@ function errBox(){
   return '<div class="alert" role="alert"><div class="t">'+ic("warn",18)+' Alasan Penolakan Sistem</div><ul>'+list.map(function(e){return '<li>'+esc(e)+'</li>';}).join("")+'</ul></div>';
 }
 function docWidget(d){
+  if(d.auto){
+    var nm=S.form.docs[d.k], fx=nm?(nm.split(".").pop()||"").toUpperCase().slice(0,4):"", sh='<div class="stack" style="gap:6px"><div class="doclab">'+esc(d.label)+'</div>';
+    if(nm) sh+='<div class="file"><span class="fi">'+esc(fx)+'</span><span class="grow"><b>'+esc(nm)+'</b><span class="sub small"><span class="chip ok" style="font-size:11px;padding:1px 8px">Dari sistem</span> Terlampir otomatis dari Data Karyawan</span></span><button class="btn sm" type="button" data-act="preview" data-k="'+d.k+'">Lihat</button></div>';
+    else sh+='<div class="file"><span class="grow sub small">Belum tersedia di data karyawan. Hubungi HC.</span></div>';
+    return sh+'</div>';
+  }
   var f=S.form, has=f.docs[d.k], fl=S.files[d.k], ext=has?(has.split(".").pop()||"").toUpperCase().slice(0,4):"";
   var h='<div class="stack" style="gap:6px"><div class="doclab">'+esc(d.label)+' <span class="req">*</span></div>';
   if(has) h+='<div class="file"><span class="fi">'+esc(ext)+'</span><span class="grow"><b>'+esc(has)+'</b><span class="sub small">'+(fl&&fl.type==="dummy"?'Contoh dummy · '+fl.pages+' halaman':(fl&&fl.pages?fl.pages+' halaman':'Siap diunggah'))+'</span></span><span class="rep">Ganti<input type="file" accept=".pdf,.jpg,.jpeg,.png" data-doc="'+d.k+'" aria-label="Ganti '+esc(d.label)+'"></span></div>';
@@ -1312,7 +1329,7 @@ function vForm(){
   if(S.step===2){
     h+='<div class="sec">Dokumen Persyaratan</div><div class="g2">';
     DOCS.forEach(function(d){ if(d.req) h+=docWidget(d); });
-    h+='</div><span class="sub small">Data anggota keluarga akan dibaca otomatis dari Kartu Keluarga yang Anda unggah.</span>';
+    h+='</div><span class="sub small">SK Mutasi dan Kartu Keluarga diambil otomatis dari data Karyawan. Jika data KK tidak sesuai, perbarui dulu melalui HC.</span>';
   }
   if(S.step===3){
     h+='<div class="sec">Keluarga yang Dibawa</div><label class="f">Apakah Anda membawa keluarga (istri/suami dan anak) ke lokasi kantor baru?</label>'+
@@ -1338,7 +1355,7 @@ function thumbs(f){
     if(fl && fl.thumb) inner='<img src="'+fl.thumb+'" alt="Pratinjau '+esc(x.label)+'">';
     else if(fl && fl.type==="pdf" && !fl.err) inner='Memuat…';
     else inner='Pratinjau tidak tersedia, unggah ulang';
-    h+='<button class="thumb" data-act="preview" data-k="'+x.k+'"'+(fl&&fl.thumb?'':' disabled')+'><div class="pg">'+inner+(fl&&fl.pages>1?'<span class="pgc">'+fl.pages+' hlm</span>':'')+'</div><b>'+esc(x.label)+'</b></button>';
+    h+='<button class="thumb" data-act="preview" data-k="'+x.k+'"'+(fl&&fl.thumb?'':' disabled')+'><div class="pg">'+inner+(fl&&fl.pages>1?'<span class="pgc">'+fl.pages+' hlm</span>':'')+'</div><b>'+esc(x.label)+'</b>'+(x.auto?'<span class="sub small">Diambil dari Data Karyawan</span>':'')+'</button>';
   });
   return h+'</div>';
 }
@@ -1744,7 +1761,7 @@ function hcStepper(st){
 }
 function docBtns(sub){
   var h='<div class="stack" style="gap:6px">';
-  DOCS.forEach(function(d){ if(sub.form.docs && sub.form.docs[d.k]) h+='<div class="row between"><span class="small">'+esc(d.label)+'</span><button class="link" style="padding:0;font-size:12px" data-act="hcfile" data-t="'+esc(sub.ticket)+'" data-k="'+d.k+'">Lihat</button></div>'; });
+  DOCS.forEach(function(d){ if(sub.form.docs && sub.form.docs[d.k]) h+='<div class="row between"><span class="small">'+esc(d.label)+(d.auto?' <span class="sub" style="font-size:11px">· Data Karyawan</span>':'')+'</span><button class="link" style="padding:0;font-size:12px" data-act="hcfile" data-t="'+esc(sub.ticket)+'" data-k="'+d.k+'">Lihat</button></div>'; });
   return h+'</div>';
 }
 function genDocs(c, t){
@@ -1775,7 +1792,7 @@ function hcStageCard(sub,c,e){
     CK_ITEMS.forEach(function(it,i){
       var na=it.opt && !sub.form.bantuanSekolah, v=c.check[it.k]||(na?"na":((it.doc?sub.form.docs&&sub.form.docs[it.doc]:true)?"ada":"tidak"));
       c.check[it.k]=v;
-      h+='<tr><td>'+(i+1)+'</td><td class="n">'+esc(it.label)+(it.doc&&sub.form.docs&&sub.form.docs[it.doc]?' <button class="link" style="padding:0;font-size:12px" data-act="hcfile" data-t="'+t+'" data-k="'+it.doc+'">Lihat</button>':'')+'</td><td>'+(na?'<span class="sub small">Tidak perlu</span>':'<select id="ck_'+it.k+'" data-hc="'+t+'" style="height:34px;width:120px"><option value="ada"'+(v==="ada"?' selected':'')+'>Ada</option><option value="tidak"'+(v==="tidak"?' selected':'')+'>Tidak ada</option></select>')+'</td><td><input type="text" id="ckn_'+it.k+'" data-hc="'+t+'" value="'+esc(c.notes[it.k]||"")+'" placeholder="Catatan" style="height:34px"'+(na?' disabled':'')+'></td></tr>';
+      h+='<tr><td>'+(i+1)+'</td><td class="n">'+esc(it.label)+(it.doc==='sk'||it.doc==='kk'?' <span class="sub small">· diambil dari Data Karyawan</span>':'')+(it.doc&&sub.form.docs&&sub.form.docs[it.doc]?' <button class="link" style="padding:0;font-size:12px" data-act="hcfile" data-t="'+t+'" data-k="'+it.doc+'">Lihat</button>':'')+'</td><td>'+(na?'<span class="sub small">Tidak perlu</span>':'<select id="ck_'+it.k+'" data-hc="'+t+'" style="height:34px;width:120px"><option value="ada"'+(v==="ada"?' selected':'')+'>Ada</option><option value="tidak"'+(v==="tidak"?' selected':'')+'>Tidak ada</option></select>')+'</td><td><input type="text" id="ckn_'+it.k+'" data-hc="'+t+'" value="'+esc(c.notes[it.k]||"")+'" placeholder="Catatan" style="height:34px"'+(na?' disabled':'')+'></td></tr>';
     });
     h+='</tbody></table></div><div class="actions"><button class="btn" data-act="hcckreq" data-t="'+t+'">Minta kelengkapan ke karyawan</button><button class="btn pri" data-act="hcckok" data-t="'+t+'">Lengkap, susun RAB</button></div></div>';
   }
@@ -1962,7 +1979,7 @@ function openHcFile(t,k){
   var sub=subBy(t); if(!sub) return;
   if(isMine(sub) && S.files[k] && S.files[k].thumb){ S.preview=k; render(); renderAllPages(k); return; }
   var key="hc_"+t+"_"+k, name=sub.form.docs[k], n=k==="sk"?2:1;
-  if(!S.files[key]){ var imgs=[]; for(var i=1;i<=n;i++) imgs.push(makeDummy(docLabel(k),name,i,n)); S.files[key]={name:name, type:"dummy", thumb:imgs[0], pages:n, imgs:imgs, label:docLabel(k)+" · "+subEmp(sub).nama}; }
+  if(!S.files[key]){ var imgs=[]; for(var i=1;i<=n;i++) imgs.push(makeDummy(docLabel(k),name,i,n)); S.files[key]={name:name, type:"dummy", thumb:imgs[0], pages:n, imgs:imgs, label:docLabel(k)+" · "+subEmp(sub).nama+(k==="sk"||k==="kk"?" (Data Karyawan)":"")}; }
   S.preview=key; render();
 }
 /* Tombol "Reset data demo" di halaman login. Semua logika ada di fungsi database reset_demo()
@@ -2119,7 +2136,7 @@ function doLogin(){
     }
     return sbLoadSks(v).then(function(sks){
       if(!sks.length) return fail("Belum ada SK mutasi untuk NPP "+v+", jadi halaman SPPD Mutasi belum bisa dibuka.");
-      EMP={nama:emp.nama, npp:emp.npp, unit:emp.unit, level:emp.level, grade:emp.grade||"-", jabatan:emp.jabatan};
+      EMP={nama:emp.nama, npp:emp.npp, unit:emp.unit, level:emp.level, grade:emp.grade||"-", jabatan:emp.jabatan, fileKk:emp.file_kk};
       if(emp.kampung_halaman) HOME={nama:emp.kampung_halaman, q:emp.kampung_halaman.replace(/^(Kab\.|Kota)\s+/,"")};
       SKS=sks; SK=SKS[0];
       if(S.empNpp!==v){
